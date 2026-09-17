@@ -41,6 +41,10 @@ class WashingMachineCard extends HTMLElement {
             today: "Today", yesterday: "Yesterday",
             tip_notify: "Finish notification", tip_plug: "Machine plug", tip_history: "History",
             confirm_plug_off: "Turn off the plug? This may interrupt the current cycle.",
+            confirm_power_off: "Turn off appliance? This will stop the current program.",
+            remote_control_required: "Remote control must be enabled on the appliance.\nPlease enable remote control using the appliance controls.",
+            program_selection_failed: "Failed to select program. Check that remote control is enabled.",
+            service_call_failed: "Action failed. Please try again.",
             decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
@@ -837,6 +841,435 @@ class WashingMachineCard extends HTMLElement {
         if (isOn && c.confirm_plug_off !== false && !window.confirm(t.confirm_plug_off))
             return;
         this._toggle(c.plug_entity);
+    }
+
+    /**
+     * Base Service Call Method
+     * ========================
+     * Central method for all Home Assistant service calls.
+     * Provides consistent error handling and logging.
+     * 
+     * @param {string} domain - Service domain (e.g., "switch", "select")
+     * @param {string} service - Service name (e.g., "turn_on", "select_option")
+     * @param {object} data - Service data (e.g., { entity_id: "...", option: "..." })
+     * @returns {Promise} Service call promise
+     */
+    _callService(domain, service, data) {
+        if (!this._hass) {
+            console.warn(`Cannot call ${domain}.${service}: hass not available`);
+            return Promise.reject(new Error("hass not available"));
+        }
+
+        console.log(`Calling service: ${domain}.${service}`, data);
+        return this._hass.callService(domain, service, data);
+    }
+
+    // ========================================
+    // SERVICE TYPE ABSTRACTIONS
+    // ========================================
+    // Wrapper methods for different Home Assistant service types.
+    // Provide consistent interface for service calls with validation.
+    // ========================================
+
+    /**
+     * Select an option from a select entity
+     * Used for: program selection, temperature, spin speed
+     * 
+     * @param {string} entityId - Select entity ID
+     * @param {string} option - Option to select
+     * @returns {Promise}
+     */
+    _selectOption(entityId, option) {
+        if (!entityId || !option) {
+            console.warn("selectOption: missing entityId or option");
+            return Promise.reject(new Error("Missing parameters"));
+        }
+        return this._callService("select", "select_option", {
+            entity_id: entityId,
+            option: option,
+        });
+    }
+
+    /**
+     * Set value on a number entity
+     * Used for: numeric settings (rare in Home Connect)
+     * 
+     * @param {string} entityId - Number entity ID
+     * @param {number} value - Value to set
+     * @returns {Promise}
+     */
+    _setValue(entityId, value) {
+        if (!entityId || value === undefined) {
+            console.warn("setValue: missing entityId or value");
+            return Promise.reject(new Error("Missing parameters"));
+        }
+        return this._callService("number", "set_value", {
+            entity_id: entityId,
+            value: value,
+        });
+    }
+
+    /**
+     * Press a button entity
+     * Used for: stop program, machine care, etc.
+     * 
+     * @param {string} entityId - Button entity ID
+     * @returns {Promise}
+     */
+    _pressButton(entityId) {
+        if (!entityId) {
+            console.warn("pressButton: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        return this._callService("button", "press", {
+            entity_id: entityId,
+        });
+    }
+
+    /**
+     * Turn on a switch entity
+     * 
+     * @param {string} entityId - Switch entity ID
+     * @returns {Promise}
+     */
+    _turnOn(entityId) {
+        if (!entityId) {
+            console.warn("turnOn: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        const domain = entityId.split(".")[0];
+        return this._callService(domain, "turn_on", {
+            entity_id: entityId,
+        });
+    }
+
+    /**
+     * Turn off a switch entity
+     * 
+     * @param {string} entityId - Switch entity ID
+     * @returns {Promise}
+     */
+    _turnOff(entityId) {
+        if (!entityId) {
+            console.warn("turnOff: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        const domain = entityId.split(".")[0];
+        return this._callService(domain, "turn_off", {
+            entity_id: entityId,
+        });
+    }
+
+    // ========================================
+    // HOME CONNECT ACTION METHODS
+    // ========================================
+    // High-level methods for common Home Connect actions.
+    // These use the service abstractions above and add HC-specific logic.
+    // ========================================
+
+    // ----------------
+    // POWER CONTROL
+    // ----------------
+
+    /**
+     * Turn appliance power on
+     * @returns {Promise|undefined}
+     */
+    _hcPowerOn() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        return this._turnOn(entity.entity_id);
+    }
+
+    /**
+     * Turn appliance power off
+     * @returns {Promise|undefined}
+     */
+    _hcPowerOff() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        return this._turnOff(entity.entity_id);
+    }
+
+    /**
+     * Toggle appliance power with confirmation
+     * Shows confirmation dialog when turning off
+     * @returns {Promise|undefined}
+     */
+    _hcTogglePower() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        if (entity.state === "on") {
+            const t = this._t;
+            const message = t.confirm_power_off ||
+                           "Turn off appliance? This will stop the current program.";
+
+            if (!window.confirm(message)) {
+                return Promise.resolve();
+            }
+
+            return this._hcPowerOff();
+        } else {
+            return this._hcPowerOn();
+        }
+    }
+
+    // ----------------
+    // PROGRAM SELECTION
+    // ----------------
+
+    /**
+     * Select a program to run
+     * Validates remote control state before selection
+     * 
+     * @param {string} programName - Program name (e.g., "Cotton", "Eco50")
+     * @returns {Promise|undefined}
+     */
+    _hcSelectProgram(programName) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.program_selector_entity) {
+            console.warn("No program_selector_entity configured");
+            return;
+        }
+
+        if (!this._getRemoteControlState()) {
+            const t = this._t;
+            const message = t.remote_control_required ||
+                           "Remote control must be enabled on the appliance.\n" +
+                           "Please enable remote control using the appliance controls.";
+            alert(message);
+            return Promise.reject(new Error("Remote control not enabled"));
+        }
+
+        return this._selectOption(hc.program_selector_entity, programName);
+    }
+
+    // ----------------
+    // START / PAUSE / STOP
+    // ----------------
+
+    /**
+     * Start the appliance program
+     * Uses start_entity if configured, otherwise remote_start_entity
+     * @returns {Promise|undefined}
+     */
+    _hcStart() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (hc?.start_entity) {
+            return this._turnOn(hc.start_entity);
+        } else if (hc?.remote_start_entity) {
+            const entity = this._hcEntity("remote_start_entity");
+            if (entity) {
+                return this._toggle(entity.entity_id);
+            }
+        }
+
+        console.warn("No start_entity or remote_start_entity configured");
+        return;
+    }
+
+    /**
+     * Pause the running program
+     * @returns {Promise|undefined}
+     */
+    _hcPause() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.pause_entity) {
+            console.warn("No pause_entity configured");
+            return;
+        }
+
+        return this._turnOn(hc.pause_entity);
+    }
+
+    /**
+     * Stop/abort the program
+     * @returns {Promise|undefined}
+     */
+    _hcStop() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.stop_entity) {
+            console.warn("No stop_entity configured");
+            return;
+        }
+
+        return this._pressButton(hc.stop_entity);
+    }
+
+    /**
+     * Intelligent start/pause toggle
+     * - If running → pause
+     * - If paused or ready → start
+     * 
+     * @returns {Promise|undefined}
+     */
+    _hcToggleStartPause() {
+        if (!this._isHomeConnectMode()) return;
+
+        const opState = this._getOperationState();
+        if (!opState) {
+            console.warn("Cannot determine operation state");
+            return;
+        }
+
+        const state = opState.toLowerCase();
+        if (state === "run") {
+            return this._hcPause();
+        } else if (state === "ready" || state === "pause") {
+            return this._hcStart();
+        } else {
+            console.warn(`Cannot start/pause from state: ${opState}`);
+            return;
+        }
+    }
+
+    // ----------------
+    // FEATURE TOGGLES
+    // ----------------
+
+    /**
+     * Toggle a feature on/off
+     * Generic method for any feature switch entity
+     * 
+     * @param {string} featureKey - Key from home_connect config (e.g., "hygiene_plus_entity")
+     * @returns {Promise|undefined}
+     */
+    _hcToggleFeature(featureKey) {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity(featureKey);
+        if (!entity) {
+            console.warn(`Feature not configured: ${featureKey}`);
+            return;
+        }
+
+        return this._toggle(entity.entity_id);
+    }
+
+    /**
+     * Toggle child lock
+     * @returns {Promise|undefined}
+     */
+    _hcToggleChildLock() {
+        return this._hcToggleFeature("child_lock_entity");
+    }
+
+    /**
+     * Toggle hygiene plus (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleHygienePlus() {
+        return this._hcToggleFeature("hygiene_plus_entity");
+    }
+
+    /**
+     * Toggle intensive zone (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleIntensiveZone() {
+        return this._hcToggleFeature("intensive_zone_entity");
+    }
+
+    /**
+     * Toggle variospeed plus (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleVariospeedPlus() {
+        return this._hcToggleFeature("variospeed_plus_entity");
+    }
+
+    /**
+     * Toggle silence on demand (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleSilenceOnDemand() {
+        return this._hcToggleFeature("silence_on_demand_entity");
+    }
+
+    /**
+     * Toggle brilliant dry (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleBrilliantDry() {
+        return this._hcToggleFeature("brilliant_dry_entity");
+    }
+
+    // ----------------
+    // OPTIONS CONTROL
+    // ----------------
+
+    /**
+     * Set wash temperature
+     * 
+     * @param {string} temperature - Temperature option (e.g., "Cold", "40°C", "60°C")
+     * @returns {Promise|undefined}
+     */
+    _hcSetTemperature(temperature) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.temperature_entity) {
+            console.warn("No temperature_entity configured");
+            return;
+        }
+
+        return this._selectOption(hc.temperature_entity, temperature);
+    }
+
+    /**
+     * Set spin speed
+     * 
+     * @param {string} speed - Speed option (e.g., "800", "1200", "1400")
+     * @returns {Promise|undefined}
+     */
+    _hcSetSpinSpeed(speed) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.spin_speed_entity) {
+            console.warn("No spin_speed_entity configured");
+            return;
+        }
+
+        return this._selectOption(hc.spin_speed_entity, speed);
     }
 
     _headerIcon() {
