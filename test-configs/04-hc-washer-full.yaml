@@ -1,0 +1,91 @@
+# ============================================================
+# Home Connect Washer - Complete Configuration Example
+# ============================================================
+# This shows all supported entities for a Home Connect washer.
+# Copy and adjust entity IDs to match your appliance.
+# Remove lines for entities your appliance doesn't have.
+# ============================================================
+
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: washer
+name: Washing Machine
+language: en
+theme: auto
+
+home_connect:
+  washer:
+    # ========================================
+    # Status Entities (what's happening)
+    # ========================================
+    operation_state_entity: sensor.washer_operation_state
+    active_program_entity: sensor.washer_active_program
+    selected_program_entity: sensor.washer_selected_program
+    progress_entity: sensor.washer_program_progress
+    remaining_time_entity: sensor.washer_remaining_time
+    end_time_entity: sensor.washer_program_finish_time
+    
+    # ========================================
+    # Control Entities (user actions)
+    # ========================================
+    power_entity: switch.washer_power
+    remote_start_entity: binary_sensor.washer_remote_start
+    remote_control_entity: binary_sensor.washer_remote_control
+    
+    # Optional: separate start/pause/stop if available
+    # start_entity: switch.washer_start_program
+    # pause_entity: switch.washer_pause_program
+    # stop_entity: button.washer_stop_program
+    
+    # ========================================
+    # Program Selection
+    # ========================================
+    program_selector_entity: select.washer_active_program
+    
+    # Optional: filter/order programs shown in UI
+    available_programs:
+      - "Cotton"
+      - "EasyCare"
+      - "DelicatesSilk"
+      - "Sportswear"
+      - "Quick45"
+      - "Mix"
+      - "Spin"
+      - "Rinse"
+    
+    # ========================================
+    # Options (washing parameters)
+    # ========================================
+    temperature_entity: select.washer_temperature
+    spin_speed_entity: select.washer_spin_speed
+    
+    # ========================================
+    # Safety & Status
+    # ========================================
+    door_entity: binary_sensor.washer_door
+    child_lock_entity: switch.washer_child_lock
+    
+    # ========================================
+    # Connectivity
+    # ========================================
+    connectivity_entity: binary_sensor.washer_connection_state
+    local_control_entity: binary_sensor.washer_local_control
+    
+    # ========================================
+    # i-Dos (Bosch/Siemens automatic dosing)
+    # ========================================
+    idos1_active_entity: binary_sensor.washer_idos1_dosing_active
+    idos1_level_entity: sensor.washer_idos1_fill_level
+    idos2_active_entity: binary_sensor.washer_idos2_dosing_active
+    idos2_level_entity: sensor.washer_idos2_fill_level
+    idos1_low_entity: binary_sensor.washer_idos1_low_fill
+    idos2_low_entity: binary_sensor.washer_idos2_low_fill
+
+# ============================================================
+# Notes:
+# ------------------------------------------------------------
+# 1. Replace "washer" prefix with your actual entity prefix
+# 2. Entity names may vary by integration/brand
+# 3. Not all features available on all appliances
+# 4. Remove entities your appliance doesn't have
+# ============================================================

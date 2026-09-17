@@ -1,0 +1,79 @@
+# ============================================================
+# Home Connect Dishwasher - Complete Configuration Example
+# ============================================================
+
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: dishwasher
+name: Dishwasher
+language: en
+theme: auto
+
+home_connect:
+  dishwasher:
+    # ========================================
+    # Status Entities
+    # ========================================
+    operation_state_entity: sensor.dishwasher_operation_state
+    active_program_entity: sensor.dishwasher_active_program
+    selected_program_entity: sensor.dishwasher_selected_program
+    progress_entity: sensor.dishwasher_program_progress
+    end_time_entity: sensor.dishwasher_finish_time
+    delayed_start_entity: sensor.dishwasher_delayed_start_time
+    
+    # ========================================
+    # Control Entities
+    # ========================================
+    power_entity: switch.dishwasher_power
+    remote_start_entity: binary_sensor.dishwasher_remote_start
+    remote_control_entity: binary_sensor.dishwasher_remote_control
+    stop_entity: button.dishwasher_stop_program
+    
+    # ========================================
+    # Program Selection
+    # ========================================
+    program_selector_entity: select.dishwasher_active_program
+    
+    available_programs:
+      - "Auto1"
+      - "Auto2"
+      - "Eco50"
+      - "Intensiv70"
+      - "Kurz60"
+      - "MachineCare"
+      - "NightWash"
+      - "PreRinse"
+      - "Quick45"
+    
+    # ========================================
+    # Door
+    # ========================================
+    door_entity: binary_sensor.dishwasher_door
+    
+    # ========================================
+    # Connectivity
+    # ========================================
+    connectivity_entity: binary_sensor.dishwasher_connection_state
+    
+    # ========================================
+    # Features (Bosch/Siemens options)
+    # ========================================
+    hygiene_plus_entity: switch.dishwasher_hygiene_plus
+    intensive_zone_entity: switch.dishwasher_intensive_zone
+    variospeed_plus_entity: switch.dishwasher_variospeed_plus
+    silence_on_demand_entity: switch.dishwasher_silence_on_demand
+    brilliant_dry_entity: switch.dishwasher_brilliant_dry
+    
+    # ========================================
+    # Consumables
+    # ========================================
+    salt_low_entity: binary_sensor.dishwasher_salt_lack
+    rinseaid_low_entity: binary_sensor.dishwasher_rinse_aid_lack
+
+# ============================================================
+# Notes:
+# ------------------------------------------------------------
+# 1. Feature entities may not be available on all models
+# 2. Some programs may have different names
+# 3. Check Developer Tools → States for exact entity names
+# ============================================================

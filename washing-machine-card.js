@@ -360,7 +360,340 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _st(entityId) {
-        return entityId ? this._hass.states[entityId] : undefined;
+        return entityId ? this._hass?.states?.[entityId] : undefined;
+    }
+
+    /*
+     * ============================================================
+     * HOME CONNECT ENTITY CONFIGURATION REFERENCE
+     * ============================================================
+     * This section documents all supported Home Connect entities
+     * for each appliance type. All entities are optional unless
+     * marked as required.
+     * ============================================================
+     */
+
+    /*
+     * WASHER ENTITY CONFIGURATION
+     * ===========================
+     * 
+     * Configuration structure:
+     * ------------------------
+     * home_connect:
+     *   washer:
+     *     # Status entities (what's happening)
+     *     operation_state_entity: sensor.*_operation_state
+     *       Values: Inactive, Ready, DelayedStart, Run, Pause,
+     *               ActionRequired, Finished, Error, Aborting
+     *     
+     *     active_program_entity: sensor.*_active_program
+     *       Currently running program name
+     *     
+     *     selected_program_entity: sensor.*_selected_program
+     *       Program selected but not yet started
+     *     
+     *     progress_entity: sensor.*_program_progress
+     *       Percentage complete (0-100)
+     *     
+     *     remaining_time_entity: sensor.*_remaining_time
+     *       Time remaining (may be ISO duration PT1H30M)
+     *     
+     *     end_time_entity: sensor.*_program_finish_time
+     *       Estimated completion datetime
+     *     
+     *     # Control entities (user actions)
+     *     power_entity: switch.*_power
+     *       Turn appliance on/off
+     *     
+     *     remote_start_entity: binary_sensor.*_remote_start
+     *       Indicates if remote start is available
+     *     
+     *     remote_control_entity: binary_sensor.*_remote_control
+     *       Indicates if remote control is enabled
+     *     
+     *     start_entity: switch.*_start_program (optional)
+     *       Start program (if separate from remote_start)
+     *     
+     *     pause_entity: switch.*_pause_program (optional)
+     *       Pause running program
+     *     
+     *     stop_entity: button.*_stop_program (optional)
+     *       Stop/abort program
+     *     
+     *     # Program selection
+     *     program_selector_entity: select.*_active_program
+     *       Select program to run
+     *     
+     *     available_programs: [list] (optional)
+     *       Filter/order programs shown in selection UI
+     *       Example: ["Cotton", "EasyCare", "DelicatesSilk"]
+     *       If omitted, shows all options from select entity
+     *     
+     *     # Options (washing parameters)
+     *     temperature_entity: select.*_temperature
+     *       Water temperature selection
+     *     
+     *     spin_speed_entity: select.*_spin_speed
+     *       Spin speed selection
+     *     
+     *     # Safety & status
+     *     door_entity: binary_sensor.*_door
+     *       Door open/closed (on=open, off=closed)
+     *     
+     *     child_lock_entity: switch.*_child_lock
+     *       Child lock on/off
+     *     
+     *     # Connectivity
+     *     connectivity_entity: binary_sensor.*_connection_state
+     *       Connected to cloud (on=connected, off=disconnected)
+     *     
+     *     local_control_entity: binary_sensor.*_local_control
+     *       Local control active (may disable remote control)
+     *     
+     *     # i-Dos (Bosch/Siemens automatic dosing)
+     *     idos1_active_entity: binary_sensor.*_idos1_dosing_active
+     *       i-Dos 1 active for this cycle
+     *     
+     *     idos1_level_entity: sensor.*_idos1_fill_level
+     *       i-Dos 1 fill level percentage
+     *     
+     *     idos2_active_entity: binary_sensor.*_idos2_dosing_active
+     *       i-Dos 2 active for this cycle
+     *     
+     *     idos2_level_entity: sensor.*_idos2_fill_level
+     *       i-Dos 2 fill level percentage
+     *     
+     *     idos1_low_entity: binary_sensor.*_idos1_low_fill
+     *       i-Dos 1 needs refilling
+     *     
+     *     idos2_low_entity: binary_sensor.*_idos2_low_fill
+     *       i-Dos 2 needs refilling
+     * 
+     * Example minimal configuration:
+     * ------------------------------
+     * home_connect:
+     *   washer:
+     *     operation_state_entity: sensor.washer_operation_state
+     * 
+     * Example full configuration:
+     * --------------------------
+     * See test-configs/04-hc-washer-full.yaml
+     */
+
+    /*
+     * DISHWASHER ENTITY CONFIGURATION
+     * ================================
+     * 
+     * Configuration structure:
+     * ------------------------
+     * home_connect:
+     *   dishwasher:
+     *     # Status entities
+     *     operation_state_entity: sensor.*_operation_state
+     *       Values: Inactive, Ready, DelayedStart, Run,
+     *               Finished, Error, Aborting
+     *     
+     *     active_program_entity: sensor.*_active_program
+     *       Currently running program name
+     *     
+     *     selected_program_entity: sensor.*_selected_program
+     *       Program selected but not yet started
+     *     
+     *     progress_entity: sensor.*_program_progress
+     *       Percentage complete (0-100)
+     *     
+     *     end_time_entity: sensor.*_finish_time
+     *       Estimated completion datetime
+     *     
+     *     delayed_start_entity: sensor.*_delayed_start_time
+     *       Scheduled start time for delayed start
+     *     
+     *     # Control entities
+     *     power_entity: switch.*_power
+     *       Turn appliance on/off
+     *     
+     *     remote_start_entity: binary_sensor.*_remote_start
+     *       Indicates if remote start is available
+     *     
+     *     remote_control_entity: binary_sensor.*_remote_control
+     *       Indicates if remote control is enabled
+     *     
+     *     stop_entity: button.*_stop_program
+     *       Stop/abort program
+     *     
+     *     # Program selection
+     *     program_selector_entity: select.*_active_program
+     *       Select program to run
+     *     
+     *     available_programs: [list] (optional)
+     *       Filter/order programs shown in selection UI
+     *       Example: ["Auto1", "Eco50", "Intensiv70", "Quick45"]
+     *     
+     *     # Door
+     *     door_entity: binary_sensor.*_door
+     *       Door open/closed (on=open, off=closed)
+     *     
+     *     # Connectivity
+     *     connectivity_entity: binary_sensor.*_connection_state
+     *       Connected to cloud
+     *     
+     *     # Features (Bosch/Siemens specific options)
+     *     hygiene_plus_entity: switch.*_hygiene_plus
+     *       Extra hygiene mode
+     *     
+     *     intensive_zone_entity: switch.*_intensive_zone
+     *       Intensive cleaning in bottom rack
+     *     
+     *     variospeed_plus_entity: switch.*_variospeed_plus
+     *       Faster washing
+     *     
+     *     silence_on_demand_entity: switch.*_silence_on_demand
+     *       Quiet mode
+     *     
+     *     brilliant_dry_entity: switch.*_brilliant_dry
+     *       Enhanced drying
+     *     
+     *     # Consumables
+     *     salt_low_entity: binary_sensor.*_salt_lack
+     *       Salt needs refilling
+     *     
+     *     rinseaid_low_entity: binary_sensor.*_rinse_aid_lack
+     *       Rinse aid needs refilling
+     * 
+     * Example minimal configuration:
+     * ------------------------------
+     * home_connect:
+     *   dishwasher:
+     *     operation_state_entity: sensor.dishwasher_operation_state
+     * 
+     * Example full configuration:
+     * --------------------------
+     * See test-configs/05-hc-dishwasher-full.yaml
+     */
+
+    /**
+     * Home Connect Entity Accessor
+     * ============================
+     * Retrieves Home Connect entities from the nested home_connect configuration.
+     * Returns undefined in standard mode.
+     * 
+     * @param {string} entityKey - Key from home_connect.{type} configuration
+     * @returns {object|undefined} Entity state object or undefined
+     */
+    _hcEntity(entityKey) {
+        if (!this._isHomeConnectMode()) return undefined;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+        if (!hc) return undefined;
+
+        const entityId = hc[entityKey];
+        return this._st(entityId);
+    }
+
+    // ========================================
+    // HOME CONNECT CONVENIENCE ACCESSORS
+    // ========================================
+    // These methods provide quick access to commonly used Home Connect entities.
+    // All return appropriate values or null when entity not configured.
+    // ========================================
+
+    /**
+     * Get current operation state (Run, Pause, Ready, etc.)
+     * @returns {string|null}
+     */
+    _getOperationState() {
+        return this._hcEntity("operation_state_entity")?.state || null;
+    }
+
+    /**
+     * Get active (running) program name
+     * @returns {string|null}
+     */
+    _getActiveProgram() {
+        return this._hcEntity("active_program_entity")?.state || null;
+    }
+
+    /**
+     * Get selected (queued) program name
+     * @returns {string|null}
+     */
+    _getSelectedProgram() {
+        return this._hcEntity("selected_program_entity")?.state || null;
+    }
+
+    /**
+     * Get door state (open/closed)
+     * @returns {string|null} "open", "closed", or null
+     */
+    _getDoorState() {
+        const door = this._hcEntity("door_entity");
+        if (!door) return null;
+        return door.state === "on" ? "open" : "closed";
+    }
+
+    /**
+     * Get program progress percentage
+     * @returns {number|null}
+     */
+    _getProgress() {
+        const progress = this._hcEntity("progress_entity")?.state;
+        if (progress === undefined || progress === null) return null;
+        const val = parseFloat(progress);
+        return isNaN(val) ? null : val;
+    }
+
+    /**
+     * Get remaining time (may be ISO duration string)
+     * @returns {string|null}
+     */
+    _getRemainingTime() {
+        return this._hcEntity("remaining_time_entity")?.state || null;
+    }
+
+    /**
+     * Get estimated end time (datetime)
+     * @returns {string|null}
+     */
+    _getEndTime() {
+        return this._hcEntity("end_time_entity")?.state || null;
+    }
+
+    /**
+     * Get connectivity state
+     * @returns {string|null} "connected", "disconnected", or null
+     */
+    _getConnectivityState() {
+        const conn = this._hcEntity("connectivity_entity");
+        if (!conn) return null;
+        return conn.state === "on" ? "connected" : "disconnected";
+    }
+
+    /**
+     * Get remote control enabled state
+     * @returns {boolean}
+     */
+    _getRemoteControlState() {
+        const rc = this._hcEntity("remote_control_entity");
+        return rc?.state === "on";
+    }
+
+    /**
+     * Get remote start enabled state
+     * @returns {boolean}
+     */
+    _getRemoteStartState() {
+        const rs = this._hcEntity("remote_start_entity");
+        return rs?.state === "on";
+    }
+
+    /**
+     * Get child lock state
+     * @returns {boolean}
+     */
+    _getChildLockState() {
+        const cl = this._hcEntity("child_lock_entity");
+        return cl?.state === "on";
     }
 
     _isRunning() {
@@ -1586,8 +1919,31 @@ class WashingMachineCardEditor extends HTMLElement {
     static get _sections() {
         const D = WashingMachineCard.DEFAULTS;
         return [{
-                title: "General",
+                title: "Operating Mode",
                 icon: "mdi:cog-outline",
+                expanded: true,
+                fields: [{
+                    key: "mode",
+                    kind: "select",
+                    title: "Mode",
+                    description: "Standard mode for basic appliances, Home Connect for smart appliances",
+                    default: "standard",
+                    selector: {
+                        select: {
+                            mode: "dropdown",
+                            options: [{
+                                value: "standard",
+                                label: "Standard (current functionality)"
+                            }, {
+                                value: "home_connect",
+                                label: "Home Connect (smart appliance features)"
+                            }],
+                        },
+                    },
+                }],
+            }, {
+                title: "General",
+                icon: "mdi:tune-variant",
                 expanded: true,
                 fields: [{
                         key: "name",
@@ -1626,8 +1982,8 @@ class WashingMachineCardEditor extends HTMLElement {
                     }, {
                         key: "status_entity",
                         kind: "entity",
-                        title: "Status entity (required)",
-                        required: true,
+                        title: "Status entity (required in standard mode)",
+                        required: false,
                         selector: {
                             entity: {}
                         },
@@ -1904,6 +2260,52 @@ class WashingMachineCardEditor extends HTMLElement {
     `;
 
         const editor = root.getElementById("editor");
+
+        const modeInfo = document.createElement("div");
+        modeInfo.id = "modeInfo";
+        modeInfo.className = "mode-info hidden";
+        modeInfo.innerHTML = `
+            <style>
+                .mode-info {
+                    margin: 4px 0 12px;
+                    padding: 12px 16px;
+                    background: var(--primary-color, #2f80ed);
+                    color: var(--text-primary-color, #fff);
+                    border-radius: 8px;
+                    display: flex;
+                    gap: 12px;
+                    align-items: flex-start;
+                }
+                .mode-info.hidden {
+                    display: none;
+                }
+                .mode-info ha-icon {
+                    --mdc-icon-size: 24px;
+                    flex-shrink: 0;
+                    margin-top: 2px;
+                }
+                .mode-info-text {
+                    flex: 1;
+                    font-size: 13px;
+                    line-height: 1.4;
+                }
+                .mode-info code {
+                    background: rgba(0,0,0,0.2);
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                }
+            </style>
+            <ha-icon icon="mdi:information-outline"></ha-icon>
+            <div class="mode-info-text">
+                <strong>Home Connect Mode Selected</strong><br>
+                Additional configuration required. Please edit the YAML to add the 
+                <code>home_connect</code> configuration object.<br>
+                See example configurations in <code>test-configs/</code> directory.
+            </div>
+        `;
+        editor.appendChild(modeInfo);
+
         const sections = WashingMachineCardEditor._sections;
 
         sections.forEach((section) => {
@@ -1933,6 +2335,14 @@ class WashingMachineCardEditor extends HTMLElement {
 
         this._built = true;
         this._syncValues();
+    }
+
+    _updateModeInfo() {
+        const mode = this._config?.mode || "standard";
+        const modeInfo = this.shadowRoot?.getElementById("modeInfo");
+        if (modeInfo) {
+            modeInfo.classList.toggle("hidden", mode !== "home_connect");
+        }
     }
 
     _isChoiceField(field) {
@@ -2037,6 +2447,7 @@ class WashingMachineCardEditor extends HTMLElement {
                 }
             }
         }
+        this._updateModeInfo();
     }
 
     _valueChanged(field, value) {
