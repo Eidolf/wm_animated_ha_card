@@ -138,6 +138,8 @@ class WashingMachineCard extends HTMLElement {
         hide_status_panel: false,
         confirm_plug_off: true,
         duration_format: "minutes",
+        mode: "standard",
+        home_connect: null,
     };
 
     static normalizeType(value) {
@@ -181,9 +183,21 @@ class WashingMachineCard extends HTMLElement {
     }
 
     setConfig(config) {
-        if (!config.status_entity) {
-            throw new Error("washing-machine-card: status_entity is required");
+        const mode = config.mode || "standard";
+        if (mode === "standard") {
+            if (!config.status_entity) {
+                throw new Error("washing-machine-card: status_entity is required in standard mode");
+            }
+        } else if (mode === "home_connect") {
+            if (!config.home_connect) {
+                throw new Error("washing-machine-card: home_connect configuration required in home_connect mode");
+            }
+            const type = WashingMachineCard.normalizeType(config.appliance_type);
+            if (!config.home_connect[type]) {
+                console.warn(`washing-machine-card: No ${type} configuration in home_connect object`);
+            }
         }
+
         this._config = {
             ...WashingMachineCard.DEFAULTS,
             ...config,
@@ -249,6 +263,82 @@ class WashingMachineCard extends HTMLElement {
             this._ro.disconnect();
             this._ro = null;
         }
+    }
+
+    _getMode() {
+        const mode = this._config?.mode;
+        if (!mode || mode === "standard") return "standard";
+        if (mode === "home_connect") return "home_connect";
+
+        console.warn(`Unknown mode "${mode}", defaulting to standard`);
+        return "standard";
+    }
+
+    _isHomeConnectMode() {
+        return this._getMode() === "home_connect";
+    }
+
+    _isStandardMode() {
+        return this._getMode() === "standard";
+    }
+
+    _getApplianceCapabilities() {
+        const mode = this._getMode();
+        const type = this._applianceType;
+
+        if (mode === "standard") {
+            return {
+                mode: "standard",
+                type: type,
+                hasPrograms: false,
+                hasDoor: false,
+                hasInteractiveControls: false,
+                hasConnectivity: false,
+                hasOptions: false,
+                hasFeatures: false,
+                hasIDos: false,
+                hasConsumables: false,
+                hasRemoteControl: false,
+                hasRemoteStart: false,
+            };
+        }
+
+        // Home Connect mode
+        const hc = this._config?.home_connect?.[type] || {};
+
+        return {
+            mode: "home_connect",
+            type: type,
+            hasPrograms: !!(hc.program_selector_entity || hc.active_program_entity),
+            hasDoor: !!hc.door_entity,
+            hasInteractiveControls: !!(hc.power_entity || hc.program_selector_entity),
+            hasConnectivity: !!hc.connectivity_entity,
+            hasOptions: !!(hc.temperature_entity || hc.spin_speed_entity),
+            hasFeatures: this._hasAnyFeature(hc),
+            hasIDos: this._hasIDos(hc),
+            hasConsumables: !!(hc.salt_low_entity || hc.rinseaid_low_entity),
+            hasRemoteControl: !!hc.remote_control_entity,
+            hasRemoteStart: !!hc.remote_start_entity,
+        };
+    }
+
+    _hasAnyFeature(hc) {
+        return !!(
+            hc?.hygiene_plus_entity ||
+            hc?.intensive_zone_entity ||
+            hc?.variospeed_plus_entity ||
+            hc?.silence_on_demand_entity ||
+            hc?.brilliant_dry_entity
+        );
+    }
+
+    _hasIDos(hc) {
+        return !!(
+            hc?.idos1_active_entity ||
+            hc?.idos2_active_entity ||
+            hc?.idos1_level_entity ||
+            hc?.idos2_level_entity
+        );
     }
 
     get _applianceType() {

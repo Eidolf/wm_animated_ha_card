@@ -1,0 +1,6 @@
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: washer
+home_connect:
+  washer:
+    operation_state_entity: sensor.test_washer_state
