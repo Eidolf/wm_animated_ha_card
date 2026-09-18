@@ -1573,6 +1573,11 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _svgDishwasher(u) {
+        const mode = this._getMode();
+        const isHc = mode === "home_connect";
+        const interactiveClass = isHc ? "hc-interactive" : "";
+        const t = this._t;
+
         const top = `
       <rect x="42" y="18" width="136" height="22" rx="8" fill="#0d1526"/>
       <text id="dispTime" x="100" y="33" text-anchor="middle"
@@ -1582,7 +1587,7 @@ class WashingMachineCard extends HTMLElement {
       <circle cx="162" cy="29" r="5.5" fill="#e9edf3" stroke="#c2cbd6" stroke-width="1"/>
       <circle cx="162" cy="29" r="1.8" fill="#31415a"/>`;
         return `
-      <svg class="machine" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
+      <svg class="machine ${interactiveClass}" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${u}-body" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ffffff"/>
@@ -1669,6 +1674,22 @@ class WashingMachineCard extends HTMLElement {
               stroke="#2f80ed" stroke-width="4" stroke-linecap="round"
               stroke-dasharray="90 70" opacity=".9"/>
         <rect x="78" y="188" width="64" height="7" rx="3.5" fill="#cfd7e0" stroke="#b4bec9" stroke-width="1"/>
+
+        ${isHc ? `
+          <!-- Home Connect Interactive Overlays -->
+          <rect class="hc-control" id="hcProgramBtn" x="42" y="18" width="46" height="22" rx="6"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_program_btn || "Select Program"}</title>
+          </rect>
+          <rect class="hc-control" id="hcStartBtn" x="90" y="18" width="60" height="22" rx="6"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_start_btn || "Start / Pause"}</title>
+          </rect>
+          <circle class="hc-control" id="hcPowerBtn" cx="162" cy="29" r="9"
+                  fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_power_btn || "Power"}</title>
+          </circle>
+        ` : ''}
       </svg>`;
     }
 
@@ -2484,17 +2505,20 @@ class WashingMachineCard extends HTMLElement {
         const name = String(programName || "").toLowerCase();
         if (name.includes("cotton") || name.includes("baumwolle")) return "👕";
         if (name.includes("easy") || name.includes("pflegeleicht") || name.includes("mix")) return "👔";
+        if (name.includes("glass") || name.includes("glas")) return "🍷";
         if (name.includes("delicate") || name.includes("silk") || name.includes("seide") || name.includes("fein")) return "🧵";
         if (name.includes("wool") || name.includes("wolle")) return "🧶";
         if (name.includes("sport")) return "🏃";
         if (name.includes("quick") || name.includes("kurz") || name.includes("speed") || name.includes("express") || name.includes("super")) return "⚡";
         if (name.includes("eco")) return "🌿";
-        if (name.includes("intensive") || name.includes("intensiv")) return "💪";
+        if (name.includes("intensive") || name.includes("intensiv") || name.includes("pots") || name.includes("pans")) return "🍲";
         if (name.includes("spin") || name.includes("schleudern")) return "🌀";
-        if (name.includes("rinse") || name.includes("spülen")) return "💧";
+        if (name.includes("rinse") || name.includes("spülen") || name.includes("prerinse")) return "💧";
         if (name.includes("auto")) return "🤖";
         if (name.includes("night") || name.includes("silence") || name.includes("quiet")) return "🌙";
-        if (name.includes("clean") || name.includes("care") || name.includes("drum")) return "✨";
+        if (name.includes("clean") || name.includes("care") || name.includes("drum") || name.includes("machinecare")) return "✨";
+        if (name.includes("hygiene") || name.includes("sanitize")) return "🧴";
+        if (name.includes("dish") || name.includes("geschirr") || name.includes("normal")) return "🍽️";
         return "🔄";
     }
 
@@ -2508,9 +2532,12 @@ class WashingMachineCard extends HTMLElement {
 
         // Available programs: explicit list > select options > defaults
         const selectorEntity = this._hcEntity("program_selector_entity");
+        const defaultPrograms = type === "dishwasher"
+            ? ["Auto1", "Auto2", "Eco50", "Intensiv70", "Quick45", "PreRinse", "NightWash", "MachineCare"]
+            : ["Cotton", "EasyCare", "DelicatesSilk", "Sportswear", "Quick45", "Mix", "Spin", "Rinse"];
         const availablePrograms = hc.available_programs ||
                                   selectorEntity?.attributes?.options ||
-                                  ["Cotton", "EasyCare", "DelicatesSilk", "Sportswear", "Quick45", "Mix", "Spin", "Rinse"];
+                                  defaultPrograms;
 
         const currentProgram = this._getSelectedProgram() || this._getActiveProgram();
 

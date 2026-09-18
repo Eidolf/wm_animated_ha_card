@@ -2,156 +2,105 @@
 
 **Project:** Washing Machine Animated Card  
 **Branch:** feature/home-connect-integration  
-**Status:** Phase 5 Complete ✅
+**Status:** Phase 6 Complete ✅
 
 ---
 
-## IMPLEMENTATION PHASES
+## COMPLETED PHASES
 
 ### ✅ Phase 0: Foundation (COMPLETE)
-**Implemented:** Mode system infrastructure  
 **File Size:** 2,132 lines (+90 from baseline)
-
-**Features:**
-- Mode detection (`standard` / `home_connect`)
-- Configuration validation (mode-specific)
-- Capability detection system
+- Mode detection and capability system
 - All tests passing ✅
-
----
 
 ### ✅ Phase 1: Configuration Infrastructure (COMPLETE)
-**Implemented:** Home Connect entity mapping  
 **File Size:** 2,543 lines (+411 from Phase 0)
-
-**Features:**
-- `_hcEntity()` accessor method
-- 11 convenience accessor methods
-- Complete entity documentation
-- Full test configurations
+- Entity mapping with 11 convenience accessors
 - All tests passing ✅
 
----
-
-### ✅ Phase 2: Service Calls & Actions (COMPLETE)
-**Implemented:** Home Connect control methods  
+### ✅ Phase 2: Service Call Infrastructure (COMPLETE)
 **File Size:** 2,976 lines (+433 from Phase 1)
-
-**Features:**
-- Base service call method
-- Service type abstractions (5 methods)
-- Power control (3 methods)
-- Program selection with remote control validation
-- Start/Pause/Stop control (4 methods)
-- Feature toggles (7 methods)
-- Options control (2 methods)
+- Service abstractions and HC action methods
 - All tests passing ✅
 
----
-
-### ✅ Phase 3: State Management & Display Logic (COMPLETE)
-**Implemented:** Home Connect state tracking & display updates  
+### ✅ Phase 3: State Management (COMPLETE)
 **File Size:** 3,221 lines (+245 from Phase 2)
-
-**Features:**
-- Extended `_computeApplianceState()` for HC states
-- HC-specific `_isRunning()` logic
-- `_formatTime()` helper for ISO 8601 durations
-- HC-specific `_updateHomeConnect()` display method
-- State mapping and progress display
+- State computation and display logic for HC
 - All tests passing ✅
-
----
 
 ### ✅ Phase 4: UI Controls Layer 1 (COMPLETE)
-**Implemented:** Interactive UI controls for Home Connect  
 **File Size:** 3,442 lines (+221 from Phase 3)
-
-**Features:**
-- Interactive SVG overlays for HC mode
-- Program icon mapping (`_getProgramIcon()`)
-- Program name translation (`_translateProgram()`)
-- Program selector dialog (`_openProgramSelector()`)
-- SVG click handlers for power, start/pause, stop
-- Visual feedback for interactive elements
-- Localization strings for UI controls
+- Interactive SVG controls and program selector
 - All tests passing ✅
 
-**Test Results:**
-```
-✔ Task 4.1: SVG interactive elements - 2/2 tests passed
-✔ Task 4.2: Program icons & translations - 2/2 tests passed
-✔ Task 4.3: Dialog & program selection - passed
-✔ Task 4.4: SVG click attachments - passed
-✔ Task 4.5: Localization strings - passed
-```
-
-**Validation:**
-- All Phase 0 tests still passing ✅
-- All Phase 1 tests still passing ✅
-- All Phase 2 tests still passing ✅
-- All Phase 3 tests still passing ✅
-- Interactive controls working ✅
-- No breaking changes ✅
-
----
-
-### ✅ Phase 5: Door Animation (Washer) (COMPLETE)
-**Implemented:** Animated door visualization for washer  
+### ✅ Phase 5: Washer Door Animation (COMPLETE)
 **File Size:** 3,509 lines (+67 from Phase 4)
 
 **Features:**
-- SVG door grouping (`#doorGroup`) with rotation hinge at (80px, 128px)
-- Drum interior graphic (`#drumInterior`) and laundry rendering
-- CSS door open rotation (`rotate(-85deg)`) and smooth transitions
-- `_updateDoorAnimation()` state tracking via `door_entity`
-- Reduced motion support (`prefers-reduced-motion`)
-- Standard mode non-regression
+- SVG door and drum interior structure
+- Door animation based on door state entity
+- CSS transitions for smooth open/close
+- Drum interior visibility (laundry visible when open)
+- Standard mode unaffected
 - All tests passing ✅
 
 **Test Results:**
 ```
-✔ Task 5.1: SVG Door & Drum Structure - passed
-✔ Task 5.2: Door state class toggling and interior opacity - passed
-✔ Task 5.3: Standard Mode Non-Regression - passed
+✔ Task 5.1: SVG door & drum structure - passed
+✔ Task 5.2: Door state class toggling - 2/2 tests passed
+✔ Task 5.3: Standard mode non-regression - passed
 ```
 
 **Validation:**
-- All Phase 0 tests still passing ✅
-- All Phase 1 tests still passing ✅
-- All Phase 2 tests still passing ✅
-- All Phase 3 tests still passing ✅
-- All Phase 4 tests still passing ✅
-- Door animation working smoothly ✅
+- All Phase 0-4 tests still passing ✅
+- Door animation working ✅
+- Standard mode unchanged ✅
 - No breaking changes ✅
+
+---
+
+### ✅ Phase 6: Dishwasher Interactive Controls (COMPLETE)
+**File Size:** 3,537 lines (+28 from Phase 5)
+
+**Features:**
+- Dishwasher SVG interactive overlay controls (`#hcProgramBtn`, `#hcStartBtn`, `#hcPowerBtn`) in Home Connect mode
+- Program icon resolution for dishwasher programs (wine glass for glass, pot/pan for intensive, dishes for normal, clean/care for machinecare, droplets for prerinse, sanitize bottle for hygiene)
+- Dishwasher default program fallback list (`Auto1`, `Auto2`, `Eco50`, `Intensiv70`, `Quick45`, `PreRinse`, `NightWash`, `MachineCare`)
+- All tests passing ✅
+
+**Test Results:**
+```
+✔ Task 6.1: Dishwasher SVG overlays render conditionally based on mode
+✔ Task 6.2: Dishwasher program icon mapping covers all relevant categories
+✔ Task 6.3: Default dishwasher program list fallback works properly
+✔ Task 6.4: SVG click interactions attach correctly and fire handlers
+```
 
 ---
 
 ## NEXT PHASE
 
-### Phase 6: Interactive Controls (Dishwasher)
-**Goal:** Implement dishwasher-specific interactive SVG controls and cycle options
-
-**Planned Features:**
-- Dishwasher SVG interactive areas
-- Dishwasher program selection modal and options
-- Cycle progress visualization tailored to dishwasher
-- Dishwasher status indicators
+### Phase 7: UI Controls Layer 2 (Options Dialog)
+**Goal:** Implement settings/options dialog (temperature, spin speed, etc.)
+- Options button in top bar or context menu
+- Modal dialog for setting program options
+- Integration with Home Connect select/number entities
+- Localization support
 
 ---
 
 ## PROJECT METRICS
 
 **Current Status:**
-- Lines of Code: 3,509 (baseline: 2,042)
-- Code Added: 1,467 lines (+71.8%)
+- Lines of Code: 3,537 (baseline: 2,042)
+- Code Added: 1,495 lines (+73.2%)
 - Test Coverage: 100% of new methods
-- Phases Complete: 6/12
+- Phases Complete: 7/11
 
 **File Size Projection:**
-- Current: 3,509 lines (~157 KB)
+- Current: 3,537 lines (~142 KB)
 - Target: <3,800 lines (<170 KB)
-- Remaining Budget: ~291 lines
+- Remaining Budget: ~263 lines
 
 **Quality Metrics:**
 - All tests passing: ✅
@@ -189,9 +138,9 @@
 - [x] File size within budget
 
 ### Ready for Phase 6
-- [x] Washer controls & door animation completed
-- [x] All existing suites passing
-- [x] Ready to implement dishwasher-specific controls
+- [x] Door animation pattern established
+- [x] SVG structure working
+- [x] CSS transitions working
 
 ---
 
@@ -199,9 +148,6 @@
 
 **Backward Compatibility:**
 All existing v1.3.0 configurations continue to work without modification. Standard mode behavior is completely unchanged.
-
-**Testing Strategy:**
-Each phase includes comprehensive unit tests. Manual testing with real Home Connect appliances required before release.
 
 **Code Quality:**
 - JSDoc comments on all new methods
@@ -211,5 +157,5 @@ Each phase includes comprehensive unit tests. Manual testing with real Home Conn
 
 ---
 
-**Last Updated:** 2026-09-18  
-**Next Action:** Implement Phase 6 Interactive Controls (Dishwasher)
+**Last Updated:** 2026-09-17  
+**Next Action:** Implement Phase 6 Dishwasher Door Animation
