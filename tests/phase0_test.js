@@ -63,13 +63,17 @@ assert.strictEqual(card._isHomeConnectMode(), true, '_isHomeConnectMode() should
 assert.strictEqual(card._isStandardMode(), false, '_isStandardMode() should return false');
 console.log('✔ Task 0.1 & 0.3: Home Connect mode detection and validation verified');
 
-// Fallback on unknown mode
-card.setConfig({
-    mode: 'unknown_mode',
-    status_entity: 'binary_sensor.test_washing'
-});
-assert.strictEqual(card._getMode(), 'standard', 'Unknown mode should fallback to standard');
-console.log('✔ Unknown mode fallback verified');
+// Rejection of unknown mode
+assert.throws(() => {
+    card.setConfig({
+        mode: 'unknown_mode',
+        status_entity: 'binary_sensor.test_washing'
+    });
+}, /Unsupported mode "unknown_mode"/, 'Unknown mode should throw an error');
+console.log('✔ Unknown mode rejection verified');
+
+// Reset to standard mode
+card.setConfig({ status_entity: 'binary_sensor.test_washing' });
 
 // 3. Test capability detection
 // Standard mode capabilities

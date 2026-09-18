@@ -439,6 +439,9 @@ class WashingMachineCard extends HTMLElement {
 
     setConfig(config) {
         const mode = config.mode || "standard";
+        if (mode !== "standard" && mode !== "home_connect") {
+            throw new Error(`washing-machine-card: Unsupported mode "${mode}"`);
+        }
         if (mode === "standard") {
             if (!config.status_entity) {
                 throw new Error("washing-machine-card: status_entity is required in standard mode");
