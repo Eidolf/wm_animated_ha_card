@@ -2,7 +2,7 @@
 
 **Project:** Washing Machine Animated Card  
 **Branch:** feature/home-connect-integration  
-**Status:** Phase 2 Complete ✅
+**Status:** Phase 3 Complete ✅
 
 ---
 
@@ -20,11 +20,6 @@
 - Test configurations created
 - All tests passing ✅
 
-**Validation:**
-- Backward compatibility maintained ✅
-- Standard mode unchanged ✅
-- No console errors ✅
-
 ---
 
 ### ✅ Phase 1: Configuration Infrastructure (COMPLETE)
@@ -40,13 +35,6 @@
 - Visual editor mode selection
 - All tests passing ✅
 
-**Test Results:**
-```
-✔ Task 1.1: _hcEntity() accessor - 4/4 tests passed
-✔ Task 1.2: Convenience accessors - 14/14 tests passed
-✔ Task 1.5: Full configurations - 2/2 tests passed
-```
-
 ---
 
 ### ✅ Phase 2: Service Call Infrastructure (COMPLETE)
@@ -55,90 +43,98 @@
 
 **Features:**
 - Base service call method (`_callService()`)
-- Service type abstractions (5 methods):
-  - `_selectOption()`, `_setValue()`, `_pressButton()`
-  - `_turnOn()`, `_turnOff()`
-- Power control (3 methods):
-  - `_hcPowerOn()`, `_hcPowerOff()`, `_hcTogglePower()`
-- Program selection:
-  - `_hcSelectProgram()` with remote control validation
-- Start/Pause/Stop control (4 methods):
-  - `_hcStart()`, `_hcPause()`, `_hcStop()`, `_hcToggleStartPause()`
-- Feature toggles (7 methods):
-  - `_hcToggleFeature()` (generic)
-  - `_hcToggleChildLock()`, `_hcToggleHygienePlus()`, etc.
-- Options control (2 methods):
-  - `_hcSetTemperature()`, `_hcSetSpinSpeed()`
+- Service type abstractions (5 methods)
+- Power control (3 methods)
+- Program selection with remote control validation
+- Start/Pause/Stop control (4 methods)
+- Feature toggles (7 methods)
+- Options control (2 methods)
 - Localization strings for confirmations and errors
+- All tests passing ✅
+
+---
+
+### ✅ Phase 3: State Management (COMPLETE)
+**Implemented:** Home Connect state computation and display logic  
+**File Size:** 3,221 lines (+245 from Phase 2)
+
+**Features:**
+- Extended `_computeApplianceState()` for HC operation states
+- HC-specific `_isRunning()` logic
+- `_formatTime()` helper for ISO 8601 durations
+- HC-specific `_updateHomeConnect()` display method
+- State mapping (Run/Pause/Ready/Finished → running/idle/off)
+- Progress display from HC progress entity
+- Remaining time display with proper formatting
+- Badge text updates for HC states
+- Ring text updates for HC states
+- Localization strings for HC states
 - All tests passing ✅
 
 **Test Results:**
 ```
-✔ Task 2.1: _callService() base method - passed
-✔ Task 2.2: Service type abstractions - 6/6 tests passed
-✔ Task 2.3: Power control - 4/4 tests passed
-✔ Task 2.4: Program selection - 2/2 tests passed
-✔ Task 2.5: Start/Pause/Stop - 5/5 tests passed
-✔ Task 2.6: Feature toggles - 2/2 tests passed
-✔ Task 2.7: Options control - 2/2 tests passed
-✔ Task 2.8: Localization strings - passed
+✔ Task 3.1: State computation - passed
+✔ Task 3.2: Time formatting - passed
+✔ Task 3.3: HC update display - 4/4 tests passed
+✔ Task 3.4: Localization strings - passed
 ```
 
 **Validation:**
 - All Phase 0 tests still passing ✅
 - All Phase 1 tests still passing ✅
-- Remote control validation working ✅
-- Power off confirmation working ✅
+- All Phase 2 tests still passing ✅
+- HC states correctly mapped ✅
+- Progress display working ✅
 - No breaking changes ✅
 
 ---
 
-### ✅ Phase 3: State Management (COMPLETE)
-**Implemented:** Home Connect state computation & display logic  
-**File Size:** 3,195 lines (+219 from Phase 2)
+### ✅ Phase 4: Interactive Controls - Washer (COMPLETE)
+**Implemented:** Washer program selection modal & SVG interactive controls  
+**File Size:** ~3,445 lines (+224 from Phase 3)
 
 **Features:**
-- State computation (`_computeApplianceState()`) mapping Home Connect states
-- Mode-aware `_isRunning()` and `_applianceState()`
-- Split update logic (`_updateTheme()`, `_updateStandard()`, `_updateHomeConnect()`)
-- Duration and time formatter `_formatTime()` supporting ISO 8601 durations and timestamps
-- Home Connect badge, ring progress arc, and state text rendering
-- Extended localization strings in `STRINGS.en`
+- Native `<dialog id="hcDialog">` in Shadow DOM
+- Modal program selection UI with program grid, icons, and direct selection dispatch
+- Home Connect washer SVG interactive overlays (`#hcProgramBtn`, `#hcPowerBtn`, `#hcStartBtn`)
+- Event listeners connecting SVG buttons to actions (`_openProgramSelector()`, `_hcTogglePower()`, `_hcToggleStartPause()`)
+- Program icons (`_getProgramIcon`) and prefix translation (`_translateProgram`)
+- Phase 4 localization strings
 - All tests passing ✅
 
 **Test Results:**
 ```
-✔ Task 3.1: State Computation - passed
-✔ Task 3.2: _formatTime() Helper - passed
-✔ Task 3.3: Home Connect Update Display - passed
-✔ Task 3.4: Phase 3 Localization Strings - passed
+✔ Task 4.1: SVG Interactive Elements - passed
+✔ Task 4.2: Program Icons & Translations - passed
+✔ Task 4.3: Dialog & Program Selection - passed
+✔ Task 4.4: SVG Click Attachments - passed
+✔ Task 4.5: Localization Strings - passed
 ```
 
 ---
 
 ## NEXT PHASE
 
-### Phase 4: Controls (Washer)
-**Goal:** Interactive UI controls for Home Connect washers (dialogs, program selector, options)
+### Phase 5: Door Animation (Washer)
+**Goal:** Animated door visualization (open/closed CSS transitions, drum interior graphics, door entity state tracking)
 
-**Estimated Effort:** 3-4 days  
-**File Size Target:** ~3,450 lines
+**Estimated Effort:** 2-3 days  
+**File Size Target:** ~3,650 lines
 
 ---
 
 ## PROJECT METRICS
 
 **Current Status:**
-- Lines of Code: ~3,195 (baseline: 2,042)
-- Code Added: 1,153 lines
+- Lines of Code: ~3,445 (baseline: 2,042)
+- Code Added: 1,403 lines
 - Test Coverage: 100% of new methods
-- Phases Complete: 4/12
+- Phases Complete: 5/12
 
 **Quality Metrics:**
 - All tests passing: ✅
 - No console errors: ✅
 - Backward compatible: ✅
-- Documentation complete: ✅
 
 ---
 
@@ -157,21 +153,22 @@
 
 ## VALIDATION CHECKLIST
 
-### Phase 0 + Phase 1 + Phase 2 Combined
+### Phase 0 + Phase 1 + Phase 2 + Phase 3 Combined
 - [x] Mode system working
 - [x] Entity mapping working
 - [x] Service call infrastructure working
-- [x] All tests passing (Phase 0: ✅, Phase 1: ✅, Phase 2: ✅)
+- [x] State management working
+- [x] All tests passing (Phase 0: ✅, Phase 1: ✅, Phase 2: ✅, Phase 3: ✅)
 - [x] Standard mode unchanged
 - [x] No breaking changes
 - [x] Documentation complete
 - [x] File size within budget
 
-### Ready for Phase 3
-- [x] Service abstractions tested
-- [x] HC action methods ready
-- [x] Error handling implemented
-- [x] Remote control validation working
+### Ready for Phase 4
+- [x] State computation tested
+- [x] Display logic working
+- [x] HC states correctly mapped
+- [x] Time formatting working
 
 ---
 
@@ -192,4 +189,4 @@ Each phase includes comprehensive unit tests. Manual testing with real Home Conn
 ---
 
 **Last Updated:** 2026-09-17  
-**Next Action:** Implement Phase 3 State Management
+**Next Action:** Implement Phase 4 UI Controls Layer 1

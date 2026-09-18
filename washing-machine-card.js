@@ -59,6 +59,11 @@ class WashingMachineCard extends HTMLElement {
             state_action_required: "Action required",
             ring_ready: "READY",
             ring_paused: "PAUSED",
+            select_program: "Select Program",
+            close: "Close",
+            tip_program_btn: "Select Program",
+            tip_power_btn: "Power",
+            tip_start_btn: "Start / Pause",
             decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
@@ -1411,8 +1416,13 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _svgWasher(u) {
+        const mode = this._getMode();
+        const isHc = mode === "home_connect";
+        const interactiveClass = isHc ? "hc-interactive" : "";
+        const t = this._t;
+
         return `
-      <svg class="machine" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
+      <svg class="machine ${interactiveClass}" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${u}-body" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ffffff"/>
@@ -1447,6 +1457,21 @@ class WashingMachineCard extends HTMLElement {
           <circle cx="110" cy="128" r="53" fill="none" stroke="#2f80ed" stroke-width="5.5"
                   stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
         </g>
+        ${isHc ? `
+          <!-- Home Connect Interactive Overlays -->
+          <rect class="hc-control" id="hcProgramBtn" x="42" y="20" width="34" height="13" rx="4"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_program_btn || "Select Program"}</title>
+          </rect>
+          <rect class="hc-control" id="hcStartBtn" x="88" y="18" width="70" height="18" rx="9"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_start_btn || "Start / Pause"}</title>
+          </rect>
+          <circle class="hc-control" id="hcPowerBtn" cx="176" cy="27" r="10"
+                  fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_power_btn || "Power"}</title>
+          </circle>
+        ` : ''}
       </svg>`;
     }
 
@@ -2147,6 +2172,100 @@ class WashingMachineCard extends HTMLElement {
         .lc-value { font-size: 14.5px; font-weight: 800; margin-top: 5px; overflow-wrap: break-word; }
         .lc-unit { font-size: 11px; font-weight: 700; color: var(--wm-accent); }
         .hidden { display: none !important; }
+
+        /* Home Connect interactive controls */
+        .hc-interactive .hc-control {
+          transition: opacity 0.2s, fill 0.2s;
+        }
+        .hc-interactive .hc-control:hover {
+          fill: rgba(47, 128, 237, 0.25) !important;
+          stroke: var(--wm-accent);
+          stroke-width: 1.5;
+        }
+
+        /* Modal Dialog */
+        .hc-dialog {
+          border: none;
+          border-radius: 20px;
+          padding: 0;
+          width: 90%;
+          max-width: 440px;
+          max-height: 80vh;
+          background: var(--wm-grad, #fff);
+          color: var(--wm-text, #1c2733);
+          box-shadow: 0 10px 40px rgba(0,0,0,.3);
+        }
+        .hc-dialog::backdrop {
+          background: rgba(0, 0, 0, .55);
+          backdrop-filter: blur(4px);
+        }
+        .hc-dialog-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          border-bottom: 1px solid var(--wm-divider, #e2e8f0);
+        }
+        .hc-dialog-title {
+          font-size: 16px;
+          font-weight: 700;
+        }
+        .hc-dialog-close {
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          border: none;
+          background: var(--wm-btn-bg, rgba(0,0,0,0.06));
+          color: inherit;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: bold;
+        }
+        .hc-dialog-body {
+          padding: 16px 20px 20px;
+          overflow-y: auto;
+          max-height: 60vh;
+        }
+        .hc-program-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+          gap: 12px;
+        }
+        .hc-program-item {
+          padding: 14px 8px;
+          border-radius: 12px;
+          background: var(--wm-panel-bg, rgba(255,255,255,.6));
+          border: 1.5px solid var(--wm-panel-border, #d8e0ea);
+          cursor: pointer;
+          text-align: center;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+        .hc-program-item:hover {
+          background: var(--wm-btn-on-bg, #eaf3fe);
+          border-color: var(--wm-accent, #2f80ed);
+          transform: translateY(-2px);
+        }
+        .hc-program-item.selected {
+          background: var(--wm-btn-on-bg, #eaf3fe);
+          border-color: var(--wm-accent, #2f80ed);
+          border-width: 2.5px;
+        }
+        .hc-program-icon {
+          font-size: 26px;
+          line-height: 1;
+        }
+        .hc-program-name {
+          font-size: 12px;
+          font-weight: 700;
+          word-break: break-word;
+        }
       </style>
 
       <ha-card>
@@ -2215,6 +2334,7 @@ class WashingMachineCard extends HTMLElement {
             </div>
           </div>
         </div>
+        <dialog class="hc-dialog" id="hcDialog"></dialog>
       </ha-card>
     `;
 
@@ -2239,6 +2359,7 @@ class WashingMachineCard extends HTMLElement {
             this._el("lcCost").addEventListener("click", mi(c.cost_entity));
 
         this._built = true;
+        this._attachSVGInteractions();
         this._observeWidth();
         const w0 = this.getBoundingClientRect().width;
         if (w0) {
@@ -2310,6 +2431,106 @@ class WashingMachineCard extends HTMLElement {
         const parts = programName.split(".");
         const cleanName = parts[parts.length - 1] || programName;
         return cleanName;
+    }
+
+    _getProgramIcon(programName) {
+        const name = String(programName || "").toLowerCase();
+        if (name.includes("cotton") || name.includes("baumwolle")) return "👕";
+        if (name.includes("easy") || name.includes("pflegeleicht") || name.includes("mix")) return "👔";
+        if (name.includes("delicate") || name.includes("silk") || name.includes("seide") || name.includes("fein")) return "🧵";
+        if (name.includes("wool") || name.includes("wolle")) return "🧶";
+        if (name.includes("sport")) return "🏃";
+        if (name.includes("quick") || name.includes("kurz") || name.includes("speed") || name.includes("express") || name.includes("super")) return "⚡";
+        if (name.includes("eco")) return "🌿";
+        if (name.includes("intensive") || name.includes("intensiv")) return "💪";
+        if (name.includes("spin") || name.includes("schleudern")) return "🌀";
+        if (name.includes("rinse") || name.includes("spülen")) return "💧";
+        if (name.includes("auto")) return "🤖";
+        if (name.includes("night") || name.includes("silence") || name.includes("quiet")) return "🌙";
+        if (name.includes("clean") || name.includes("care") || name.includes("drum")) return "✨";
+        return "🔄";
+    }
+
+    _openProgramSelector() {
+        const dialog = this.shadowRoot?.getElementById("hcDialog");
+        if (!dialog) return;
+
+        const t = this._t;
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type] || {};
+
+        // Available programs: explicit list > select options > defaults
+        const selectorEntity = this._hcEntity("program_selector_entity");
+        const availablePrograms = hc.available_programs ||
+                                  selectorEntity?.attributes?.options ||
+                                  ["Cotton", "EasyCare", "DelicatesSilk", "Sportswear", "Quick45", "Mix", "Spin", "Rinse"];
+
+        const currentProgram = this._getSelectedProgram() || this._getActiveProgram();
+
+        dialog.innerHTML = `
+            <div class="hc-dialog-header">
+                <div class="hc-dialog-title">${t.select_program || "Select Program"}</div>
+                <button class="hc-dialog-close" id="closeHcDialog" title="${t.close || "Close"}">✕</button>
+            </div>
+            <div class="hc-dialog-body">
+                <div class="hc-program-grid" id="hcProgramGrid">
+                    ${availablePrograms.map(prog => `
+                        <div class="hc-program-item ${prog === currentProgram ? 'selected' : ''}" data-program="${prog}">
+                            <div class="hc-program-icon">${this._getProgramIcon(prog)}</div>
+                            <div class="hc-program-name">${this._translateProgram(prog)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        const items = dialog.querySelectorAll(".hc-program-item");
+        items.forEach(item => {
+            item.addEventListener("click", () => {
+                const program = item.dataset.program;
+                dialog.close();
+                if (program) {
+                    this._hcSelectProgram(program);
+                }
+            });
+        });
+
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        } else {
+            dialog.setAttribute("open", "");
+        }
+    }
+
+    _attachSVGInteractions() {
+        if (!this._isHomeConnectMode()) return;
+
+        const programBtn = this._el("hcProgramBtn");
+        const powerBtn = this._el("hcPowerBtn");
+        const startBtn = this._el("hcStartBtn");
+
+        if (programBtn) {
+            programBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._openProgramSelector();
+            });
+        }
+
+        if (powerBtn) {
+            powerBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._hcTogglePower();
+            });
+        }
+
+        if (startBtn) {
+            startBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._hcToggleStartPause();
+            });
+        }
     }
 
     _update() {
