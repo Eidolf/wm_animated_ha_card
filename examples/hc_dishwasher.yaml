@@ -1,0 +1,77 @@
+# =====================================================================
+# Home Connect dishwasher — full card configuration example
+# =====================================================================
+# Mode: home_connect
+# Appliance: Bosch / Siemens / Neff / Gaggenau dishwasher
+#
+# All entities under home_connect.dishwasher are OPTIONAL.
+# Remove any you don't have — the card hides the corresponding
+# control or indicator automatically.
+# =====================================================================
+
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: dishwasher
+name: Dishwasher
+language: auto
+theme: auto
+
+home_connect:
+  dishwasher:
+    # ── Status ────────────────────────────────────────────────────
+    operation_state_entity: sensor.dishwasher_operation_state
+      # Values: Inactive | Ready | DelayedStart | Run | Pause
+      #         ActionRequired | Finished | Error | Aborting
+
+    active_program_entity: sensor.dishwasher_active_program
+    selected_program_entity: sensor.dishwasher_selected_program
+    progress_entity: sensor.dishwasher_program_progress
+    remaining_time_entity: sensor.dishwasher_remaining_program_time
+    end_time_entity: sensor.dishwasher_program_finish_time
+
+    # ── Connectivity ──────────────────────────────────────────────
+    connectivity_entity: binary_sensor.dishwasher_connectivity
+
+    # ── Door ──────────────────────────────────────────────────────
+    # Animates the dishwasher door fold-down
+    door_entity: binary_sensor.dishwasher_door
+
+    # ── Controls ──────────────────────────────────────────────────
+    power_entity: switch.dishwasher_power
+    remote_start_entity: binary_sensor.dishwasher_remote_start
+    remote_control_entity: binary_sensor.dishwasher_remote_control
+    program_selector_entity: select.dishwasher_active_program
+
+    # Optional: restrict programs shown in the selector dialog
+    # available_programs:
+    #   - Auto1
+    #   - Auto2
+    #   - Eco50
+    #   - Intensiv70
+    #   - Quick45
+    #   - PreRinse
+    #   - NightWash
+    #   - MachineCare
+
+    start_entity: switch.dishwasher_start_program
+    pause_entity: switch.dishwasher_pause_program
+    stop_entity: button.dishwasher_stop_program
+
+    # ── Dishwasher-specific feature options ───────────────────────
+    # Shown as toggles in the Options dialog (⚙ button in header)
+    # Active features also appear as chips in the status panel
+    child_lock_entity: switch.dishwasher_child_lock
+    hygiene_plus_entity: switch.dishwasher_hygiene_plus
+    intensive_zone_entity: switch.dishwasher_intensive_zone
+    variospeed_plus_entity: switch.dishwasher_variospeed_plus
+    silence_on_demand_entity: switch.dishwasher_silence_on_demand
+    brilliant_dry_entity: switch.dishwasher_brilliant_dry
+
+    # ── Consumable indicators ─────────────────────────────────────
+    # Warning chips appear in the status panel when levels are low
+    salt_low_entity: binary_sensor.dishwasher_salt_nearly_empty
+    rinseaid_low_entity: binary_sensor.dishwasher_rinse_aid_nearly_empty
+
+# ── Optional standard-mode entities ──────────────────────────────────
+power_entity: sensor.dishwasher_power
+currency: "€"

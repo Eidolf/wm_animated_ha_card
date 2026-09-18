@@ -2,7 +2,7 @@
 
 **English** | [Русский](README_RU.md) | [Deutsch](README_DE.md) | [Français](README_FR.md)
 
-An Oikos-inspired Lovelace card that turns a *dumb* washer, dryer, dishwasher, oven or microwave on a smart plug into a beautiful, animated dashboard widget — no smart appliance required.
+An Oikos-inspired Lovelace card that turns a *dumb* washer, dryer, dishwasher, oven or microwave on a smart plug into a beautiful, animated dashboard widget — or connects natively to a **Home Connect** smart appliance (Bosch, Siemens, Neff, Gaggenau) for program selection, remote control and live status.
 
 ![Demo](media/demo_en.gif)
 
@@ -12,13 +12,14 @@ An Oikos-inspired Lovelace card that turns a *dumb* washer, dryer, dishwasher, o
 
 - **Five appliances, one card** — `washer`, `dryer`, `dishwasher`, `oven` and `microwave`, each with its own illustration, icon and wording. Switch with a single line: `appliance_type: dryer`.
 - **Animated while running** — laundry tumbles behind the glass, dishwasher jets sweep, the oven glows, the microwave turntable turns. All animation is pure CSS/SVG, no external assets, and it respects `prefers-reduced-motion`.
+- **🏠 Home Connect mode** — set `mode: home_connect` for native integration with Bosch/Siemens/Neff/Gaggenau appliances: program selector, remote start/pause/stop, door animation, connectivity indicator, feature chips (i-Dos, HygienePlus, etc.) and options dialog.
 - **Light and dark themes** — the card follows your Home Assistant theme automatically, or you can pin it with `theme: light | dark`. A fourth value, `theme: ha`, drops the card's own palette and uses the colours of your active Home Assistant theme.
 - **Live status** — a pulsing "RUNNING / IDLE" badge, an elapsed-time ring and a power gauge with automatic unit handling (`1950 W` is shown as `1.95 kW`; an ampere sensor is labelled "Current draw" automatically).
 - **Last cycle summary** — start time ("Today, 09:55"), duration, energy and cost, each column tappable for more-info.
 - **Quick actions** — header buttons toggle the smart plug and the finish-notification automation, and open the power history.
 - **Four languages** — English, Russian, German and French labels out of the box. The language follows your Home Assistant profile, or set `language: en | ru | de | fr` explicitly.
 - **Visual editor** — the card ships a config form, so it can be set up from the UI without touching YAML.
-- **Zero dependencies** — a single vanilla-JS file with Shadow DOM. Every entity option except `status_entity` is optional: blocks without an entity are simply hidden. Responsive via CSS container queries.
+- **Zero dependencies** — a single vanilla-JS file with Shadow DOM. Every entity option except `status_entity` (standard mode) is optional: blocks without an entity are simply hidden. Responsive via CSS container queries.
 
 ## 🌗 Light and dark
 
@@ -151,6 +152,157 @@ theme: auto                                        # auto / light / dark / ha
 
 Titles and labels are translated into all four languages; `name` overrides the title.
 
+## 🔌 Standard mode — dumb appliance on a smart plug
+
+If your appliance has no Wi-Fi, everything is derived from a smart plug with power monitoring:
+
+- a template `binary_sensor` (power above a threshold, with `delay_off` of a few minutes) drives the status;
+- a small automation stores the cycle start into `input_datetime`, and on finish writes duration, energy and cost into `input_number` helpers the card shows as the "Last cycle" panel.
+
+The ready-made package that creates all of this is installed in step 2 above.
+
+## 🏠 Home Connect mode
+
+Set `mode: home_connect` to connect the card natively to a **Bosch, Siemens, Neff or Gaggenau** appliance via the [Home Connect integration](https://www.home-assistant.io/integrations/home_connect/).
+
+No helpers, no automations, no template sensors. Point each entity key at the corresponding entity from the integration and the card handles the rest.
+
+### Minimal washer config
+
+```yaml
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: washer
+home_connect:
+  washer:
+    operation_state_entity: sensor.washer_operation_state
+    active_program_entity: sensor.washer_active_program
+    progress_entity: sensor.washer_program_progress
+    remaining_time_entity: sensor.washer_remaining_program_time
+    connectivity_entity: binary_sensor.washer_connectivity
+    door_entity: binary_sensor.washer_door
+    power_entity: switch.washer_power
+    remote_start_entity: binary_sensor.washer_remote_start
+    remote_control_entity: binary_sensor.washer_remote_control
+    program_selector_entity: select.washer_active_program
+    temperature_entity: select.washer_temperature
+    spin_speed_entity: select.washer_spin_speed
+    child_lock_entity: switch.washer_child_lock
+```
+
+### Minimal dishwasher config
+
+```yaml
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: dishwasher
+home_connect:
+  dishwasher:
+    operation_state_entity: sensor.dishwasher_operation_state
+    active_program_entity: sensor.dishwasher_active_program
+    progress_entity: sensor.dishwasher_program_progress
+    connectivity_entity: binary_sensor.dishwasher_connectivity
+    door_entity: binary_sensor.dishwasher_door
+    power_entity: switch.dishwasher_power
+    remote_start_entity: binary_sensor.dishwasher_remote_start
+    remote_control_entity: binary_sensor.dishwasher_remote_control
+    program_selector_entity: select.dishwasher_active_program
+    hygiene_plus_entity: switch.dishwasher_hygiene_plus
+    intensive_zone_entity: switch.dishwasher_intensive_zone
+    variospeed_plus_entity: switch.dishwasher_variospeed_plus
+    salt_low_entity: binary_sensor.dishwasher_salt_nearly_empty
+    rinseaid_low_entity: binary_sensor.dishwasher_rinse_aid_nearly_empty
+```
+
+### HC entity reference — washer
+
+| Key | Entity type | Purpose |
+|---|---|---|
+| `operation_state_entity` | `sensor` | Core state: `Inactive` `Ready` `DelayedStart` `Run` `Pause` `Finished` `Error` |
+| `active_program_entity` | `sensor` | Currently running program |
+| `selected_program_entity` | `sensor` | Program selected but not yet started |
+| `progress_entity` | `sensor` | Completion percentage 0–100 |
+| `remaining_time_entity` | `sensor` | Time remaining (ISO 8601 or seconds) |
+| `end_time_entity` | `sensor` | Estimated finish datetime |
+| `connectivity_entity` | `binary_sensor` | Online/offline indicator in header |
+| `door_entity` | `binary_sensor` | Animates drum door open/closed |
+| `power_entity` | `switch` | Appliance on/off; header button |
+| `remote_start_entity` | `binary_sensor` | Remote start permission |
+| `remote_control_entity` | `binary_sensor` | Remote control permission |
+| `program_selector_entity` | `select` | Opens program selector dialog |
+| `start_entity` | `switch` | Start program |
+| `pause_entity` | `switch` | Pause program |
+| `stop_entity` | `button` | Stop/abort program |
+| `temperature_entity` | `select` | Washing temperature option |
+| `spin_speed_entity` | `select` | Spin speed option |
+| `child_lock_entity` | `switch` | Child lock toggle |
+| `idos1_active_entity` | `binary_sensor` | i-Dos 1 active indicator |
+| `idos1_low_entity` | `binary_sensor` | i-Dos 1 low level warning |
+| `idos2_active_entity` | `binary_sensor` | i-Dos 2 active indicator |
+| `idos2_low_entity` | `binary_sensor` | i-Dos 2 low level warning |
+
+### HC entity reference — dishwasher
+
+| Key | Entity type | Purpose |
+|---|---|---|
+| `operation_state_entity` | `sensor` | Core state (same values as washer) |
+| `active_program_entity` | `sensor` | Currently running program |
+| `selected_program_entity` | `sensor` | Program selected but not yet started |
+| `progress_entity` | `sensor` | Completion percentage 0–100 |
+| `remaining_time_entity` | `sensor` | Time remaining |
+| `end_time_entity` | `sensor` | Estimated finish datetime |
+| `connectivity_entity` | `binary_sensor` | Online/offline indicator |
+| `door_entity` | `binary_sensor` | Animates door fold-down |
+| `power_entity` | `switch` | Appliance on/off |
+| `remote_start_entity` | `binary_sensor` | Remote start permission |
+| `remote_control_entity` | `binary_sensor` | Remote control permission |
+| `program_selector_entity` | `select` | Opens program selector dialog |
+| `start_entity` | `switch` | Start program |
+| `pause_entity` | `switch` | Pause program |
+| `stop_entity` | `button` | Stop/abort program |
+| `child_lock_entity` | `switch` | Child lock toggle |
+| `hygiene_plus_entity` | `switch` | HygienePlus feature chip + toggle |
+| `intensive_zone_entity` | `switch` | IntensiveZone feature chip + toggle |
+| `variospeed_plus_entity` | `switch` | VarioSpeed Plus feature chip + toggle |
+| `silence_on_demand_entity` | `switch` | Silence on Demand feature chip + toggle |
+| `brilliant_dry_entity` | `switch` | BrilliantDry feature chip + toggle |
+| `salt_low_entity` | `binary_sensor` | Salt low warning chip |
+| `rinseaid_low_entity` | `binary_sensor` | Rinse aid low warning chip |
+
+### HC mode UI overview
+
+| Area | What appears |
+|---|---|
+| **Header** | Connectivity dot, Options (⚙) button, Power button |
+| **Hero** | SVG with animated door (open/close) and optional SVG controls |
+| **Status panel** | State text, active program name, progress bar, feature chips |
+| **Dialog** | Program selector grid or Options sheet (temperature, spin, feature toggles) |
+
+### Migration — standard → home_connect
+
+Your existing standard-mode config continues to work unchanged. To upgrade:
+
+1. Add `mode: home_connect` at the top level.
+2. Add a `home_connect:` block under your `appliance_type`.
+3. Remove `status_entity` (it is no longer required).
+4. Optionally keep `power_entity`, `energy_entity`, `cost_entity`, `currency` — they still work alongside HC entities.
+
+Full examples: [`examples/hc_washer.yaml`](examples/hc_washer.yaml) · [`examples/hc_dishwasher.yaml`](examples/hc_dishwasher.yaml)
+
+> **Note:** Home Connect appliances drop to `unavailable` when powered off at the mains or when they lose Wi-Fi. This is expected — all entities return once the appliance is powered on again.
+
+## 🧺 Appliance types
+
+| `appliance_type` | Default title | Running label |
+|---|---|---|
+| `washer` | Washing machine | Washing |
+| `dryer` (alias `tumbler`) | Dryer | Drying |
+| `dishwasher` | Dishwasher | Washing dishes |
+| `oven` | Oven | Baking |
+| `microwave` | Microwave | Heating |
+
+Titles and labels are translated into all four languages; `name` overrides the title.
+
 ## 🧠 How it works with a dumb appliance
 
 The appliance itself reports nothing — everything is derived from a smart plug with power monitoring:
@@ -160,32 +312,10 @@ The appliance itself reports nothing — everything is derived from a smart plug
 
 The ready-made package that creates all of this is installed in step 2 above.
 
-## 🔌 Using it with a smart appliance
-
-If your appliance already reports its own state, you don't need the plug or any of the
-helpers. Home Connect (Bosch / Siemens / Neff / Gaggenau), Miele@home, LG ThinQ and
-SmartHQ all expose an operation state entity, so `status_entity` can point straight at it:
-
-```yaml
-type: custom:washing-machine-card
-appliance_type: washer
-status_entity: sensor.washer_operation_state
-plug_entity: switch.washer_power
-running_states: [run]
-```
-
-A dryer, dishwasher, oven or microwave is the same config with a different
-`appliance_type` and entity prefix. Narrow `running_states` to the one state that
-really means "running", otherwise a paused or powered-but-idle appliance reads as running.
-
-[`examples/smart_appliance.yaml`](examples/smart_appliance.yaml) has the full version,
-including the progress, finish time and door values the card has no options for, plus
-notes on what stays empty and why.
-
 ## 📝 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 [sionetta](https://github.com/sionetta)
+[MIT](LICENSE) © 2026 [Eidolf](https://github.com/Eidolf)
