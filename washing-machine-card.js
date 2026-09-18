@@ -498,7 +498,7 @@ class WashingMachineCard extends HTMLElement {
             'operation_state_entity': /_operation_state$/,
             'active_program_entity': /_active_program$/,
             'selected_program_entity': /_selected_program$/,
-            'progress_entity': /_program_progress$/,
+            'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
             'remaining_time_entity': /_remaining_time$/,
             'end_time_entity': /_(finish_time|end_time)$/,
 
@@ -542,7 +542,7 @@ class WashingMachineCard extends HTMLElement {
             'operation_state_entity': /_operation_state$/,
             'active_program_entity': /_active_program$/,
             'selected_program_entity': /_selected_program$/,
-            'progress_entity': /_program_progress$/,
+            'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
             'remaining_time_entity': /_remaining_time$/,
             'end_time_entity': /_(finish_time|end_time)$/,
 
@@ -1736,14 +1736,37 @@ class WashingMachineCard extends HTMLElement {
         }
 
         const state = opState.toLowerCase();
+        const type = this._applianceType;
+
+        // If running, pause (washer) or stop (dishwasher)
         if (state === "run") {
-            return this._hcPause();
-        } else if (state === "ready" || state === "pause") {
-            return this._hcStart();
-        } else {
-            console.warn(`Cannot start/pause from state: ${opState}`);
-            return;
+            if (type === "dishwasher") {
+                // Dishwashers don't support pause - use stop
+                return this._hcStop();
+            } else {
+                return this._hcPause();
+            }
         }
+
+        // If paused or ready, start
+        if (state === "pause" || state === "ready") {
+            return this._hcStart();
+        }
+
+        // If inactive or finished, start
+        if (state === "inactive" || state === "finished") {
+            return this._hcStart();
+        }
+
+        console.warn(`Cannot start/pause from state: ${opState}`);
+        return;
+    }
+
+    /**
+     * Show program selection and options overlay (alias for dialog selector)
+     */
+    _showProgramOverlay() {
+        return this._openProgramSelector();
     }
 
     // ----------------
@@ -1871,6 +1894,56 @@ class WashingMachineCard extends HTMLElement {
                 this._handleServiceError(error, "set_spin_speed");
                 return Promise.reject(error);
             });
+    }
+
+    /**
+     * Render i-Dos panel for washing machine
+     * Shows detergent fill levels when i-Dos entities are available
+     */
+    _renderIDosPanel() {
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        // Only for washers with i-Dos
+        if (type !== 'washer' || !this._hasIDos(hc)) {
+            return `
+      <rect x="42" y="20" width="34" height="13" rx="4" fill="#cfd7e0"/>
+      <rect x="42" y="20" width="34" height="6"  rx="3" fill="#dee5ec"/>`;
+        }
+
+        const idos1Level = this._st(hc.idos1_level_entity)?.state;
+        const idos2Level = this._st(hc.idos2_level_entity)?.state;
+        const idos1Active = this._st(hc.idos1_active_entity)?.state === "on";
+        const idos2Active = this._st(hc.idos2_active_entity)?.state === "on";
+
+        const level1 = idos1Level ? parseFloat(idos1Level) : 0;
+        const level2 = idos2Level ? parseFloat(idos2Level) : 0;
+
+        // i-Dos 1 color (usually detergent - blue)
+        const color1 = idos1Active ? "#4a90e2" : "#b0bac6";
+        const level1Height = (level1 / 100) * 10;
+
+        // i-Dos 2 color (usually softener - green)
+        const color2 = idos2Active ? "#52c490" : "#b0bac6";
+        const level2Height = (level2 / 100) * 10;
+
+        return `
+      <!-- i-Dos Panel Background -->
+      <rect x="42" y="20" width="34" height="13" rx="4" fill="#f0f3f7" stroke="#c2cbd6" stroke-width="0.8"/>
+      
+      <!-- i-Dos 1 Container -->
+      <rect x="45" y="22" width="13" height="9" rx="2" fill="#e5e9ef"/>
+      <rect x="45" y="${31 - level1Height}" width="13" height="${level1Height}" rx="2" fill="${color1}" opacity="0.85"/>
+      <text x="51.5" y="29" text-anchor="middle" font-size="6" fill="#666" font-weight="600">${Math.round(level1)}%</text>
+      
+      <!-- i-Dos 2 Container -->
+      <rect x="61" y="22" width="13" height="9" rx="2" fill="#e5e9ef"/>
+      <rect x="61" y="${31 - level2Height}" width="13" height="${level2Height}" rx="2" fill="${color2}" opacity="0.85"/>
+      <text x="67.5" y="29" text-anchor="middle" font-size="6" fill="#666" font-weight="600">${Math.round(level2)}%</text>
+      
+      <!-- Active indicators -->
+      ${idos1Active ? `<circle cx="51.5" cy="23.5" r="1.2" fill="${color1}"/>` : ''}
+      ${idos2Active ? `<circle cx="67.5" cy="23.5" r="1.2" fill="${color2}"/>` : ''}`;
     }
 
     _headerIcon() {
@@ -2052,7 +2125,18 @@ class WashingMachineCard extends HTMLElement {
             <stop offset="1" stop-color="#d5dce5"/>
           </linearGradient>
         </defs>
-        ${this._svgChassis(u)}
+        ${this._svgChassis(u, {
+            topPanel: `
+      ${this._renderIDosPanel()}
+      <rect x="88" y="18" width="70" height="18" rx="9" fill="#0d1526"/>
+      <text id="dispTime" x="116" y="31" text-anchor="middle"
+            font-family="ui-monospace, 'SF Mono', Consolas, monospace"
+            font-size="11.5" font-weight="700" fill="#e8f1ff" letter-spacing="1">--:--</text>
+      <circle id="dispDot" cx="149" cy="27" r="2.4" fill="#22b263"/>
+      <circle cx="176" cy="27" r="10" fill="#e9edf3" stroke="#c2cbd6" stroke-width="1.3"/>
+      <circle cx="176" cy="27" r="3.2" fill="#31415a"/>
+      <rect x="175.1" y="18.5" width="1.8" height="6.5" rx=".9" fill="#31415a"/>`
+        })}
 
         <!-- Drum interior (visible when door is open) -->
         <g class="drum-interior" id="drumInterior">
@@ -2795,9 +2879,10 @@ class WashingMachineCard extends HTMLElement {
           transition: opacity 0.4s ease-in-out;
           opacity: 0;
         }
+        .door-open .drum-interior,
         .door-group.door-open ~ .drum-interior,
-        .door-open ~ .drum-interior,
-        #doorGroup.door-open ~ #drumInterior {
+        #doorGroup.door-open ~ #drumInterior,
+        .door-group.door-open + .drum-interior {
           opacity: 1;
         }
 
@@ -3672,6 +3757,7 @@ class WashingMachineCard extends HTMLElement {
         const hero = this._el("hero");
         if (hero) {
             hero.innerHTML = this._machineSvg();
+            this._attachSVGInteractions();
         }
 
         if (this._isHomeConnectMode()) {
@@ -4050,6 +4136,7 @@ class WashingMachineCard extends HTMLElement {
         if (!this._isHomeConnectMode()) return;
         const doorGroup = this._el("doorGroup");
         const drumInterior = this._el("drumInterior");
+        const wrap = this._el("wrap");
         if (!doorGroup) return;
 
         const doorState = this._getDoorState();
@@ -4057,6 +4144,8 @@ class WashingMachineCard extends HTMLElement {
 
         doorGroup.classList.toggle("door-open", isOpen);
         doorGroup.classList.toggle("door-closed", !isOpen);
+        wrap?.classList.toggle("door-open", isOpen);
+        wrap?.classList.toggle("door-closed", !isOpen);
 
         if (drumInterior) {
             drumInterior.style.opacity = isOpen ? "1" : "0";
@@ -4282,10 +4371,6 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "power_entity",
                         kind: "entity",
                         title: "Power sensor",
-                        visibleWhen: (config) => {
-                            const mode = config?.mode || "standard";
-                            return mode === "standard";
-                        },
                         selector: {
                             entity: {
                                 domain: "sensor"
@@ -4306,10 +4391,6 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "power_max",
                         kind: "number",
                         title: "Gauge max (W)",
-                        visibleWhen: (config) => {
-                            const mode = config?.mode || "standard";
-                            return mode === "standard";
-                        },
                     default:
                         D.power_max,
                         min: 1,
