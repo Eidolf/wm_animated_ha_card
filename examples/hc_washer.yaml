@@ -1,0 +1,101 @@
+# =====================================================================
+# Home Connect washer — full card configuration example
+# =====================================================================
+# Mode: home_connect
+# Appliance: Bosch / Siemens / Neff / Gaggenau washer
+#
+# All entities under home_connect.washer are OPTIONAL.
+# Remove any you don't have — the card hides the corresponding
+# control or indicator automatically.
+#
+# Entity names follow the Home Connect integration defaults.
+# Adjust the prefix (e.g. "washer_") to match your own.
+# =====================================================================
+
+type: custom:washing-machine-card
+mode: home_connect
+appliance_type: washer
+name: Washing machine      # optional, defaults to locale string
+language: auto             # auto | en | de | ru | fr
+theme: auto                # auto | light | dark | ha
+
+home_connect:
+  washer:
+    # ── Status ────────────────────────────────────────────────────
+    # State-display and start/pause toggle input (optional for basic controls)
+    operation_state_entity: sensor.washer_operation_state
+      # Values: Inactive | Ready | DelayedStart | Run | Pause
+      #         ActionRequired | Finished | Error | Aborting
+
+    # Active program (what is currently running)
+    active_program_entity: sensor.washer_active_program
+
+    # Selected program (chosen but not yet started)
+    selected_program_entity: sensor.washer_selected_program
+
+    # Progress 0-100 %
+    progress_entity: sensor.washer_program_progress
+
+    # Remaining time (ISO 8601 duration or seconds)
+    remaining_time_entity: sensor.washer_remaining_program_time
+
+    # Estimated finish datetime
+    end_time_entity: sensor.washer_program_finish_time
+
+    # ── Connectivity ──────────────────────────────────────────────
+    # Shows a coloured dot (green = connected) in the card header
+    connectivity_entity: binary_sensor.washer_connectivity
+
+    # ── Door ──────────────────────────────────────────────────────
+    # Animates the drum door open/closed
+    door_entity: binary_sensor.washer_door
+
+    # ── Controls ──────────────────────────────────────────────────
+    # Power on/off switch; shown as header button
+    power_entity: switch.washer_power
+
+    # Remote-start permission (binary — must be ON to start remotely)
+    remote_start_entity: binary_sensor.washer_remote_start
+
+    # Remote-control permission (binary — must be ON to change options)
+    remote_control_entity: binary_sensor.washer_remote_control
+
+    # Program selector (select entity with program list as options)
+    program_selector_entity: select.washer_active_program
+
+    # Optional: restrict programs shown in the selector dialog
+    # If omitted, all options from the select entity are shown
+    # available_programs:
+    #   - Cotton
+    #   - EasyCare
+    #   - DelicatesSilk
+    #   - Sportswear
+    #   - Quick45
+    #   - Mix
+    #   - Eco50
+    #   - NightWash
+
+    # Start / pause / stop controls
+    start_entity: switch.washer_start_program
+    pause_entity: switch.washer_pause_program
+    stop_entity: button.washer_stop_program
+
+    # ── Washing options ───────────────────────────────────────────
+    # Shown in the Options dialog (⚙ button in header)
+    temperature_entity: select.washer_temperature
+    spin_speed_entity: select.washer_spin_speed
+    child_lock_entity: switch.washer_child_lock
+
+    # ── i-Dos detergent system ────────────────────────────────────
+    # Feature chips appear when i-Dos is active
+    idos1_active_entity: binary_sensor.washer_idos1_active
+    idos1_low_entity: binary_sensor.washer_idos1_low
+    idos2_active_entity: binary_sensor.washer_idos2_active
+    idos2_low_entity: binary_sensor.washer_idos2_low
+
+# ── Optional: standard-mode entities alongside HC ─────────────────
+# These work exactly as in standard mode and can be combined freely
+power_entity: sensor.washer_power      # adds power gauge to status panel
+energy_entity: input_number.wm_energy  # adds energy to last-cycle panel
+cost_entity: input_number.wm_cost
+currency: "€"

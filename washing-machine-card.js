@@ -32,8 +32,13 @@ class WashingMachineCard extends HTMLElement {
         en: {
             name: "Washing machine",
             badge_running: "RUNNING", badge_idle: "IDLE", badge_off: "OFF", badge_nodata: "NO DATA",
+            badge_finished: "FINISHED", badge_paused: "PAUSED", badge_ready: "READY",
+            badge_delayed: "DELAYED", badge_error: "ERROR", badge_action_required: "ACTION REQ.",
             state_running: "Washing", state_idle: "Idle", state_off: "Off", state_nodata: "No data",
+            state_finished: "Finished", state_paused: "Paused", state_ready: "Ready",
+            state_delayed: "Delayed start", state_error: "Error", state_action_required: "Action required",
             ring_running: "ELAPSED", ring_idle: "IDLE", ring_off: "OFF",
+            ring_ready: "READY", ring_paused: "PAUSED",
             power: "Current power", current: "Current draw",
             last_cycle: "LAST CYCLE", start: "START", duration: "DURATION",
             energy: "ENERGY", cost: "COST",
@@ -41,20 +46,85 @@ class WashingMachineCard extends HTMLElement {
             today: "Today", yesterday: "Yesterday",
             tip_notify: "Finish notification", tip_plug: "Machine plug", tip_history: "History",
             confirm_plug_off: "Turn off the plug? This may interrupt the current cycle.",
+            confirm_power_off: "Turn off appliance? This will stop the current program.",
+            remote_control_required: "Remote control must be enabled on the appliance.\nPlease enable remote control using the appliance controls.",
+            program_selection_failed: "Failed to select program. Check that remote control is enabled.",
+            service_call_failed: "Action failed. Please try again.",
+            select_program: "Select Program",
+            close: "Close",
+            tip_program_btn: "Select Program",
+            tip_power_btn: "Power",
+            tip_start_btn: "Start / Pause",
+            options_title: "Options & Settings",
+            tip_options_btn: "Options & Settings",
+            temperature: "Temperature",
+            spin_speed: "Spin Speed",
+            child_lock: "Child Lock",
+            hygiene_plus: "Hygiene Plus",
+            intensive_zone: "Intensive Zone",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence on Demand",
+            brilliant_dry: "BrilliantDry",
+            no_options_available: "No options available",
+            connected: "Connected",
+            disconnected: "Offline",
+            active_program: "Program",
+            salt_low: "Salt Low",
+            rinseaid_low: "Rinse Aid Low",
             decimal: ".",
             types: {
-                washer: { name: "Washing machine", state_running: "Washing" },
-                dryer: { name: "Dryer", state_running: "Drying" },
-                dishwasher: { name: "Dishwasher", state_running: "Washing dishes" },
-                oven: { name: "Oven", state_running: "Baking" },
-                microwave: { name: "Microwave", state_running: "Heating" },
+                washer:     { name: "Washing machine",  state_running: "Washing" },
+                dryer:      { name: "Dryer",            state_running: "Drying" },
+                dishwasher: { name: "Dishwasher",       state_running: "Washing dishes" },
+                oven:       { name: "Oven",             state_running: "Baking" },
+                microwave:  { name: "Microwave",        state_running: "Heating" },
+            },
+            programs: {
+                // Washer
+                Cotton: "Cotton",
+                EasyCare: "Easy Care",
+                DelicatesSilk: "Delicates / Silk",
+                Wool: "Wool",
+                Sportswear: "Sportswear",
+                Quick45: "Quick 45",
+                Mix: "Mix",
+                Spin: "Spin",
+                Rinse: "Rinse",
+                Eco50: "Eco 50°",
+                Intensiv70: "Intensive 70°",
+                Auto: "Auto",
+                Kurz60: "Short 60",
+                MachineCare: "Machine Care",
+                NightWash: "Night Wash",
+                OutdoorSports: "Outdoor Sports",
+                Shirts: "Shirts",
+                Towels: "Towels",
+                DrumClean: "Drum Clean",
+                // Dishwasher
+                Auto1: "Auto",
+                Auto2: "Auto Intensive",
+                Auto3: "Auto Quick",
+                Eco50dw: "Eco 50°",
+                Intensiv70dw: "Intensive 70°",
+                PreRinse: "Pre-Rinse",
+                Glass40: "Delicate / Glass 40°",
+                Quick45dw: "Quick 45°",
+                Quick65: "Quick 65°",
+                NightWashdw: "Night Wash",
+                MachineCaredw: "Machine Care",
+                Kurz60dw: "Short 60",
             },
         },
         ru: {
             name: "Стиральная машина",
             badge_running: "В РАБОТЕ", badge_idle: "ОЖИДАНИЕ", badge_off: "ВЫКЛ", badge_nodata: "НЕТ ДАННЫХ",
+            badge_finished: "ЗАВЕРШЕНО", badge_paused: "НА ПАУЗЕ", badge_ready: "ГОТОВО",
+            badge_delayed: "ОТЛОЖЕН", badge_error: "ОШИБКА", badge_action_required: "ТРЕБУЕТСЯ ДЕЙСТВИЕ",
             state_running: "Идёт стирка", state_idle: "Ожидание", state_off: "Выключено", state_nodata: "Нет данных",
+            state_finished: "Завершено", state_paused: "На паузе", state_ready: "Готово",
+            state_delayed: "Отложенный старт", state_error: "Ошибка", state_action_required: "Требуется действие",
             ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_off: "ВЫКЛ",
+            ring_ready: "ГОТОВО", ring_paused: "ПАУЗА",
             power: "Текущая мощность", current: "Текущий ток",
             last_cycle: "ПОСЛЕДНИЙ ЦИКЛ", start: "СТАРТ", duration: "ДЛИТЕЛЬН.",
             energy: "РАСХОД", cost: "СТОИМОСТЬ",
@@ -62,20 +132,83 @@ class WashingMachineCard extends HTMLElement {
             today: "Сегодня", yesterday: "Вчера",
             tip_notify: "Уведомление об окончании", tip_plug: "Розетка машины", tip_history: "История",
             confirm_plug_off: "Выключить розетку? Это может прервать текущий цикл.",
+            confirm_power_off: "Выключить прибор? Текущая программа будет остановлена.",
+            remote_control_required: "На приборе должно быть включено дистанционное управление.\nВключите его с помощью элементов управления прибора.",
+            program_selection_failed: "Не удалось выбрать программу. Проверьте, включено ли дистанционное управление.",
+            service_call_failed: "Действие не выполнено. Попробуйте ещё раз.",
+            select_program: "Выбрать программу",
+            close: "Закрыть",
+            tip_program_btn: "Выбрать программу",
+            tip_power_btn: "Питание",
+            tip_start_btn: "Старт / Пауза",
+            options_title: "Опции и настройки",
+            tip_options_btn: "Опции и настройки",
+            temperature: "Температура",
+            spin_speed: "Скорость отжима",
+            child_lock: "Защита от детей",
+            hygiene_plus: "Гигиена плюс",
+            intensive_zone: "Интенсивная зона",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Тихий режим",
+            brilliant_dry: "Экстра сушка",
+            no_options_available: "Нет доступных опций",
+            connected: "Подключено",
+            disconnected: "Не в сети",
+            active_program: "Программа",
+            salt_low: "Соль заканчивается",
+            rinseaid_low: "Ополаскиватель заканчивается",
             decimal: ",",
             types: {
-                washer: { name: "Стиральная машина", state_running: "Идёт стирка" },
-                dryer: { name: "Сушилка", state_running: "Сушка" },
-                dishwasher: { name: "Посудомойка", state_running: "Моет посуду" },
-                oven: { name: "Духовка", state_running: "Выпечка" },
-                microwave: { name: "Микроволновка", state_running: "Разогрев" },
+                washer:     { name: "Стиральная машина", state_running: "Идёт стирка" },
+                dryer:      { name: "Сушилка",           state_running: "Сушка" },
+                dishwasher: { name: "Посудомойка",       state_running: "Моет посуду" },
+                oven:       { name: "Духовка",           state_running: "Выпечка" },
+                microwave:  { name: "Микроволновка",     state_running: "Разогрев" },
+            },
+            programs: {
+                Cotton: "Хлопок",
+                EasyCare: "Лёгкий уход",
+                DelicatesSilk: "Деликатные / Шёлк",
+                Wool: "Шерсть",
+                Sportswear: "Спортивная одежда",
+                Quick45: "Быстрая 45",
+                Mix: "Смешанное",
+                Spin: "Отжим",
+                Rinse: "Полоскание",
+                Eco50: "Эко 50°",
+                Intensiv70: "Интенсивная 70°",
+                Auto: "Авто",
+                Kurz60: "Быстрая 60",
+                MachineCare: "Уход за машиной",
+                NightWash: "Ночная стирка",
+                OutdoorSports: "Уличная одежда",
+                Shirts: "Рубашки",
+                Towels: "Полотенца",
+                DrumClean: "Очистка барабана",
+                Auto1: "Авто",
+                Auto2: "Авто интенсивный",
+                Auto3: "Авто быстрый",
+                Eco50dw: "Эко 50°",
+                Intensiv70dw: "Интенсивный 70°",
+                PreRinse: "Предварительное полоскание",
+                Glass40: "Стекло 40°",
+                Quick45dw: "Быстрая 45°",
+                Quick65: "Быстрая 65°",
+                NightWashdw: "Ночная мойка",
+                MachineCaredw: "Уход за машиной",
+                Kurz60dw: "Быстрая 60",
             },
         },
         de: {
             name: "Waschmaschine",
             badge_running: "LÄUFT", badge_idle: "BEREIT", badge_off: "AUS", badge_nodata: "KEINE DATEN",
+            badge_finished: "FERTIG", badge_paused: "PAUSIERT", badge_ready: "BEREIT",
+            badge_delayed: "VERZÖGERT", badge_error: "FEHLER", badge_action_required: "AKTION ERF.",
             state_running: "Läuft", state_idle: "Bereit", state_off: "Aus", state_nodata: "Keine Daten",
+            state_finished: "Fertig", state_paused: "Pausiert", state_ready: "Bereit",
+            state_delayed: "Verzögerter Start", state_error: "Fehler", state_action_required: "Aktion erforderlich",
             ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_off: "AUS",
+            ring_ready: "BEREIT", ring_paused: "PAUSE",
             power: "Aktuelle Leistung", current: "Stromaufnahme",
             last_cycle: "LETZTER DURCHGANG", start: "START", duration: "DAUER",
             energy: "VERBRAUCH", cost: "KOSTEN",
@@ -83,19 +216,83 @@ class WashingMachineCard extends HTMLElement {
             today: "Heute", yesterday: "Gestern",
             tip_notify: "Benachrichtigung bei Ende", tip_plug: "Steckdose der Maschine", tip_history: "Verlauf",
             confirm_plug_off: "Steckdose ausschalten? Der laufende Durchgang könnte dadurch unterbrochen werden.",
+            confirm_power_off: "Gerät ausschalten? Das aktuelle Programm wird gestoppt.",
+            remote_control_required: "Die Fernsteuerung muss am Gerät aktiviert sein.\nBitte aktivieren Sie die Fernsteuerung über die Gerätebedienung.",
+            program_selection_failed: "Programm konnte nicht gewählt werden. Prüfen Sie, ob die Fernsteuerung aktiv ist.",
+            service_call_failed: "Aktion fehlgeschlagen. Bitte erneut versuchen.",
+            select_program: "Programm wählen",
+            close: "Schließen",
+            tip_program_btn: "Programm wählen",
+            tip_power_btn: "Ein/Aus",
+            tip_start_btn: "Start / Pause",
+            options_title: "Optionen & Einstellungen",
+            tip_options_btn: "Optionen & Einstellungen",
+            temperature: "Temperatur",
+            spin_speed: "Schleuderdrehzahl",
+            child_lock: "Kindersicherung",
+            hygiene_plus: "HygienePlus",
+            intensive_zone: "IntensivZone",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence on Demand",
+            brilliant_dry: "BrilliantDry",
+            no_options_available: "Keine Optionen verfügbar",
+            connected: "Verbunden",
+            disconnected: "Offline",
+            active_program: "Programm",
+            salt_low: "Salz leer",
+            rinseaid_low: "Klarspüler leer",
             decimal: ",",
             types: {
-                washer: { name: "Waschmaschine", state_running: "Wäsche läuft" },
-                dryer: { name: "Tumbler", state_running: "Trocknet" },
+                washer:     { name: "Waschmaschine",  state_running: "Wäsche läuft" },
+                dryer:      { name: "Tumbler",         state_running: "Trocknet" },
                 dishwasher: { name: "Geschirrspüler", state_running: "Spült" },
-                oven: { name: "Backofen", state_running: "Backt" },
-                microwave: { name: "Mikrowelle", state_running: "Erwärmt" },
+                oven:       { name: "Backofen",        state_running: "Backt" },
+                microwave:  { name: "Mikrowelle",      state_running: "Erwärmt" },
+            },
+            programs: {
+                Cotton: "Baumwolle",
+                EasyCare: "Pflegeleicht",
+                DelicatesSilk: "Fein / Seide",
+                Wool: "Wolle",
+                Sportswear: "Sportbekleidung",
+                Quick45: "Schnell 45",
+                Mix: "Gemischt",
+                Spin: "Schleudern",
+                Rinse: "Spülen",
+                Eco50: "Eco 50°",
+                Intensiv70: "Intensiv 70°",
+                Auto: "Auto",
+                Kurz60: "Kurz 60",
+                MachineCare: "Maschinenpflege",
+                NightWash: "Nachtwaschen",
+                OutdoorSports: "Outdoor",
+                Shirts: "Hemden",
+                Towels: "Handtücher",
+                DrumClean: "Trommelreinigung",
+                Auto1: "Auto",
+                Auto2: "Auto Intensiv",
+                Auto3: "Auto Schnell",
+                Eco50dw: "Eco 50°",
+                Intensiv70dw: "Intensiv 70°",
+                PreRinse: "Vorspülen",
+                Glass40: "Glas 40°",
+                Quick45dw: "Schnell 45°",
+                Quick65: "Schnell 65°",
+                NightWashdw: "Nachtspülen",
+                MachineCaredw: "Maschinenpflege",
+                Kurz60dw: "Kurz 60",
             },
         },
         fr: {
-            name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN PAUSE", badge_off: "ÉTEINT", badge_nodata: "PAS DE DONNÉES",
+            name: "Lave-linge",
+            badge_running: "EN MARCHE", badge_idle: "EN PAUSE", badge_off: "ÉTEINT", badge_nodata: "PAS DE DONNÉES",
+            badge_finished: "TERMINÉ", badge_paused: "EN PAUSE", badge_ready: "PRÊT",
+            badge_delayed: "DIFFÉRÉ", badge_error: "ERREUR", badge_action_required: "ACTION REQ.",
             state_running: "Lavage en cours", state_idle: "En pause", state_off: "Éteint", state_nodata: "Pas de données",
+            state_finished: "Terminé", state_paused: "En pause", state_ready: "Prêt",
+            state_delayed: "Départ différé", state_error: "Erreur", state_action_required: "Action requise",
             ring_running: "ÉCOULÉ", ring_idle: "PAUSE", ring_off: "ÉTEINT",
+            ring_ready: "PRÊT", ring_paused: "PAUSE",
             power: "Puissance actuelle", current: "Courant instantané",
             last_cycle: "DERNIER CYCLE", start: "DÉPART", duration: "DURÉE",
             energy: "ÉNERGIE", cost: "COÛT",
@@ -103,13 +300,71 @@ class WashingMachineCard extends HTMLElement {
             today: "Aujourd'hui", yesterday: "Hier",
             tip_notify: "Notification de fin", tip_plug: "Prise machine", tip_history: "Historique",
             confirm_plug_off: "Éteindre la prise ? Cela peut interrompre le cycle en cours.",
+            confirm_power_off: "Éteindre l'appareil ? Le programme en cours sera arrêté.",
+            remote_control_required: "La commande à distance doit être activée sur l'appareil.\nVeuillez l'activer via les commandes de l'appareil.",
+            program_selection_failed: "Impossible de sélectionner le programme. Vérifiez que la commande à distance est activée.",
+            service_call_failed: "Action échouée. Veuillez réessayer.",
+            select_program: "Choisir un programme",
+            close: "Fermer",
+            tip_program_btn: "Choisir un programme",
+            tip_power_btn: "Marche/Arrêt",
+            tip_start_btn: "Démarrer / Pause",
+            options_title: "Options & Réglages",
+            tip_options_btn: "Options & Réglages",
+            temperature: "Température",
+            spin_speed: "Vitesse d'essorage",
+            child_lock: "Sécurité enfants",
+            hygiene_plus: "Hygiène Plus",
+            intensive_zone: "Zone intensive",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence à la demande",
+            brilliant_dry: "Séchage brillant",
+            no_options_available: "Aucune option disponible",
+            connected: "Connecté",
+            disconnected: "Hors ligne",
+            active_program: "Programme",
+            salt_low: "Sel bas",
+            rinseaid_low: "Liquide de rinçage bas",
             decimal: ",",
             types: {
-                washer: { name: "Lave-linge", state_running: "Lavage en cours" },
-                dryer: { name: "Sèche-linge", state_running: "Séchage en cours" },
-                dishwasher: { name: "Lave-vaisselle", state_running: "Lavage vaisselle" },
-                oven: { name: "Four", state_running: "Cuisson" },
-                microwave: { name: "Micro-ondes", state_running: "Chauffage" },
+                washer:     { name: "Lave-linge",      state_running: "Lavage en cours" },
+                dryer:      { name: "Sèche-linge",     state_running: "Séchage en cours" },
+                dishwasher: { name: "Lave-vaisselle",  state_running: "Lavage vaisselle" },
+                oven:       { name: "Four",             state_running: "Cuisson" },
+                microwave:  { name: "Micro-ondes",     state_running: "Chauffage" },
+            },
+            programs: {
+                Cotton: "Coton",
+                EasyCare: "Entretien facile",
+                DelicatesSilk: "Délicat / Soie",
+                Wool: "Laine",
+                Sportswear: "Sportswear",
+                Quick45: "Rapide 45",
+                Mix: "Mixte",
+                Spin: "Essorage",
+                Rinse: "Rinçage",
+                Eco50: "Éco 50°",
+                Intensiv70: "Intensif 70°",
+                Auto: "Auto",
+                Kurz60: "Court 60",
+                MachineCare: "Entretien machine",
+                NightWash: "Lavage nuit",
+                OutdoorSports: "Outdoor",
+                Shirts: "Chemises",
+                Towels: "Serviettes",
+                DrumClean: "Nettoyage tambour",
+                Auto1: "Auto",
+                Auto2: "Auto intensif",
+                Auto3: "Auto rapide",
+                Eco50dw: "Éco 50°",
+                Intensiv70dw: "Intensif 70°",
+                PreRinse: "Pré-rinçage",
+                Glass40: "Verre 40°",
+                Quick45dw: "Rapide 45°",
+                Quick65: "Rapide 65°",
+                NightWashdw: "Lavage nuit",
+                MachineCaredw: "Entretien machine",
+                Kurz60dw: "Court 60",
             },
         },
     };
@@ -632,9 +887,7 @@ class WashingMachineCard extends HTMLElement {
     _getDoorState() {
         const door = this._hcEntity("door_entity");
         if (!door) return null;
-        if (door.state === "on") return "open";
-        if (door.state === "off") return "closed";
-        return null;
+        return door.state === "on" ? "open" : "closed";
     }
 
     /**
@@ -671,9 +924,7 @@ class WashingMachineCard extends HTMLElement {
     _getConnectivityState() {
         const conn = this._hcEntity("connectivity_entity");
         if (!conn) return null;
-        if (conn.state === "on") return "connected";
-        if (conn.state === "off") return "disconnected";
-        return null;
+        return conn.state === "on" ? "connected" : "disconnected";
     }
 
     /**
@@ -703,29 +954,64 @@ class WashingMachineCard extends HTMLElement {
         return cl?.state === "on";
     }
 
-    _isRunning() {
-        const c = this._config;
-        const status = this._st(c.status_entity);
-        const byStatus =
-            status && c.running_states.includes(String(status.state).toLowerCase());
-        let byPower = false;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            byPower = !isNaN(p) && p > c.power_threshold;
+    _computeApplianceState() {
+        const mode = this._getMode();
+
+        if (mode === "standard") {
+            if (this._isRunning())
+                return "running";
+            const c = this._config;
+            if (c.power_entity) {
+                const p = parseFloat(this._st(c.power_entity)?.state);
+                if (!isNaN(p) && p >= 1)
+                    return "idle";
+            }
+            return "off";
         }
-        return byStatus || byPower;
+
+        // Home Connect mode
+        const opState = this._getOperationState();
+        if (!opState)
+            return "unknown";
+
+        const state = opState.toLowerCase();
+
+        // Map Home Connect states to card states
+        if (state === "run") return "running";
+        if (state === "pause") return "paused";
+        if (state === "ready") return "ready";
+        if (state === "delayedstart") return "delayed";
+        if (state === "finished") return "finished";
+        if (state === "error") return "error";
+        if (state === "actionrequired") return "action_required";
+        if (state === "inactive") return "off";
+        if (state === "aborting") return "aborting";
+
+        return "idle";
+    }
+
+    _isRunning() {
+        const mode = this._getMode();
+
+        if (mode === "standard") {
+            const c = this._config;
+            const status = this._st(c.status_entity);
+            const byStatus =
+                status && c.running_states.includes(String(status.state).toLowerCase());
+            let byPower = false;
+            if (c.power_entity) {
+                const p = parseFloat(this._st(c.power_entity)?.state);
+                byPower = !isNaN(p) && p > c.power_threshold;
+            }
+            return byStatus || byPower;
+        }
+
+        // Home Connect mode
+        return this._computeApplianceState() === "running";
     }
 
     _applianceState() {
-        if (this._isRunning())
-            return "running";
-        const c = this._config;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            if (!isNaN(p) && p >= 1)
-                return "idle";
-        }
-        return "off";
+        return this._computeApplianceState();
     }
 
     _parseDate(state) {
@@ -846,6 +1132,435 @@ class WashingMachineCard extends HTMLElement {
         this._toggle(c.plug_entity);
     }
 
+    /**
+     * Base Service Call Method
+     * ========================
+     * Central method for all Home Assistant service calls.
+     * Provides consistent error handling and logging.
+     * 
+     * @param {string} domain - Service domain (e.g., "switch", "select")
+     * @param {string} service - Service name (e.g., "turn_on", "select_option")
+     * @param {object} data - Service data (e.g., { entity_id: "...", option: "..." })
+     * @returns {Promise} Service call promise
+     */
+    _callService(domain, service, data) {
+        if (!this._hass) {
+            console.warn(`Cannot call ${domain}.${service}: hass not available`);
+            return Promise.reject(new Error("hass not available"));
+        }
+
+        console.log(`Calling service: ${domain}.${service}`, data);
+        return this._hass.callService(domain, service, data);
+    }
+
+    // ========================================
+    // SERVICE TYPE ABSTRACTIONS
+    // ========================================
+    // Wrapper methods for different Home Assistant service types.
+    // Provide consistent interface for service calls with validation.
+    // ========================================
+
+    /**
+     * Select an option from a select entity
+     * Used for: program selection, temperature, spin speed
+     * 
+     * @param {string} entityId - Select entity ID
+     * @param {string} option - Option to select
+     * @returns {Promise}
+     */
+    _selectOption(entityId, option) {
+        if (!entityId || !option) {
+            console.warn("selectOption: missing entityId or option");
+            return Promise.reject(new Error("Missing parameters"));
+        }
+        return this._callService("select", "select_option", {
+            entity_id: entityId,
+            option: option,
+        });
+    }
+
+    /**
+     * Set value on a number entity
+     * Used for: numeric settings (rare in Home Connect)
+     * 
+     * @param {string} entityId - Number entity ID
+     * @param {number} value - Value to set
+     * @returns {Promise}
+     */
+    _setValue(entityId, value) {
+        if (!entityId || value === undefined) {
+            console.warn("setValue: missing entityId or value");
+            return Promise.reject(new Error("Missing parameters"));
+        }
+        return this._callService("number", "set_value", {
+            entity_id: entityId,
+            value: value,
+        });
+    }
+
+    /**
+     * Press a button entity
+     * Used for: stop program, machine care, etc.
+     * 
+     * @param {string} entityId - Button entity ID
+     * @returns {Promise}
+     */
+    _pressButton(entityId) {
+        if (!entityId) {
+            console.warn("pressButton: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        return this._callService("button", "press", {
+            entity_id: entityId,
+        });
+    }
+
+    /**
+     * Turn on a switch entity
+     * 
+     * @param {string} entityId - Switch entity ID
+     * @returns {Promise}
+     */
+    _turnOn(entityId) {
+        if (!entityId) {
+            console.warn("turnOn: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        const domain = entityId.split(".")[0];
+        return this._callService(domain, "turn_on", {
+            entity_id: entityId,
+        });
+    }
+
+    /**
+     * Turn off a switch entity
+     * 
+     * @param {string} entityId - Switch entity ID
+     * @returns {Promise}
+     */
+    _turnOff(entityId) {
+        if (!entityId) {
+            console.warn("turnOff: missing entityId");
+            return Promise.reject(new Error("Missing entityId"));
+        }
+        const domain = entityId.split(".")[0];
+        return this._callService(domain, "turn_off", {
+            entity_id: entityId,
+        });
+    }
+
+    // ========================================
+    // HOME CONNECT ACTION METHODS
+    // ========================================
+    // High-level methods for common Home Connect actions.
+    // These use the service abstractions above and add HC-specific logic.
+    // ========================================
+
+    // ----------------
+    // POWER CONTROL
+    // ----------------
+
+    /**
+     * Turn appliance power on
+     * @returns {Promise|undefined}
+     */
+    _hcPowerOn() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        return this._turnOn(entity.entity_id);
+    }
+
+    /**
+     * Turn appliance power off
+     * @returns {Promise|undefined}
+     */
+    _hcPowerOff() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        return this._turnOff(entity.entity_id);
+    }
+
+    /**
+     * Toggle appliance power with confirmation
+     * Shows confirmation dialog when turning off
+     * @returns {Promise|undefined}
+     */
+    _hcTogglePower() {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity("power_entity");
+        if (!entity) {
+            console.warn("No power_entity configured");
+            return;
+        }
+
+        if (entity.state === "on") {
+            const t = this._t;
+            const message = t.confirm_power_off ||
+                           "Turn off appliance? This will stop the current program.";
+
+            if (!window.confirm(message)) {
+                return Promise.resolve();
+            }
+
+            return this._hcPowerOff();
+        } else {
+            return this._hcPowerOn();
+        }
+    }
+
+    // ----------------
+    // PROGRAM SELECTION
+    // ----------------
+
+    /**
+     * Select a program to run
+     * Validates remote control state before selection
+     * 
+     * @param {string} programName - Program name (e.g., "Cotton", "Eco50")
+     * @returns {Promise|undefined}
+     */
+    _hcSelectProgram(programName) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.program_selector_entity) {
+            console.warn("No program_selector_entity configured");
+            return;
+        }
+
+        if (!this._getRemoteControlState()) {
+            const t = this._t;
+            const message = t.remote_control_required ||
+                           "Remote control must be enabled on the appliance.\n" +
+                           "Please enable remote control using the appliance controls.";
+            alert(message);
+            return Promise.reject(new Error("Remote control not enabled"));
+        }
+
+        return this._selectOption(hc.program_selector_entity, programName);
+    }
+
+    // ----------------
+    // START / PAUSE / STOP
+    // ----------------
+
+    /**
+     * Start the appliance program
+     * Uses start_entity if configured, otherwise remote_start_entity
+     * @returns {Promise|undefined}
+     */
+    _hcStart() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (hc?.start_entity) {
+            return this._turnOn(hc.start_entity);
+        } else if (hc?.remote_start_entity) {
+            const entity = this._hcEntity("remote_start_entity");
+            if (entity) {
+                return this._toggle(entity.entity_id);
+            }
+        }
+
+        console.warn("No start_entity or remote_start_entity configured");
+        return;
+    }
+
+    /**
+     * Pause the running program
+     * @returns {Promise|undefined}
+     */
+    _hcPause() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.pause_entity) {
+            console.warn("No pause_entity configured");
+            return;
+        }
+
+        return this._turnOn(hc.pause_entity);
+    }
+
+    /**
+     * Stop/abort the program
+     * @returns {Promise|undefined}
+     */
+    _hcStop() {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.stop_entity) {
+            console.warn("No stop_entity configured");
+            return;
+        }
+
+        return this._pressButton(hc.stop_entity);
+    }
+
+    /**
+     * Intelligent start/pause toggle
+     * - If running → pause
+     * - If paused or ready → start
+     * 
+     * @returns {Promise|undefined}
+     */
+    _hcToggleStartPause() {
+        if (!this._isHomeConnectMode()) return;
+
+        const opState = this._getOperationState();
+        if (!opState) {
+            console.warn("Cannot determine operation state");
+            return;
+        }
+
+        const state = opState.toLowerCase();
+        if (state === "run") {
+            return this._hcPause();
+        } else if (state === "ready" || state === "pause") {
+            return this._hcStart();
+        } else {
+            console.warn(`Cannot start/pause from state: ${opState}`);
+            return;
+        }
+    }
+
+    // ----------------
+    // FEATURE TOGGLES
+    // ----------------
+
+    /**
+     * Toggle a feature on/off
+     * Generic method for any feature switch entity
+     * 
+     * @param {string} featureKey - Key from home_connect config (e.g., "hygiene_plus_entity")
+     * @returns {Promise|undefined}
+     */
+    _hcToggleFeature(featureKey) {
+        if (!this._isHomeConnectMode()) return;
+
+        const entity = this._hcEntity(featureKey);
+        if (!entity) {
+            console.warn(`Feature not configured: ${featureKey}`);
+            return;
+        }
+
+        return this._toggle(entity.entity_id);
+    }
+
+    /**
+     * Toggle child lock
+     * @returns {Promise|undefined}
+     */
+    _hcToggleChildLock() {
+        return this._hcToggleFeature("child_lock_entity");
+    }
+
+    /**
+     * Toggle hygiene plus (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleHygienePlus() {
+        return this._hcToggleFeature("hygiene_plus_entity");
+    }
+
+    /**
+     * Toggle intensive zone (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleIntensiveZone() {
+        return this._hcToggleFeature("intensive_zone_entity");
+    }
+
+    /**
+     * Toggle variospeed plus (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleVariospeedPlus() {
+        return this._hcToggleFeature("variospeed_plus_entity");
+    }
+
+    /**
+     * Toggle silence on demand (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleSilenceOnDemand() {
+        return this._hcToggleFeature("silence_on_demand_entity");
+    }
+
+    /**
+     * Toggle brilliant dry (dishwasher)
+     * @returns {Promise|undefined}
+     */
+    _hcToggleBrilliantDry() {
+        return this._hcToggleFeature("brilliant_dry_entity");
+    }
+
+    // ----------------
+    // OPTIONS CONTROL
+    // ----------------
+
+    /**
+     * Set wash temperature
+     * 
+     * @param {string} temperature - Temperature option (e.g., "Cold", "40°C", "60°C")
+     * @returns {Promise|undefined}
+     */
+    _hcSetTemperature(temperature) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.temperature_entity) {
+            console.warn("No temperature_entity configured");
+            return;
+        }
+
+        return this._selectOption(hc.temperature_entity, temperature);
+    }
+
+    /**
+     * Set spin speed
+     * 
+     * @param {string} speed - Speed option (e.g., "800", "1200", "1400")
+     * @returns {Promise|undefined}
+     */
+    _hcSetSpinSpeed(speed) {
+        if (!this._isHomeConnectMode()) return;
+
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type];
+
+        if (!hc?.spin_speed_entity) {
+            console.warn("No spin_speed_entity configured");
+            return;
+        }
+
+        return this._selectOption(hc.spin_speed_entity, speed);
+    }
+
     _headerIcon() {
         const type = this._applianceType;
         if (type === "dryer") {
@@ -936,8 +1651,13 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _svgWasher(u) {
+        const mode = this._getMode();
+        const isHc = mode === "home_connect";
+        const interactiveClass = isHc ? "hc-interactive" : "";
+        const t = this._t;
+
         return `
-      <svg class="machine" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
+      <svg class="machine ${interactiveClass}" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${u}-body" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ffffff"/>
@@ -955,23 +1675,63 @@ class WashingMachineCard extends HTMLElement {
           </linearGradient>
         </defs>
         ${this._svgChassis(u)}
-        <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
-        <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
-        <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
-        <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
+
+        <!-- Drum interior (visible when door is open) -->
+        <g class="drum-interior" id="drumInterior">
+          <circle cx="110" cy="128" r="46" fill="#1b2537"/>
+          <g class="drum-pattern" opacity=".6">
+            <circle cx="98"  cy="116" r="2.2" fill="#3a4a63"/>
+            <circle cx="122" cy="116" r="2.2" fill="#3a4a63"/>
+            <circle cx="92"  cy="128" r="2.2" fill="#3a4a63"/>
+            <circle cx="128" cy="128" r="2.2" fill="#3a4a63"/>
+            <circle cx="98"  cy="140" r="2.2" fill="#3a4a63"/>
+            <circle cx="122" cy="140" r="2.2" fill="#3a4a63"/>
+          </g>
+        </g>
+
+        <!-- Laundry (inside drum) -->
         <g class="laundry">
           <circle cx="100" cy="124" r="14"   fill="#ea4335"/>
           <circle cx="119" cy="131" r="13.2" fill="#4285f4"/>
           <circle cx="110" cy="115" r="11"   fill="#fbbc05"/>
           <circle cx="103" cy="135" r="8"    fill="#f28b82" opacity=".9"/>
         </g>
-        <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
-                 transform="rotate(-24 94 106)"/>
-        <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+
+        <!-- Progress arcs -->
         <g class="arcs">
           <circle cx="110" cy="128" r="53" fill="none" stroke="#2f80ed" stroke-width="5.5"
                   stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
         </g>
+
+        <!-- Door group with transform origin at left hinge point (80px 128px) -->
+        <g class="door-group" id="doorGroup">
+          <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
+          <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
+          <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
+          <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
+          <!-- Door handle -->
+          <rect x="156" y="124" width="10" height="7" rx="3.5" fill="#b0bac6"/>
+          <!-- Glass highlight reflection -->
+          <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
+                   transform="rotate(-24 94 106)"/>
+          <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+        </g>
+
+        ${isHc ? `
+          <!-- Home Connect Interactive Overlays -->
+          <rect class="hc-control" id="hcProgramBtn" x="42" y="20" width="34" height="13" rx="4"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_program_btn || "Select Program"}</title>
+          </rect>
+          <rect class="hc-control" id="hcStartBtn" x="88" y="18" width="70" height="18" rx="9"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_start_btn || "Start / Pause"}</title>
+          </rect>
+          <circle class="hc-control" id="hcPowerBtn" cx="176" cy="27" r="10"
+                  fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_power_btn || "Power"}</title>
+          </circle>
+        ` : ''}
       </svg>`;
     }
 
@@ -1048,6 +1808,11 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _svgDishwasher(u) {
+        const mode = this._getMode();
+        const isHc = mode === "home_connect";
+        const interactiveClass = isHc ? "hc-interactive" : "";
+        const t = this._t;
+
         const top = `
       <rect x="42" y="18" width="136" height="22" rx="8" fill="#0d1526"/>
       <text id="dispTime" x="100" y="33" text-anchor="middle"
@@ -1057,7 +1822,7 @@ class WashingMachineCard extends HTMLElement {
       <circle cx="162" cy="29" r="5.5" fill="#e9edf3" stroke="#c2cbd6" stroke-width="1"/>
       <circle cx="162" cy="29" r="1.8" fill="#31415a"/>`;
         return `
-      <svg class="machine" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
+      <svg class="machine ${interactiveClass}" id="machine" viewBox="0 0 220 232" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="${u}-body" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stop-color="#ffffff"/>
@@ -1144,6 +1909,22 @@ class WashingMachineCard extends HTMLElement {
               stroke="#2f80ed" stroke-width="4" stroke-linecap="round"
               stroke-dasharray="90 70" opacity=".9"/>
         <rect x="78" y="188" width="64" height="7" rx="3.5" fill="#cfd7e0" stroke="#b4bec9" stroke-width="1"/>
+
+        ${isHc ? `
+          <!-- Home Connect Interactive Overlays -->
+          <rect class="hc-control" id="hcProgramBtn" x="42" y="18" width="46" height="22" rx="6"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_program_btn || "Select Program"}</title>
+          </rect>
+          <rect class="hc-control" id="hcStartBtn" x="90" y="18" width="60" height="22" rx="6"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_start_btn || "Start / Pause"}</title>
+          </rect>
+          <circle class="hc-control" id="hcPowerBtn" cx="162" cy="29" r="9"
+                  fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_power_btn || "Power"}</title>
+          </circle>
+        ` : ''}
       </svg>`;
     }
 
@@ -1618,6 +2399,28 @@ class WashingMachineCard extends HTMLElement {
           .running .mw-glow, .running .mw-wave, .running .mw-rim,
           .running .mw-mug, .running .mw-frame, .running .mw-dots,
           .running .badge .b-dot, .running .ring-anim { animation: none; }
+          .door-group { transition: none !important; }
+        }
+
+        .door-group {
+          transform-box: view-box;
+          transform-origin: 80px 128px;
+          transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .door-group.door-open {
+          transform: rotate(-85deg);
+        }
+        .door-group.door-closed {
+          transform: rotate(0deg);
+        }
+        .drum-interior {
+          transition: opacity 0.4s ease-in-out;
+          opacity: 0;
+        }
+        .door-group.door-open ~ .drum-interior,
+        .door-open ~ .drum-interior,
+        #doorGroup.door-open ~ #drumInterior {
+          opacity: 1;
         }
 
         .panel {
@@ -1672,6 +2475,312 @@ class WashingMachineCard extends HTMLElement {
         .lc-value { font-size: 14.5px; font-weight: 800; margin-top: 5px; overflow-wrap: break-word; }
         .lc-unit { font-size: 11px; font-weight: 700; color: var(--wm-accent); }
         .hidden { display: none !important; }
+
+        /* Home Connect interactive controls */
+        .hc-interactive .hc-control {
+          transition: opacity 0.2s, fill 0.2s;
+        }
+        .hc-interactive .hc-control:hover {
+          fill: rgba(47, 128, 237, 0.25) !important;
+          stroke: var(--wm-accent);
+          stroke-width: 1.5;
+        }
+
+        /* Modal Dialog */
+        .hc-dialog {
+          border: none;
+          border-radius: 20px;
+          padding: 0;
+          width: 90%;
+          max-width: 440px;
+          max-height: 80vh;
+          background: var(--wm-grad, #fff);
+          color: var(--wm-text, #1c2733);
+          box-shadow: 0 10px 40px rgba(0,0,0,.3);
+        }
+        .hc-dialog::backdrop {
+          background: rgba(0, 0, 0, .55);
+          backdrop-filter: blur(4px);
+        }
+        .hc-dialog-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          border-bottom: 1px solid var(--wm-divider, #e2e8f0);
+        }
+        .hc-dialog-title {
+          font-size: 16px;
+          font-weight: 700;
+        }
+        .hc-dialog-close {
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          border: none;
+          background: var(--wm-btn-bg, rgba(0,0,0,0.06));
+          color: inherit;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: bold;
+        }
+        .hc-dialog-body {
+          padding: 16px 20px 20px;
+          overflow-y: auto;
+          max-height: 60vh;
+        }
+        .hc-program-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+          gap: 12px;
+        }
+        .hc-program-item {
+          padding: 14px 8px;
+          border-radius: 12px;
+          background: var(--wm-panel-bg, rgba(255,255,255,.6));
+          border: 1.5px solid var(--wm-panel-border, #d8e0ea);
+          cursor: pointer;
+          text-align: center;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+        .hc-program-item:hover {
+          background: var(--wm-btn-on-bg, #eaf3fe);
+          border-color: var(--wm-accent, #2f80ed);
+          transform: translateY(-2px);
+        }
+        .hc-program-item.selected {
+          background: var(--wm-btn-on-bg, #eaf3fe);
+          border-color: var(--wm-accent, #2f80ed);
+          border-width: 2.5px;
+        }
+        .hc-program-icon {
+          font-size: 26px;
+          line-height: 1;
+        }
+        .hc-program-name {
+          font-size: 12px;
+          font-weight: 700;
+          word-break: break-word;
+        }
+
+        /* Home Connect Options Dialog */
+        .hc-options-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .hc-option-section {
+          background: var(--wm-panel-bg, rgba(255,255,255,.5));
+          border: 1px solid var(--wm-panel-border, #e2e8f0);
+          border-radius: 14px;
+          padding: 12px 14px;
+        }
+        .hc-option-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .hc-option-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .hc-pill-btn {
+          border: 1.5px solid var(--wm-panel-border, #cbd5e1);
+          background: var(--wm-card-bg, #fff);
+          color: var(--wm-text, inherit);
+          border-radius: 20px;
+          padding: 6px 14px;
+          font-size: 12.5px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .hc-pill-btn:hover {
+          border-color: var(--wm-accent, #2f80ed);
+          background: var(--wm-btn-on-bg, #eaf3fe);
+        }
+        .hc-pill-btn.selected {
+          border-color: var(--wm-accent, #2f80ed);
+          background: var(--wm-accent, #2f80ed);
+          color: #fff;
+        }
+        .hc-feature-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid var(--wm-divider, #e2e8f0);
+        }
+        .hc-feature-row:last-child {
+          border-bottom: none;
+        }
+        .hc-feature-label {
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .hc-toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
+          cursor: pointer;
+        }
+        .hc-toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .hc-toggle-slider {
+          position: absolute;
+          inset: 0;
+          background: var(--wm-bar-bg, #cbd5e1);
+          border-radius: 24px;
+          transition: .3s;
+        }
+        .hc-toggle-slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background: #fff;
+          border-radius: 50%;
+          transition: .3s;
+        }
+        input:checked + .hc-toggle-slider {
+          background: var(--wm-accent, #2f80ed);
+        }
+        input:checked + .hc-toggle-slider:before {
+          transform: translateX(20px);
+        }
+        .hc-empty-options {
+          padding: 24px 16px;
+          text-align: center;
+          color: var(--wm-muted, #718096);
+          font-size: 13px;
+        }
+
+        /* Phase 8: Connectivity indicator */
+        .hc-connectivity {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 8px;
+          background: var(--wm-panel-bg);
+          border: 1px solid var(--wm-panel-border);
+          white-space: nowrap;
+        }
+        .hc-conn-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          transition: background 0.3s, box-shadow 0.3s;
+        }
+        .hc-conn-dot.connected {
+          background: #22b263;
+          box-shadow: 0 0 0 2px rgba(34, 178, 99, 0.22);
+          animation: hc-pulse 2.5s ease-in-out infinite;
+        }
+        .hc-conn-dot.disconnected {
+          background: #d93025;
+          box-shadow: 0 0 0 2px rgba(217, 48, 37, 0.22);
+        }
+        .hc-conn-dot.unknown {
+          background: #8a95a3;
+        }
+        .hc-conn-label { color: var(--wm-muted); }
+        @keyframes hc-pulse {
+          0%, 100% { box-shadow: 0 0 0 2px rgba(34,178,99,0.22); }
+          50% { box-shadow: 0 0 0 5px rgba(34,178,99,0.08); }
+        }
+
+        /* Phase 8: Program display panel */
+        .hc-program-panel {
+          margin-top: 10px;
+          padding: 10px 12px;
+          background: var(--wm-panel-bg);
+          border: 1px solid var(--wm-panel-border);
+          border-radius: 12px;
+        }
+        .hc-program-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          font-size: 12px;
+        }
+        .hc-program-label {
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          color: var(--wm-label);
+          text-transform: uppercase;
+          font-size: 10px;
+        }
+        .hc-program-value {
+          font-size: 13px;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .hc-program-progress {
+          height: 4px;
+          border-radius: 3px;
+          background: var(--wm-bar-bg);
+          margin-top: 8px;
+          overflow: hidden;
+        }
+        .hc-progress-fill {
+          height: 100%;
+          border-radius: 3px;
+          background: var(--wm-accent);
+          transition: width 0.6s ease;
+        }
+
+        /* Phase 8: Feature chips */
+        .hc-features {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 10px;
+        }
+        .hc-chip {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 12px;
+          background: var(--wm-badge-bg, rgba(47,128,237,0.1));
+          color: var(--wm-badge-fg, #2f80ed);
+          white-space: nowrap;
+          border: 1px solid rgba(47,128,237,0.2);
+          transition: opacity 0.3s;
+        }
+        .hc-chip.warning {
+          background: rgba(217,144,48,0.13);
+          color: #b87800;
+          border-color: rgba(217,144,48,0.25);
+        }
+        .hc-chip.active {
+          background: rgba(34,178,99,0.13);
+          color: #1a8f50;
+          border-color: rgba(34,178,99,0.25);
+        }
       </style>
 
       <ha-card>
@@ -1681,6 +2790,13 @@ class WashingMachineCard extends HTMLElement {
             <div class="h-title" id="name"></div>
             <div class="badge"><span class="b-dot"></span><span id="badgeText"></span></div>
             <div class="h-spacer"></div>
+            <div class="hc-connectivity hidden" id="hcConnectivity">
+              <div class="hc-conn-dot unknown" id="hcConnDot"></div>
+              <span class="hc-conn-label" id="hcConnLabel"></span>
+            </div>
+            <div class="h-btn hidden" id="optionsBtn" title="${t.tip_options_btn}">
+              <ha-icon icon="mdi:tune-variant"></ha-icon>
+            </div>
             <div class="h-btn hidden" id="notifyBtn" title="${t.tip_notify}">
               <ha-icon icon="mdi:bell-ring-outline"></ha-icon>
             </div>
@@ -1715,6 +2831,16 @@ class WashingMachineCard extends HTMLElement {
                 <span class="st-power" id="powerValue">—</span>
               </div>
               <div class="bar hidden" id="bar"><div class="bar-fill" id="barFill"></div></div>
+              <div class="hc-program-panel hidden" id="hcProgramPanel">
+                <div class="hc-program-row">
+                  <span class="hc-program-label" id="hcProgramLabel"></span>
+                  <span class="hc-program-value" id="hcProgramValue">—</span>
+                </div>
+                <div class="hc-program-progress hidden" id="hcProgressBar">
+                  <div class="hc-progress-fill" id="hcProgressFill"></div>
+                </div>
+              </div>
+              <div class="hc-features hidden" id="hcFeatures"></div>
             </div>
           </div>
 
@@ -1740,6 +2866,7 @@ class WashingMachineCard extends HTMLElement {
             </div>
           </div>
         </div>
+        <dialog class="hc-dialog" id="hcDialog"></dialog>
       </ha-card>
     `;
 
@@ -1748,6 +2875,7 @@ class WashingMachineCard extends HTMLElement {
         const mi = (ent) => () => this._moreInfo(ent);
         this._el("chartBtn").addEventListener("click", mi(c.power_entity || c.status_entity));
         this._el("ringBox").addEventListener("click", mi(c.last_wash_entity || c.status_entity));
+        this._el("optionsBtn")?.addEventListener("click", () => this._openOptionsDialog());
         if (c.power_entity)
             this._el("powerValue").addEventListener("click", mi(c.power_entity));
         if (c.notify_entity)
@@ -1764,6 +2892,7 @@ class WashingMachineCard extends HTMLElement {
             this._el("lcCost").addEventListener("click", mi(c.cost_entity));
 
         this._built = true;
+        this._attachSVGInteractions();
         this._observeWidth();
         const w0 = this.getBoundingClientRect().width;
         if (w0) {
@@ -1773,10 +2902,8 @@ class WashingMachineCard extends HTMLElement {
         }
     }
 
-    _update() {
+    _updateTheme() {
         const c = this._config;
-        const t = this._t;
-        const wrap = this._el("wrap");
         const themeCfg = String(c.theme || "auto").toLowerCase();
         const isNative = themeCfg === "ha";
         const haIsDark = !!this._hass?.themes?.darkMode;
@@ -1784,6 +2911,326 @@ class WashingMachineCard extends HTMLElement {
         this.classList.toggle("wm-native-dark", isNative && haIsDark);
         const dark = !isNative && (themeCfg === "dark" || (themeCfg !== "light" && haIsDark));
         this.classList.toggle("wm-dark", dark);
+    }
+
+    _formatTime(timeStr) {
+        if (!timeStr) return "--:--";
+        const str = String(timeStr).trim();
+
+        // ISO 8601 Duration (e.g. PT1H30M, PT45M, PT20S)
+        if (str.startsWith("PT") || str.startsWith("P")) {
+            const hMatch = str.match(/(\d+)H/i);
+            const mMatch = str.match(/(\d+)M/i);
+            const sMatch = str.match(/(\d+)S/i);
+            const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+            const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+            const s = sMatch ? parseInt(sMatch[1], 10) : 0;
+
+            if (h > 0) {
+                return `${h}:${String(m).padStart(2, "0")}`;
+            }
+            return `${m}:${String(s).padStart(2, "0")}`;
+        }
+
+        // Numeric seconds (e.g. 5400)
+        const num = parseFloat(str);
+        if (!isNaN(num) && !str.includes(":")) {
+            const h = Math.floor(num / 3600);
+            const m = Math.floor((num % 3600) / 60);
+            if (h > 0) {
+                return `${h}:${String(m).padStart(2, "0")}`;
+            }
+            return `${m}:${String(Math.floor(num % 60)).padStart(2, "0")}`;
+        }
+
+        // Timestamp / Date string
+        if (str.includes("T") || str.includes("-")) {
+            const d = this._parseDate(str);
+            if (d) {
+                return d.toLocaleTimeString(this._t.locale, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: this._hour12(),
+                });
+            }
+        }
+
+        return str;
+    }
+
+    _translateProgram(programName) {
+        if (!programName) return "";
+        // Strip Home Connect API prefix, e.g. "LaundryCare.Washer.Program.Cotton" → "Cotton"
+        const parts = programName.split(".");
+        const cleanName = parts[parts.length - 1] || programName;
+        // Look up in the locale's programs map first
+        const programs = this._t?.programs || {};
+        if (programs[cleanName]) return programs[cleanName];
+        // Fallback: split CamelCase into words (e.g. "EasyCare" → "Easy Care")
+        return cleanName.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+    }
+
+    _getProgramIcon(programName) {
+        const name = String(programName || "").toLowerCase();
+        if (name.includes("cotton") || name.includes("baumwolle")) return "👕";
+        if (name.includes("easy") || name.includes("pflegeleicht") || name.includes("mix")) return "👔";
+        if (name.includes("glass") || name.includes("glas")) return "🍷";
+        if (name.includes("delicate") || name.includes("silk") || name.includes("seide") || name.includes("fein")) return "🧵";
+        if (name.includes("wool") || name.includes("wolle")) return "🧶";
+        if (name.includes("sport")) return "🏃";
+        if (name.includes("quick") || name.includes("kurz") || name.includes("speed") || name.includes("express") || name.includes("super")) return "⚡";
+        if (name.includes("eco")) return "🌿";
+        if (name.includes("intensive") || name.includes("intensiv") || name.includes("pots") || name.includes("pans")) return "🍲";
+        if (name.includes("spin") || name.includes("schleudern")) return "🌀";
+        if (name.includes("rinse") || name.includes("spülen") || name.includes("prerinse")) return "💧";
+        if (name.includes("auto")) return "🤖";
+        if (name.includes("night") || name.includes("silence") || name.includes("quiet")) return "🌙";
+        if (name.includes("clean") || name.includes("care") || name.includes("drum") || name.includes("machinecare")) return "✨";
+        if (name.includes("hygiene") || name.includes("sanitize")) return "🧴";
+        if (name.includes("dish") || name.includes("geschirr") || name.includes("normal")) return "🍽️";
+        return "🔄";
+    }
+
+    _openProgramSelector() {
+        const dialog = this.shadowRoot?.getElementById("hcDialog");
+        if (!dialog) return;
+
+        const t = this._t;
+        const type = this._applianceType;
+        const hc = this._config?.home_connect?.[type] || {};
+
+        // Available programs: explicit list > select options > defaults
+        const selectorEntity = this._hcEntity("program_selector_entity");
+        const defaultPrograms = type === "dishwasher"
+            ? ["Auto1", "Auto2", "Eco50", "Intensiv70", "Quick45", "PreRinse", "NightWash", "MachineCare"]
+            : ["Cotton", "EasyCare", "DelicatesSilk", "Sportswear", "Quick45", "Mix", "Spin", "Rinse"];
+        const availablePrograms = hc.available_programs ||
+                                  selectorEntity?.attributes?.options ||
+                                  defaultPrograms;
+
+        const currentProgram = this._getSelectedProgram() || this._getActiveProgram();
+
+        dialog.innerHTML = `
+            <div class="hc-dialog-header">
+                <div class="hc-dialog-title">${t.select_program || "Select Program"}</div>
+                <button class="hc-dialog-close" id="closeHcDialog" title="${t.close || "Close"}">✕</button>
+            </div>
+            <div class="hc-dialog-body">
+                <div class="hc-program-grid" id="hcProgramGrid">
+                    ${availablePrograms.map(prog => `
+                        <div class="hc-program-item ${prog === currentProgram ? 'selected' : ''}" data-program="${prog}">
+                            <div class="hc-program-icon">${this._getProgramIcon(prog)}</div>
+                            <div class="hc-program-name">${this._translateProgram(prog)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        const items = dialog.querySelectorAll(".hc-program-item");
+        items.forEach(item => {
+            item.addEventListener("click", () => {
+                const program = item.dataset.program;
+                dialog.close();
+                if (program) {
+                    this._hcSelectProgram(program);
+                }
+            });
+        });
+
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        } else {
+            dialog.setAttribute("open", "");
+        }
+    }
+
+    _openOptionsDialog() {
+        const dialog = this.shadowRoot?.getElementById("hcDialog");
+        if (!dialog) return;
+
+        const t = this._t;
+
+        const tempEntity = this._hcEntity("temperature_entity");
+        const spinEntity = this._hcEntity("spin_speed_entity");
+
+        const features = [
+            { key: "child_lock_entity", label: t.child_lock || "Child Lock", toggleFn: () => this._hcToggleChildLock() },
+            { key: "hygiene_plus_entity", label: t.hygiene_plus || "Hygiene Plus", toggleFn: () => this._hcToggleHygienePlus() },
+            { key: "intensive_zone_entity", label: t.intensive_zone || "Intensive Zone", toggleFn: () => this._hcToggleIntensiveZone() },
+            { key: "variospeed_plus_entity", label: t.variospeed_plus || "VarioSpeed Plus", toggleFn: () => this._hcToggleVariospeedPlus() },
+            { key: "silence_on_demand_entity", label: t.silence_on_demand || "Silence on Demand", toggleFn: () => this._hcToggleSilenceOnDemand() },
+            { key: "brilliant_dry_entity", label: t.brilliant_dry || "BrilliantDry", toggleFn: () => this._hcToggleBrilliantDry() },
+        ].filter(f => !!this._hcEntity(f.key));
+
+        const hasAny = !!tempEntity || !!spinEntity || features.length > 0;
+
+        let contentHtml = '';
+        if (!hasAny) {
+            contentHtml = `<div class="hc-empty-options">${t.no_options_available || "No options available"}</div>`;
+        } else {
+            contentHtml = `<div class="hc-options-container">`;
+
+            if (tempEntity) {
+                const currentTemp = String(tempEntity.state || "");
+                const tempOptions = tempEntity.attributes?.options || ["Cold", "20°C", "30°C", "40°C", "60°C", "90°C"];
+                contentHtml += `
+                    <div class="hc-option-section" id="tempOptionSection">
+                        <div class="hc-option-header">
+                            <span>${t.temperature || "Temperature"}</span>
+                            <span class="lc-unit">${currentTemp || "—"}</span>
+                        </div>
+                        <div class="hc-option-pills">
+                            ${tempOptions.map(opt => `
+                                <button class="hc-pill-btn ${opt === currentTemp ? 'selected' : ''}" data-temp="${opt}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (spinEntity) {
+                const currentSpin = String(spinEntity.state || "");
+                const spinOptions = spinEntity.attributes?.options || ["0", "400", "800", "1200", "1400", "1600"];
+                contentHtml += `
+                    <div class="hc-option-section" id="spinOptionSection">
+                        <div class="hc-option-header">
+                            <span>${t.spin_speed || "Spin Speed"}</span>
+                            <span class="lc-unit">${currentSpin || "—"}</span>
+                        </div>
+                        <div class="hc-option-pills">
+                            ${spinOptions.map(opt => `
+                                <button class="hc-pill-btn ${opt === currentSpin ? 'selected' : ''}" data-spin="${opt}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (features.length > 0) {
+                contentHtml += `
+                    <div class="hc-option-section" id="featuresOptionSection">
+                        ${features.map(f => {
+                            const ent = this._hcEntity(f.key);
+                            const isOn = ent?.state === "on";
+                            return `
+                                <div class="hc-feature-row">
+                                    <span class="hc-feature-label">${f.label}</span>
+                                    <label class="hc-toggle-switch">
+                                        <input type="checkbox" data-feature="${f.key}" ${isOn ? 'checked' : ''}>
+                                        <span class="hc-toggle-slider"></span>
+                                    </label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            contentHtml += `</div>`;
+        }
+
+        dialog.innerHTML = `
+            <div class="hc-dialog-header">
+                <div class="hc-dialog-title">${t.options_title || "Options & Settings"}</div>
+                <button class="hc-dialog-close" id="closeHcDialog" title="${t.close || "Close"}">✕</button>
+            </div>
+            <div class="hc-dialog-body">
+                ${contentHtml}
+            </div>
+        `;
+
+        dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        // Bind temperature pill buttons
+        dialog.querySelectorAll("button[data-temp]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = btn.dataset.temp;
+                if (val) {
+                    this._hcSetTemperature(val);
+                }
+                dialog.close();
+            });
+        });
+
+        // Bind spin speed pill buttons
+        dialog.querySelectorAll("button[data-spin]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = btn.dataset.spin;
+                if (val) {
+                    this._hcSetSpinSpeed(val);
+                }
+                dialog.close();
+            });
+        });
+
+        // Bind feature toggles
+        dialog.querySelectorAll("input[data-feature]").forEach(input => {
+            input.addEventListener("change", () => {
+                const fKey = input.dataset.feature;
+                const feat = features.find(f => f.key === fKey);
+                if (feat && feat.toggleFn) {
+                    feat.toggleFn();
+                }
+            });
+        });
+
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        } else {
+            dialog.setAttribute("open", "");
+        }
+    }
+
+    _attachSVGInteractions() {
+        if (!this._isHomeConnectMode()) return;
+
+        const programBtn = this._el("hcProgramBtn");
+        const powerBtn = this._el("hcPowerBtn");
+        const startBtn = this._el("hcStartBtn");
+
+        if (programBtn) {
+            programBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._openProgramSelector();
+            });
+        }
+
+        if (powerBtn) {
+            powerBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._hcTogglePower();
+            });
+        }
+
+        if (startBtn) {
+            startBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this._hcToggleStartPause();
+            });
+        }
+    }
+
+    _update() {
+        this._updateTheme();
+        if (this._isHomeConnectMode()) {
+            this._updateHomeConnect();
+        } else {
+            this._updateStandard();
+        }
+    }
+
+    _updateStandard() {
+        const c = this._config;
+        const t = this._t;
+        const wrap = this._el("wrap");
+
         const running = this._isRunning();
         wrap.classList.toggle("running", running);
         this._el("name").textContent = c.name || t.name;
@@ -1791,7 +3238,7 @@ class WashingMachineCard extends HTMLElement {
         const noData = !status || ["unknown", "unavailable"].includes(status.state);
         const applianceState = noData ? "nodata" : this._applianceState();
         const displayState = (applianceState === "off" && !c.power_entity) ? "idle" : applianceState;
-        this._el("badgeText").textContent = t[`badge_${displayState}`];
+        this._el("badgeText").textContent = t[`badge_${displayState}`] || displayState.toUpperCase();
         wrap.classList.toggle("state-idle", applianceState === "idle");
         const active = applianceState === "running" || applianceState === "idle";
         wrap.classList.toggle("idle", !active);
@@ -1801,9 +3248,9 @@ class WashingMachineCard extends HTMLElement {
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : "#4a5871");
         this._el("ringTime").textContent = active ? (clock || "…") : "—";
         const ringState = displayState === "running" ? "running" : displayState === "idle" ? "idle" : "off";
-        this._el("ringLabel").textContent = t[`ring_${ringState}`];
+        this._el("ringLabel").textContent = t[`ring_${ringState}`] || ringState.toUpperCase();
         this._el("ringArc").style.display = active ? "" : "none";
-        this._el("stState").textContent = t[`state_${displayState}`];
+        this._el("stState").textContent = t[`state_${displayState}`] || displayState;
         const hideStatus = !!c.hide_status_panel && !active;
         this._el("statusPanel").classList.toggle("hidden", hideStatus);
 
@@ -1872,6 +3319,292 @@ class WashingMachineCard extends HTMLElement {
             const on = this._st(c.plug_entity)?.state === "on";
             this._el("plugBtn").classList.remove("hidden");
             this._el("plugBtn").classList.toggle("on", on);
+        }
+    }
+
+    _updateHomeConnect() {
+        const c = this._config;
+        const t = this._t;
+        const wrap = this._el("wrap");
+
+        const state = this._computeApplianceState();
+        const running = state === "running";
+
+        wrap.classList.toggle("running", running);
+        this._el("name").textContent = c.name || t.name;
+
+        // Badge display
+        let badgeText = t[`badge_${state}`];
+        if (!badgeText) {
+            if (state === "running") badgeText = t.badge_running;
+            else if (state === "off") badgeText = t.badge_off;
+            else if (state === "finished") badgeText = t.badge_finished || "FINISHED";
+            else if (state === "paused") badgeText = t.badge_paused || "PAUSED";
+            else if (state === "ready") badgeText = t.badge_ready || "READY";
+            else if (state === "delayed") badgeText = t.badge_delayed || "DELAYED";
+            else if (state === "error") badgeText = t.badge_error || "ERROR";
+            else if (state === "action_required") badgeText = t.badge_action_required || "ACTION REQ.";
+            else badgeText = t.badge_idle || "IDLE";
+        }
+        this._el("badgeText").textContent = badgeText;
+
+        const active = running || state === "ready" || state === "paused" || state === "delayed";
+        wrap.classList.toggle("state-idle", state === "ready" || state === "idle");
+        wrap.classList.toggle("idle", !active && state !== "finished");
+
+        // Display & Ring times
+        const activeProgram = this._getActiveProgram() || this._getSelectedProgram();
+        const progress = this._getProgress();
+        const remainingTime = this._getRemainingTime();
+        const endTime = this._getEndTime();
+
+        if (running && remainingTime) {
+            const formatted = this._formatTime(remainingTime);
+            this._el("dispTime").textContent = formatted;
+            this._el("ringTime").textContent = formatted;
+        } else if (state === "delayed" && endTime) {
+            const formatted = this._formatTime(endTime);
+            this._el("dispTime").textContent = formatted;
+            this._el("ringTime").textContent = formatted;
+        } else {
+            this._el("dispTime").textContent = active ? "0:00" : "--:--";
+            this._el("ringTime").textContent = active ? "…" : "—";
+        }
+
+        this._el("dispDot").setAttribute("fill", running ? "#22b263" : (active ? "#f0a04b" : "#4a5871"));
+
+        // Ring Label
+        let ringLabel = t.ring_idle;
+        if (state === "running") ringLabel = t.ring_running;
+        else if (state === "ready") ringLabel = t.ring_ready || "READY";
+        else if (state === "paused") ringLabel = t.ring_paused || "PAUSED";
+        else if (state === "off") ringLabel = t.ring_off;
+        this._el("ringLabel").textContent = ringLabel;
+
+        // Progress Arc
+        if (progress !== null && running) {
+            this._el("ringArc").style.display = "";
+            const dasharray = (Math.max(0, Math.min(100, progress)) / 100) * 245;
+            this._el("ringArc").setAttribute("stroke-dasharray", `${dasharray} 245`);
+        } else {
+            this._el("ringArc").style.display = active ? "" : "none";
+            if (!active) {
+                this._el("ringArc").style.display = "none";
+            }
+        }
+
+        // Status text
+        let stateText = t[`state_${state}`];
+        if (!stateText) {
+            if (state === "running") {
+                stateText = activeProgram ? this._translateProgram(activeProgram) : t.state_running;
+            } else if (state === "ready") {
+                stateText = activeProgram ? `${t.state_ready || "Ready"}: ${this._translateProgram(activeProgram)}` : (t.state_ready || "Ready");
+            } else if (state === "finished") {
+                stateText = t.state_finished || "Finished";
+            } else if (state === "paused") {
+                stateText = t.state_paused || "Paused";
+            } else if (state === "off") {
+                stateText = t.state_off;
+            } else {
+                stateText = t.state_idle;
+            }
+        } else if (state === "running" && activeProgram) {
+            stateText = this._translateProgram(activeProgram);
+        }
+        this._el("stState").textContent = stateText;
+
+        const hideStatus = !!c.hide_status_panel && !active && state !== "finished";
+        this._el("statusPanel").classList.toggle("hidden", hideStatus);
+
+        // Power gauge / last cycle / extra entity buttons if standard entities also configured in HC mode
+        if (c.power_entity) {
+            const ps = this._st(c.power_entity);
+            const p = parseFloat(ps?.state);
+            const unit = ps?.attributes?.unit_of_measurement || "W";
+            this._el("powerRow").classList.remove("hidden");
+            this._el("bar").classList.remove("hidden");
+            const unitL = String(unit).toLowerCase();
+            this._el("powerLabel").textContent =
+                ["a", "а"].includes(unitL) ? t.current : t.power;
+            let disp;
+            if (isNaN(p))
+                disp = "—";
+            else if (["w", "вт"].includes(unitL) && Math.abs(p) >= 1000)
+                disp = `${this._fmtNum(p / 1000, 2)} ${t.kw}`;
+            else
+                disp = `${Math.abs(p) >= 10 ? Math.round(p) : this._fmtNum(p, 2)} ${unit}`;
+            this._el("powerValue").textContent = disp;
+            const frac = isNaN(p) ? 0 : Math.min(1, Math.max(0, p / (c.power_max || 1)));
+            this._el("barFill").style.width = `${frac * 100}%`;
+        }
+
+        if (this._el("optionsBtn")) {
+            const hasOptions = !!(
+                this._hcEntity("temperature_entity") ||
+                this._hcEntity("spin_speed_entity") ||
+                this._hcEntity("child_lock_entity") ||
+                this._hcEntity("hygiene_plus_entity") ||
+                this._hcEntity("intensive_zone_entity") ||
+                this._hcEntity("variospeed_plus_entity") ||
+                this._hcEntity("silence_on_demand_entity") ||
+                this._hcEntity("brilliant_dry_entity")
+            );
+            this._el("optionsBtn").classList.toggle("hidden", !hasOptions);
+        }
+
+        if (c.notify_entity) {
+            const on = this._st(c.notify_entity)?.state === "on";
+            this._el("notifyBtn").classList.remove("hidden");
+            this._el("notifyBtn").classList.toggle("on", on);
+        }
+        if (c.plug_entity) {
+            const on = this._st(c.plug_entity)?.state === "on";
+            this._el("plugBtn").classList.remove("hidden");
+            this._el("plugBtn").classList.toggle("on", on);
+        }
+
+        // Animate door state
+        this._updateDoorAnimation();
+
+        // Phase 8: Status indicators
+        this._updateStatusIndicators();
+    }
+
+    /**
+     * Phase 8: Update connectivity indicator in header
+     */
+    _updateConnectivity() {
+        const connectivity = this._el("hcConnectivity");
+        const dot = this._el("hcConnDot");
+        const label = this._el("hcConnLabel");
+        if (!connectivity) return;
+
+        const caps = this._getApplianceCapabilities();
+        if (!caps.hasConnectivity) {
+            connectivity.classList.add("hidden");
+            return;
+        }
+
+        connectivity.classList.remove("hidden");
+        const connState = this._getConnectivityState();
+        const t = this._t;
+
+        if (connState === "connected") {
+            dot.className = "hc-conn-dot connected";
+            label.textContent = t.connected || "Connected";
+        } else if (connState === "disconnected") {
+            dot.className = "hc-conn-dot disconnected";
+            label.textContent = t.disconnected || "Offline";
+        } else {
+            dot.className = "hc-conn-dot unknown";
+            label.textContent = "";
+        }
+    }
+
+    /**
+     * Phase 8: Update active program display panel
+     */
+    _updateProgramDisplay() {
+        const panel = this._el("hcProgramPanel");
+        if (!panel) return;
+
+        const activeProgram = this._getActiveProgram();
+        if (!activeProgram) {
+            panel.classList.add("hidden");
+            return;
+        }
+
+        panel.classList.remove("hidden");
+        const label = this._el("hcProgramLabel");
+        const value = this._el("hcProgramValue");
+        const progressBar = this._el("hcProgressBar");
+        const progressFill = this._el("hcProgressFill");
+
+        if (label) label.textContent = this._t.active_program || "Program";
+        if (value) value.textContent = this._translateProgram(activeProgram);
+
+        const progress = this._getProgress();
+        if (progressBar && progressFill) {
+            if (progress !== null) {
+                progressBar.classList.remove("hidden");
+                progressFill.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+            } else {
+                progressBar.classList.add("hidden");
+            }
+        }
+    }
+
+    /**
+     * Phase 8: Update feature chips (i-Dos, consumables, active options)
+     */
+    _updateFeatureChips() {
+        const container = this._el("hcFeatures");
+        if (!container) return;
+
+        const t = this._t;
+        const chips = [];
+
+        // i-Dos indicators (washer)
+        const idos1Active = this._hcEntity("idos1_active_entity")?.state === "on";
+        const idos1Low = this._hcEntity("idos1_low_entity")?.state === "on";
+        const idos2Active = this._hcEntity("idos2_active_entity")?.state === "on";
+        const idos2Low = this._hcEntity("idos2_low_entity")?.state === "on";
+
+        if (idos1Active)
+            chips.push(`<div class="hc-chip ${idos1Low ? "warning" : "active"}">i-Dos 1${idos1Low ? " ⚠" : ""}</div>`);
+        if (idos2Active)
+            chips.push(`<div class="hc-chip ${idos2Low ? "warning" : "active"}">i-Dos 2${idos2Low ? " ⚠" : ""}</div>`);
+
+        // Dishwasher consumables
+        const saltLow = this._hcEntity("salt_low_entity")?.state === "on";
+        const rinseaidLow = this._hcEntity("rinseaid_low_entity")?.state === "on";
+        if (saltLow)
+            chips.push(`<div class="hc-chip warning">🧂 ${t.salt_low || "Salt Low"}</div>`);
+        if (rinseaidLow)
+            chips.push(`<div class="hc-chip warning">💧 ${t.rinseaid_low || "Rinse Aid Low"}</div>`);
+
+        // Active feature options
+        const featureMap = [
+            ["hygiene_plus_entity",       "🦠 " + (t.hygiene_plus      || "Hygiene+")],
+            ["intensive_zone_entity",     "💪 " + (t.intensive_zone    || "Intensive")],
+            ["variospeed_plus_entity",    "⚡ " + (t.variospeed_plus   || "Vario+")],
+            ["silence_on_demand_entity",  "🔇 " + (t.silence_on_demand || "Silence")],
+            ["brilliant_dry_entity",      "✨ " + (t.brilliant_dry     || "BrilliantDry")],
+        ];
+        for (const [key, label] of featureMap) {
+            if (this._hcEntity(key)?.state === "on")
+                chips.push(`<div class="hc-chip active">${label}</div>`);
+        }
+
+        container.innerHTML = chips.join("");
+        container.classList.toggle("hidden", chips.length === 0);
+    }
+
+    /**
+     * Phase 8: Orchestrate all HC status indicator updates
+     */
+    _updateStatusIndicators() {
+        if (!this._isHomeConnectMode()) return;
+        this._updateConnectivity();
+        this._updateProgramDisplay();
+        this._updateFeatureChips();
+    }
+
+    _updateDoorAnimation() {
+        if (!this._isHomeConnectMode()) return;
+        const doorGroup = this._el("doorGroup");
+        const drumInterior = this._el("drumInterior");
+        if (!doorGroup) return;
+
+        const doorState = this._getDoorState();
+        const isOpen = doorState === "open";
+
+        doorGroup.classList.toggle("door-open", isOpen);
+        doorGroup.classList.toggle("door-closed", !isOpen);
+
+        if (drumInterior) {
+            drumInterior.style.opacity = isOpen ? "1" : "0";
         }
     }
 }

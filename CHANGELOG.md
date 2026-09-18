@@ -4,7 +4,73 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-09-18
+
+### Added
+
+- **Home Connect mode** — set `mode: home_connect` to connect the card natively to
+  Bosch, Siemens, Neff or Gaggenau appliances via the Home Connect integration.
+  A new `home_connect:` config block maps 40+ entity keys for both washer and
+  dishwasher. No helpers, no automations, no template sensors required.
+
+- **Program selector dialog** — tap the appliance SVG in HC mode to open a
+  grid of program icons. The selection immediately sends a
+  `select.select_option` service call (requires remote control to be active on
+  the appliance).
+
+- **Remote control infrastructure** — power on/off, start, pause, stop, and
+  all option changes go through dedicated `_hc*` methods with remote-control
+  guard-rails and localized error feedback.
+
+- **Animated door** — the washer door swings open (CSS 3D rotation with drum
+  interior visible) and the dishwasher door folds down. Both are driven by a
+  `door_entity` binary sensor.
+
+- **Connectivity indicator** — a coloured dot in the card header reflects the
+  `connectivity_entity` state. Green pulses gently; red is solid offline.
+
+- **Active program panel** — shows the running program name (translated via
+  the locale's `programs` map) and a thin animated progress bar driven by
+  `progress_entity`.
+
+- **Feature chips** — compact chips appear in the status panel whenever a
+  feature is active: i-Dos 1/2 (with low-level warning), HygienePlus,
+  IntensiveZone, VarioSpeed+, Silence on Demand, BrilliantDry, salt low, rinse
+  aid low.
+
+- **Options dialog** — a ⚙ button in the header opens a sheet with
+  pill-selectors for temperature and spin speed (washer) and toggle switches
+  for all feature entities (washer + dishwasher).
+
+- **HC operation states** — maps all nine Home Connect states
+  (`Inactive`, `Ready`, `DelayedStart`, `Run`, `Pause`, `ActionRequired`,
+  `Finished`, `Error`, `Aborting`) to badge text, ring label and card
+  CSS class.
+
+- **Full localization of HC strings** — all new badge/state/ring/dialog strings
+  are translated into English, German, Russian and French. Program names for
+  19 washer and 12 dishwasher programs are also translated.
+
+- **`_translateProgram()` upgrade** — strips the Home Connect API prefix
+  (`LaundryCare.Washer.Program.Cotton` → `Cotton`), looks up the locale's
+  `programs` map, then falls back to CamelCase word-splitting.
+
+- **Example configs** — [`examples/hc_washer.yaml`](examples/hc_washer.yaml)
+  and [`examples/hc_dishwasher.yaml`](examples/hc_dishwasher.yaml) with every
+  supported key documented.
+
+### Changed
+
+- `README.md` updated with a full Home Connect mode section: minimal config
+  examples for washer and dishwasher, entity reference tables, UI overview,
+  and a migration guide from standard → home_connect mode.
+
+- All existing v1.x standard-mode configurations continue to work without
+  modification. `mode: standard` (the default) takes the identical code path
+  as before.
+
 ## [1.3.0] — 2026-09-12
+
 
 ### Added
 - **Native Home Assistant theme** — the new `theme: ha` drops the card's own
