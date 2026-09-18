@@ -64,6 +64,17 @@ class WashingMachineCard extends HTMLElement {
             tip_program_btn: "Select Program",
             tip_power_btn: "Power",
             tip_start_btn: "Start / Pause",
+            options_title: "Options & Settings",
+            tip_options_btn: "Options & Settings",
+            temperature: "Temperature",
+            spin_speed: "Spin Speed",
+            child_lock: "Child Lock",
+            hygiene_plus: "Hygiene Plus",
+            intensive_zone: "Intensive Zone",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence on Demand",
+            brilliant_dry: "BrilliantDry",
+            no_options_available: "No options available",
             decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
@@ -85,6 +96,17 @@ class WashingMachineCard extends HTMLElement {
             today: "Сегодня", yesterday: "Вчера",
             tip_notify: "Уведомление об окончании", tip_plug: "Розетка машины", tip_history: "История",
             confirm_plug_off: "Выключить розетку? Это может прервать текущий цикл.",
+            options_title: "Опции и настройки",
+            tip_options_btn: "Опции и настройки",
+            temperature: "Температура",
+            spin_speed: "Скорость отжима",
+            child_lock: "Защита от детей",
+            hygiene_plus: "Гигиена плюс",
+            intensive_zone: "Интенсивная зона",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Тихий режим",
+            brilliant_dry: "Экстра сушка",
+            no_options_available: "Нет доступных опций",
             decimal: ",",
             types: {
                 washer: { name: "Стиральная машина", state_running: "Идёт стирка" },
@@ -106,6 +128,17 @@ class WashingMachineCard extends HTMLElement {
             today: "Heute", yesterday: "Gestern",
             tip_notify: "Benachrichtigung bei Ende", tip_plug: "Steckdose der Maschine", tip_history: "Verlauf",
             confirm_plug_off: "Steckdose ausschalten? Der laufende Durchgang könnte dadurch unterbrochen werden.",
+            options_title: "Optionen & Einstellungen",
+            tip_options_btn: "Optionen & Einstellungen",
+            temperature: "Temperatur",
+            spin_speed: "Schleuderdrehzahl",
+            child_lock: "Kindersicherung",
+            hygiene_plus: "HygienePlus",
+            intensive_zone: "IntensivZone",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence on Demand",
+            brilliant_dry: "BrilliantDry",
+            no_options_available: "Keine Optionen verfügbar",
             decimal: ",",
             types: {
                 washer: { name: "Waschmaschine", state_running: "Wäsche läuft" },
@@ -126,6 +159,17 @@ class WashingMachineCard extends HTMLElement {
             today: "Aujourd'hui", yesterday: "Hier",
             tip_notify: "Notification de fin", tip_plug: "Prise machine", tip_history: "Historique",
             confirm_plug_off: "Éteindre la prise ? Cela peut interrompre le cycle en cours.",
+            options_title: "Options & Réglages",
+            tip_options_btn: "Options & Réglages",
+            temperature: "Température",
+            spin_speed: "Vitesse d'essorage",
+            child_lock: "Sécurité enfants",
+            hygiene_plus: "Hygiène Plus",
+            intensive_zone: "Zone intensive",
+            variospeed_plus: "VarioSpeed Plus",
+            silence_on_demand: "Silence à la demande",
+            brilliant_dry: "Séchage brillant",
+            no_options_available: "Aucune option disponible",
             decimal: ",",
             types: {
                 washer: { name: "Lave-linge", state_running: "Lavage en cours" },
@@ -2334,6 +2378,108 @@ class WashingMachineCard extends HTMLElement {
           font-weight: 700;
           word-break: break-word;
         }
+
+        /* Home Connect Options Dialog */
+        .hc-options-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .hc-option-section {
+          background: var(--wm-panel-bg, rgba(255,255,255,.5));
+          border: 1px solid var(--wm-panel-border, #e2e8f0);
+          border-radius: 14px;
+          padding: 12px 14px;
+        }
+        .hc-option-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .hc-option-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .hc-pill-btn {
+          border: 1.5px solid var(--wm-panel-border, #cbd5e1);
+          background: var(--wm-card-bg, #fff);
+          color: var(--wm-text, inherit);
+          border-radius: 20px;
+          padding: 6px 14px;
+          font-size: 12.5px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .hc-pill-btn:hover {
+          border-color: var(--wm-accent, #2f80ed);
+          background: var(--wm-btn-on-bg, #eaf3fe);
+        }
+        .hc-pill-btn.selected {
+          border-color: var(--wm-accent, #2f80ed);
+          background: var(--wm-accent, #2f80ed);
+          color: #fff;
+        }
+        .hc-feature-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid var(--wm-divider, #e2e8f0);
+        }
+        .hc-feature-row:last-child {
+          border-bottom: none;
+        }
+        .hc-feature-label {
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .hc-toggle-switch {
+          position: relative;
+          display: inline-block;
+          width: 44px;
+          height: 24px;
+          cursor: pointer;
+        }
+        .hc-toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .hc-toggle-slider {
+          position: absolute;
+          inset: 0;
+          background: var(--wm-bar-bg, #cbd5e1);
+          border-radius: 24px;
+          transition: .3s;
+        }
+        .hc-toggle-slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background: #fff;
+          border-radius: 50%;
+          transition: .3s;
+        }
+        input:checked + .hc-toggle-slider {
+          background: var(--wm-accent, #2f80ed);
+        }
+        input:checked + .hc-toggle-slider:before {
+          transform: translateX(20px);
+        }
+        .hc-empty-options {
+          padding: 24px 16px;
+          text-align: center;
+          color: var(--wm-muted, #718096);
+          font-size: 13px;
+        }
       </style>
 
       <ha-card>
@@ -2343,6 +2489,9 @@ class WashingMachineCard extends HTMLElement {
             <div class="h-title" id="name"></div>
             <div class="badge"><span class="b-dot"></span><span id="badgeText"></span></div>
             <div class="h-spacer"></div>
+            <div class="h-btn hidden" id="optionsBtn" title="${t.tip_options_btn}">
+              <ha-icon icon="mdi:tune-variant"></ha-icon>
+            </div>
             <div class="h-btn hidden" id="notifyBtn" title="${t.tip_notify}">
               <ha-icon icon="mdi:bell-ring-outline"></ha-icon>
             </div>
@@ -2411,6 +2560,7 @@ class WashingMachineCard extends HTMLElement {
         const mi = (ent) => () => this._moreInfo(ent);
         this._el("chartBtn").addEventListener("click", mi(c.power_entity || c.status_entity));
         this._el("ringBox").addEventListener("click", mi(c.last_wash_entity || c.status_entity));
+        this._el("optionsBtn")?.addEventListener("click", () => this._openOptionsDialog());
         if (c.power_entity)
             this._el("powerValue").addEventListener("click", mi(c.power_entity));
         if (c.notify_entity)
@@ -2567,6 +2717,147 @@ class WashingMachineCard extends HTMLElement {
                 dialog.close();
                 if (program) {
                     this._hcSelectProgram(program);
+                }
+            });
+        });
+
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        } else {
+            dialog.setAttribute("open", "");
+        }
+    }
+
+    _openOptionsDialog() {
+        const dialog = this.shadowRoot?.getElementById("hcDialog");
+        if (!dialog) return;
+
+        const t = this._t;
+
+        const tempEntity = this._hcEntity("temperature_entity");
+        const spinEntity = this._hcEntity("spin_speed_entity");
+
+        const features = [
+            { key: "child_lock_entity", label: t.child_lock || "Child Lock", toggleFn: () => this._hcToggleChildLock() },
+            { key: "hygiene_plus_entity", label: t.hygiene_plus || "Hygiene Plus", toggleFn: () => this._hcToggleHygienePlus() },
+            { key: "intensive_zone_entity", label: t.intensive_zone || "Intensive Zone", toggleFn: () => this._hcToggleIntensiveZone() },
+            { key: "variospeed_plus_entity", label: t.variospeed_plus || "VarioSpeed Plus", toggleFn: () => this._hcToggleVariospeedPlus() },
+            { key: "silence_on_demand_entity", label: t.silence_on_demand || "Silence on Demand", toggleFn: () => this._hcToggleSilenceOnDemand() },
+            { key: "brilliant_dry_entity", label: t.brilliant_dry || "BrilliantDry", toggleFn: () => this._hcToggleBrilliantDry() },
+        ].filter(f => !!this._hcEntity(f.key));
+
+        const hasAny = !!tempEntity || !!spinEntity || features.length > 0;
+
+        let contentHtml = '';
+        if (!hasAny) {
+            contentHtml = `<div class="hc-empty-options">${t.no_options_available || "No options available"}</div>`;
+        } else {
+            contentHtml = `<div class="hc-options-container">`;
+
+            if (tempEntity) {
+                const currentTemp = String(tempEntity.state || "");
+                const tempOptions = tempEntity.attributes?.options || ["Cold", "20°C", "30°C", "40°C", "60°C", "90°C"];
+                contentHtml += `
+                    <div class="hc-option-section" id="tempOptionSection">
+                        <div class="hc-option-header">
+                            <span>${t.temperature || "Temperature"}</span>
+                            <span class="lc-unit">${currentTemp || "—"}</span>
+                        </div>
+                        <div class="hc-option-pills">
+                            ${tempOptions.map(opt => `
+                                <button class="hc-pill-btn ${opt === currentTemp ? 'selected' : ''}" data-temp="${opt}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (spinEntity) {
+                const currentSpin = String(spinEntity.state || "");
+                const spinOptions = spinEntity.attributes?.options || ["0", "400", "800", "1200", "1400", "1600"];
+                contentHtml += `
+                    <div class="hc-option-section" id="spinOptionSection">
+                        <div class="hc-option-header">
+                            <span>${t.spin_speed || "Spin Speed"}</span>
+                            <span class="lc-unit">${currentSpin || "—"}</span>
+                        </div>
+                        <div class="hc-option-pills">
+                            ${spinOptions.map(opt => `
+                                <button class="hc-pill-btn ${opt === currentSpin ? 'selected' : ''}" data-spin="${opt}">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (features.length > 0) {
+                contentHtml += `
+                    <div class="hc-option-section" id="featuresOptionSection">
+                        ${features.map(f => {
+                            const ent = this._hcEntity(f.key);
+                            const isOn = ent?.state === "on";
+                            return `
+                                <div class="hc-feature-row">
+                                    <span class="hc-feature-label">${f.label}</span>
+                                    <label class="hc-toggle-switch">
+                                        <input type="checkbox" data-feature="${f.key}" ${isOn ? 'checked' : ''}>
+                                        <span class="hc-toggle-slider"></span>
+                                    </label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            contentHtml += `</div>`;
+        }
+
+        dialog.innerHTML = `
+            <div class="hc-dialog-header">
+                <div class="hc-dialog-title">${t.options_title || "Options & Settings"}</div>
+                <button class="hc-dialog-close" id="closeHcDialog" title="${t.close || "Close"}">✕</button>
+            </div>
+            <div class="hc-dialog-body">
+                ${contentHtml}
+            </div>
+        `;
+
+        dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        // Bind temperature pill buttons
+        dialog.querySelectorAll("button[data-temp]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = btn.dataset.temp;
+                if (val) {
+                    this._hcSetTemperature(val);
+                }
+                dialog.close();
+            });
+        });
+
+        // Bind spin speed pill buttons
+        dialog.querySelectorAll("button[data-spin]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = btn.dataset.spin;
+                if (val) {
+                    this._hcSetSpinSpeed(val);
+                }
+                dialog.close();
+            });
+        });
+
+        // Bind feature toggles
+        dialog.querySelectorAll("input[data-feature]").forEach(input => {
+            input.addEventListener("change", () => {
+                const fKey = input.dataset.feature;
+                const feat = features.find(f => f.key === fKey);
+                if (feat && feat.toggleFn) {
+                    feat.toggleFn();
                 }
             });
         });
@@ -2827,6 +3118,20 @@ class WashingMachineCard extends HTMLElement {
             this._el("powerValue").textContent = disp;
             const frac = isNaN(p) ? 0 : Math.min(1, Math.max(0, p / (c.power_max || 1)));
             this._el("barFill").style.width = `${frac * 100}%`;
+        }
+
+        if (this._el("optionsBtn")) {
+            const hasOptions = !!(
+                this._hcEntity("temperature_entity") ||
+                this._hcEntity("spin_speed_entity") ||
+                this._hcEntity("child_lock_entity") ||
+                this._hcEntity("hygiene_plus_entity") ||
+                this._hcEntity("intensive_zone_entity") ||
+                this._hcEntity("variospeed_plus_entity") ||
+                this._hcEntity("silence_on_demand_entity") ||
+                this._hcEntity("brilliant_dry_entity")
+            );
+            this._el("optionsBtn").classList.toggle("hidden", !hasOptions);
         }
 
         if (c.notify_entity) {
