@@ -43,10 +43,9 @@ assert.strictEqual(card._isStandardMode(), true, '_isStandardMode() should retur
 assert.strictEqual(card._isHomeConnectMode(), false, '_isHomeConnectMode() should return false');
 console.log('✔ Task 0.1 & 0.3: Standard mode detection and validation verified');
 
-// Home connect mode: home_connect object required
-assert.throws(() => {
-    card.setConfig({ mode: 'home_connect' });
-}, /home_connect configuration required in home_connect mode/, 'Should throw when home_connect is missing in home_connect mode');
+// Home connect mode: home_connect object not yet configured shows setup message
+card.setConfig({ mode: 'home_connect' });
+assert.strictEqual(card._showSetupMessage, true, 'Should set _showSetupMessage when home_connect is missing');
 
 // Home connect valid config
 card.setConfig({

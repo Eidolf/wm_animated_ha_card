@@ -71,6 +71,14 @@ class WashingMachineCard extends HTMLElement {
             active_program: "Program",
             salt_low: "Salt Low",
             rinseaid_low: "Rinse Aid Low",
+            setup_title: "Home Connect Setup",
+            setup_message: "Please select your Home Connect device in the card settings.",
+            setup_step1: "Click the pencil icon to edit this card",
+            setup_step2: "Select your Home Connect device from the dropdown",
+            setup_step3: "Choose appliance type (Washer or Dishwasher)",
+            setup_step4: "Save - entities will be detected automatically",
+            remote_start_required: "Remote start must be activated on the appliance",
+            door_must_be_closed: "Please close the door",
             decimal: ".",
             types: {
                 washer:     { name: "Washing machine",  state_running: "Washing" },
@@ -157,6 +165,14 @@ class WashingMachineCard extends HTMLElement {
             active_program: "Программа",
             salt_low: "Соль заканчивается",
             rinseaid_low: "Ополаскиватель заканчивается",
+            setup_title: "Настройка Home Connect",
+            setup_message: "Пожалуйста, выберите ваше устройство Home Connect в настройках карточки.",
+            setup_step1: "Нажмите на иконку карандаша для редактирования карточки",
+            setup_step2: "Выберите ваше устройство Home Connect из выпадающего списка",
+            setup_step3: "Выберите тип устройства (Стиральная машина или Посудомоечная машина)",
+            setup_step4: "Сохраните - объекты будут обнаружены автоматически",
+            remote_start_required: "Необходимо активировать удалённый запуск на устройстве",
+            door_must_be_closed: "Пожалуйста, закройте дверцу",
             decimal: ",",
             types: {
                 washer:     { name: "Стиральная машина", state_running: "Идёт стирка" },
@@ -241,6 +257,14 @@ class WashingMachineCard extends HTMLElement {
             active_program: "Programm",
             salt_low: "Salz leer",
             rinseaid_low: "Klarspüler leer",
+            setup_title: "Home Connect Einrichtung",
+            setup_message: "Bitte wählen Sie Ihr Home Connect Gerät in den Karteneinstellungen.",
+            setup_step1: "Klicken Sie auf das Stift-Symbol um die Karte zu bearbeiten",
+            setup_step2: "Wählen Sie Ihr Home Connect Gerät aus der Dropdown-Liste",
+            setup_step3: "Wählen Sie den Gerätetyp (Waschmaschine oder Geschirrspüler)",
+            setup_step4: "Speichern - Entitäten werden automatisch erkannt",
+            remote_start_required: "Fernstart muss am Gerät aktiviert werden",
+            door_must_be_closed: "Bitte Tür schließen",
             decimal: ",",
             types: {
                 washer:     { name: "Waschmaschine",  state_running: "Wäsche läuft" },
@@ -325,6 +349,14 @@ class WashingMachineCard extends HTMLElement {
             active_program: "Programme",
             salt_low: "Sel bas",
             rinseaid_low: "Liquide de rinçage bas",
+            setup_title: "Configuration Home Connect",
+            setup_message: "Veuillez sélectionner votre appareil Home Connect dans les paramètres de la carte.",
+            setup_step1: "Cliquez sur l'icône crayon pour modifier cette carte",
+            setup_step2: "Sélectionnez votre appareil Home Connect dans la liste déroulante",
+            setup_step3: "Choisissez le type d'appareil (Lave-linge ou Lave-vaisselle)",
+            setup_step4: "Enregistrez - les entités seront détectées automatiquement",
+            remote_start_required: "Le démarrage à distance doit être activé sur l'appareil",
+            door_must_be_closed: "Veuillez fermer la porte",
             decimal: ",",
             types: {
                 washer:     { name: "Lave-linge",      state_running: "Lavage en cours" },
@@ -437,7 +469,141 @@ class WashingMachineCard extends HTMLElement {
         return code.toUpperCase();
     }
 
+    /**
+     * Auto-discover Home Connect entities from device
+     * Scans all entities belonging to a device and maps them to config keys
+     * 
+     * @param {string} deviceId - Home Assistant device ID
+     * @returns {object|null} Auto-generated home_connect config or null
+     */
+    _autoDiscoverEntities(deviceId) {
+        if (!this._hass || !deviceId) return null;
+
+        const applianceType = this._config?.appliance_type || 'washer';
+        const entities = {};
+
+        // Get all entities for this device
+        const states = this._hass.states ? Object.values(this._hass.states) : [];
+        const deviceEntities = states.filter(entity => {
+            if (!entity?.entity_id) return false;
+            const regDeviceId = this._hass.entities?.[entity.entity_id]?.device_id ||
+                                this._hass.devices?.[deviceId]?.entities?.[entity.entity_id] ||
+                                entity.device_id;
+            return regDeviceId === deviceId;
+        });
+
+        // Entity pattern mapping for Washer
+        const washerPatterns = {
+            // Status entities
+            'operation_state_entity': /_operation_state$/,
+            'active_program_entity': /_active_program$/,
+            'selected_program_entity': /_selected_program$/,
+            'progress_entity': /_program_progress$/,
+            'remaining_time_entity': /_remaining_time$/,
+            'end_time_entity': /_(finish_time|end_time)$/,
+
+            // Control entities
+            'power_entity': /_power$/,
+            'remote_control_entity': /_remote_control$/,
+            'remote_start_entity': /_remote_start$/,
+            'program_selector_entity': /_(program|active_program)$/,
+
+            // Options
+            'temperature_entity': /_temperature$/,
+            'spin_speed_entity': /_spin_speed$/,
+
+            // Door & Safety
+            'door_entity': /_door$/,
+            'child_lock_entity': /_child_lock$/,
+
+            // Connectivity
+            'connectivity_entity': /_connection_state$/,
+            'local_control_entity': /_local_control$/,
+
+            // i-Dos (Bosch/Siemens)
+            'idos1_active_entity': /_idos1_dosing_active$/,
+            'idos1_level_entity': /_idos1_fill_level$/,
+            'idos2_active_entity': /_idos2_dosing_active$/,
+            'idos2_level_entity': /_idos2_fill_level$/,
+            'idos1_low_entity': /_idos1_low_fill$/,
+            'idos2_low_entity': /_idos2_low_fill$/,
+
+            // Features
+            'hygiene_plus_entity': /_hygiene_plus$/,
+            'prewash_entity': /_prewash$/,
+            'extra_rinse_entity': /_extra_rinse$/,
+            'vario_speed_entity': /_(vario_speed|speed_perfect)$/,
+            'silence_entity': /_(silence|quiet)$/,
+        };
+
+        // Entity pattern mapping for Dishwasher
+        const dishwasherPatterns = {
+            // Status entities (same as washer)
+            'operation_state_entity': /_operation_state$/,
+            'active_program_entity': /_active_program$/,
+            'selected_program_entity': /_selected_program$/,
+            'progress_entity': /_program_progress$/,
+            'remaining_time_entity': /_remaining_time$/,
+            'end_time_entity': /_(finish_time|end_time)$/,
+
+            // Control entities
+            'power_entity': /_power$/,
+            'remote_control_entity': /_remote_control$/,
+            'remote_start_entity': /_remote_start$/,
+            'program_selector_entity': /_(program|active_program)$/,
+
+            // Door
+            'door_entity': /_door$/,
+
+            // Connectivity
+            'connectivity_entity': /_connection_state$/,
+            'local_control_entity': /_local_control$/,
+
+            // Consumables (dishwasher-specific)
+            'salt_low_entity': /_salt_low$/,
+            'rinse_aid_low_entity': /_(rinse_aid_low|rinseaid_low)$/,
+
+            // Features
+            'hygiene_plus_entity': /_hygiene_plus$/,
+            'intensive_zone_entity': /_(intensive_zone|extra_dry)$/,
+            'vario_speed_entity': /_(vario_speed|speed_perfect)$/,
+            'silence_entity': /_(silence|quiet)$/,
+            'brilliant_dry_entity': /_brilliant_dry$/,
+            'extra_dry_entity': /_extra_dry$/,
+            'half_load_entity': /_half_load$/,
+        };
+
+        const patterns = applianceType === 'dishwasher' ? dishwasherPatterns : washerPatterns;
+
+        // Match entities to patterns
+        deviceEntities.forEach(entity => {
+            const entityId = entity.entity_id;
+
+            for (const [configKey, pattern] of Object.entries(patterns)) {
+                if (pattern.test(entityId)) {
+                    if (!entities[configKey]) {
+                        entities[configKey] = entityId;
+                    }
+                    break; // First match wins
+                }
+            }
+        });
+
+        // Return config object if we found essential entities
+        const hasEssentials = entities.operation_state_entity || entities.power_entity;
+        if (!hasEssentials) {
+            console.warn('Auto-discovery: No essential Home Connect entities found');
+            return null;
+        }
+
+        return entities;
+    }
+
     setConfig(config) {
+        if (!config) {
+            throw new Error('washing-machine-card: Invalid configuration');
+        }
+
         const mode = config.mode || "standard";
         if (mode !== "standard" && mode !== "home_connect") {
             throw new Error(`washing-machine-card: Unsupported mode "${mode}"`);
@@ -446,13 +612,31 @@ class WashingMachineCard extends HTMLElement {
             if (!config.status_entity) {
                 throw new Error("washing-machine-card: status_entity is required in standard mode");
             }
+            this._showSetupMessage = false;
         } else if (mode === "home_connect") {
-            if (!config.home_connect) {
-                throw new Error("washing-machine-card: home_connect configuration required in home_connect mode");
+            // Auto-discovery for Home Connect Mode
+            if (config.device_id && !config.home_connect) {
+                const discovered = this._autoDiscoverEntities(config.device_id);
+                if (discovered) {
+                    const applianceType = config.appliance_type || 'washer';
+                    config = {
+                        ...config,
+                        home_connect: {
+                            [applianceType]: discovered,
+                        },
+                    };
+                    console.log('Home Connect entities auto-discovered:', discovered);
+                }
             }
-            const type = WashingMachineCard.normalizeType(config.appliance_type);
-            if (!config.home_connect[type]) {
-                console.warn(`washing-machine-card: No ${type} configuration in home_connect object`);
+
+            if (!config.home_connect) {
+                this._showSetupMessage = true;
+            } else {
+                this._showSetupMessage = false;
+                const type = WashingMachineCard.normalizeType(config.appliance_type);
+                if (!config.home_connect[type]) {
+                    console.warn(`washing-machine-card: No ${type} configuration in home_connect object`);
+                }
             }
         }
 
@@ -467,6 +651,21 @@ class WashingMachineCard extends HTMLElement {
 
     set hass(hass) {
         this._hass = hass;
+        const c = this._config;
+        if (c && (c.mode || "standard") === "home_connect" && c.device_id && !c.home_connect) {
+            const discovered = this._autoDiscoverEntities(c.device_id);
+            if (discovered) {
+                const applianceType = c.appliance_type || 'washer';
+                this._config = {
+                    ...c,
+                    home_connect: {
+                        [applianceType]: discovered,
+                    },
+                };
+                this._showSetupMessage = false;
+                console.log('Home Connect entities auto-discovered:', discovered);
+            }
+        }
         if (!this._built)
             this._build();
         this._update();
@@ -1321,6 +1520,55 @@ class WashingMachineCard extends HTMLElement {
         }
     }
 
+    /**
+     * Handle Home Connect service call errors
+     * Displays error message on card for 5 seconds
+     * 
+     * @param {Error} error - The error object
+     * @param {string} action - The action that failed (e.g., "start_program", "select_program")
+     */
+    _handleServiceError(error, action) {
+        const t = this._t;
+
+        // Map error types to user messages
+        let errorMessage = t.service_call_failed || 'Service call failed';
+
+        // Check for specific Home Connect errors
+        const msg = String(error?.message || '');
+        if (msg.includes('Remote control')) {
+            errorMessage = t.remote_control_required || 
+                          'Remote control must be enabled on the appliance';
+        } else if (msg.includes('Remote start')) {
+            errorMessage = t.remote_start_required || 
+                          'Remote start must be activated on the appliance display';
+        } else if (msg.toLowerCase().includes('door')) {
+            errorMessage = t.door_must_be_closed || 
+                          'Door must be closed';
+        }
+
+        const timestamp = Date.now();
+        // Store error state
+        this._errorState = {
+            message: errorMessage,
+            timestamp: timestamp,
+            action: action,
+        };
+
+        // Auto-clear error after 5 seconds
+        setTimeout(() => {
+            if (this._errorState && this._errorState.timestamp === timestamp) {
+                this._errorState = null;
+                this._update();
+            }
+        }, 5000);
+
+        // Trigger card update to show error
+        this._update();
+
+        // Also log to console for debugging
+        console.error(`Home Connect ${action} failed:`, error);
+    }
+
     // ----------------
     // PROGRAM SELECTION
     // ----------------
@@ -1344,15 +1592,23 @@ class WashingMachineCard extends HTMLElement {
         }
 
         if (!this._getRemoteControlState()) {
+            const err = new Error("Remote control not enabled");
+            this._handleServiceError(err, "select_program");
             const t = this._t;
             const message = t.remote_control_required ||
                            "Remote control must be enabled on the appliance.\n" +
                            "Please enable remote control using the appliance controls.";
-            alert(message);
-            return Promise.reject(new Error("Remote control not enabled"));
+            if (typeof alert === "function") {
+                alert(message);
+            }
+            return Promise.reject(err);
         }
 
-        return this._selectOption(hc.program_selector_entity, programName);
+        return this._selectOption(hc.program_selector_entity, programName)
+            .catch(error => {
+                this._handleServiceError(error, "select_program");
+                return Promise.reject(error);
+            });
     }
 
     // ----------------
@@ -1370,17 +1626,32 @@ class WashingMachineCard extends HTMLElement {
         const type = this._applianceType;
         const hc = this._config?.home_connect?.[type];
 
+        const hasRemoteStart = !!this._hcEntity("remote_start_entity");
+        if (hasRemoteStart && !this._getRemoteStartState()) {
+            const err = new Error("Remote start not enabled");
+            this._handleServiceError(err, "start_program");
+            return Promise.reject(err);
+        }
+
+        let p;
         if (hc?.start_entity) {
-            return this._turnOn(hc.start_entity);
+            p = this._turnOn(hc.start_entity);
         } else if (hc?.remote_start_entity) {
             const entity = this._hcEntity("remote_start_entity");
             if (entity) {
-                return this._toggle(entity.entity_id);
+                p = this._toggle(entity.entity_id);
             }
         }
 
-        console.warn("No start_entity or remote_start_entity configured");
-        return;
+        if (!p) {
+            console.warn("No start_entity or remote_start_entity configured");
+            return;
+        }
+
+        return p.catch(error => {
+            this._handleServiceError(error, "start_program");
+            return Promise.reject(error);
+        });
     }
 
     /**
@@ -1398,7 +1669,11 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
-        return this._turnOn(hc.pause_entity);
+        return this._turnOn(hc.pause_entity)
+            .catch(error => {
+                this._handleServiceError(error, "pause_program");
+                return Promise.reject(error);
+            });
     }
 
     /**
@@ -1416,7 +1691,11 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
-        return this._pressButton(hc.stop_entity);
+        return this._pressButton(hc.stop_entity)
+            .catch(error => {
+                this._handleServiceError(error, "stop_program");
+                return Promise.reject(error);
+            });
     }
 
     /**
@@ -1466,7 +1745,11 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
-        return this._toggle(entity.entity_id);
+        return Promise.resolve(this._toggle(entity.entity_id))
+            .catch(error => {
+                this._handleServiceError(error, `toggle_${featureKey}`);
+                return Promise.reject(error);
+            });
     }
 
     /**
@@ -1538,7 +1821,11 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
-        return this._selectOption(hc.temperature_entity, temperature);
+        return this._selectOption(hc.temperature_entity, temperature)
+            .catch(error => {
+                this._handleServiceError(error, "set_temperature");
+                return Promise.reject(error);
+            });
     }
 
     /**
@@ -1558,7 +1845,11 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
-        return this._selectOption(hc.spin_speed_entity, speed);
+        return this._selectOption(hc.spin_speed_entity, speed)
+            .catch(error => {
+                this._handleServiceError(error, "set_spin_speed");
+                return Promise.reject(error);
+            });
     }
 
     _headerIcon() {
@@ -1615,18 +1906,84 @@ class WashingMachineCard extends HTMLElement {
       </svg>`;
     }
 
+    /**
+     * Render setup message when device not selected
+     * @returns {string} HTML string for setup container
+     */
+    _renderSetupMessage() {
+        const t = this._t;
+        return `
+            <div class="setup-container">
+                <div class="setup-icon">
+                    <ha-icon icon="mdi:washing-machine"></ha-icon>
+                </div>
+                <div class="setup-title">
+                    ${t.setup_title || 'Home Connect Setup'}
+                </div>
+                <div class="setup-message">
+                    ${t.setup_message || 'Please select your Home Connect device in the card settings.'}
+                </div>
+                <div class="setup-steps">
+                    <ol>
+                        <li>${t.setup_step1 || 'Click the pencil icon to edit this card'}</li>
+                        <li>${t.setup_step2 || 'Select your Home Connect device from the dropdown'}</li>
+                        <li>${t.setup_step3 || 'Choose appliance type (Washer or Dishwasher)'}</li>
+                        <li>${t.setup_step4 || 'Save - entities will be detected automatically'}</li>
+                    </ol>
+                </div>
+            </div>
+        `;
+    }
+
     _machineSvg() {
         const type = this._applianceType;
         const u = this._uid;
+        let svg;
         if (type === "dryer")
-            return this._svgDryer(u);
-        if (type === "dishwasher")
-            return this._svgDishwasher(u);
-        if (type === "oven")
-            return this._svgOven(u);
-        if (type === "microwave")
-            return this._svgMicrowave(u);
-        return this._svgWasher(u);
+            svg = this._svgDryer(u);
+        else if (type === "dishwasher")
+            svg = this._svgDishwasher(u);
+        else if (type === "oven")
+            svg = this._svgOven(u);
+        else if (type === "microwave")
+            svg = this._svgMicrowave(u);
+        else
+            svg = this._svgWasher(u);
+
+        if (this._errorState && this._isHomeConnectMode()) {
+            const overlay = `
+            <g id="errorOverlay">
+                <!-- Semi-transparent background -->
+                <rect x="0" y="0" width="220" height="232" 
+                      fill="rgba(0,0,0,0.7)" rx="16" />
+                
+                <!-- Error icon -->
+                <circle cx="110" cy="80" r="20" 
+                        fill="var(--error-color, #ff5252)" />
+                <text x="110" y="88" 
+                      text-anchor="middle" 
+                      font-size="24" 
+                      fill="white" 
+                      font-weight="bold">!</text>
+                
+                <!-- Error message -->
+                <foreignObject x="20" y="110" width="180" height="90">
+                    <div xmlns="http://www.w3.org/1999/xhtml" 
+                         style="
+                             color: white;
+                             font-size: 13px;
+                             text-align: center;
+                             line-height: 1.4;
+                             padding: 0 10px;
+                         ">
+                        ${this._errorState.message}
+                    </div>
+                </foreignObject>
+            </g>`;
+            svg = svg.replace("</svg>", `${overlay}\n      </svg>`);
+        }
+
+        return svg;
     }
 
     _svgChassis(u, opts = {}) {
@@ -2781,6 +3138,45 @@ class WashingMachineCard extends HTMLElement {
           color: #1a8f50;
           border-color: rgba(34,178,99,0.25);
         }
+
+        /* Setup message container */
+        .setup-container {
+          padding: 48px 24px;
+          text-align: center;
+          color: var(--wm-text, var(--primary-text-color));
+        }
+        .setup-icon {
+          margin-bottom: 16px;
+        }
+        .setup-icon ha-icon {
+          --mdc-icon-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: var(--wm-accent, var(--primary-color));
+        }
+        .setup-title {
+          font-size: 24px;
+          font-weight: 500;
+          margin-bottom: 8px;
+        }
+        .setup-message {
+          font-size: 16px;
+          color: var(--wm-muted, var(--secondary-text-color));
+          margin-bottom: 24px;
+        }
+        .setup-steps {
+          max-width: 400px;
+          margin: 0 auto;
+          text-align: left;
+        }
+        .setup-steps ol {
+          padding-left: 20px;
+          margin: 0;
+        }
+        .setup-steps li {
+          margin-bottom: 8px;
+          line-height: 1.5;
+        }
       </style>
 
       <ha-card>
@@ -2866,6 +3262,25 @@ class WashingMachineCard extends HTMLElement {
             </div>
           </div>
         </div>
+        <div class="setup-container hidden" id="setupContainer">
+          <div class="setup-icon">
+            <ha-icon icon="mdi:washing-machine"></ha-icon>
+          </div>
+          <div class="setup-title" id="setupTitle">
+            ${t.setup_title || 'Home Connect Setup'}
+          </div>
+          <div class="setup-message" id="setupMessage">
+            ${t.setup_message || 'Please select your Home Connect device in the card settings.'}
+          </div>
+          <div class="setup-steps">
+            <ol>
+              <li>${t.setup_step1 || 'Click the pencil icon to edit this card'}</li>
+              <li>${t.setup_step2 || 'Select your Home Connect device from the dropdown'}</li>
+              <li>${t.setup_step3 || 'Choose appliance type (Washer or Dishwasher)'}</li>
+              <li>${t.setup_step4 || 'Save - entities will be detected automatically'}</li>
+            </ol>
+          </div>
+        </div>
         <dialog class="hc-dialog" id="hcDialog"></dialog>
       </ha-card>
     `;
@@ -2903,6 +3318,7 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _updateTheme() {
+        if (!this.classList) return;
         const c = this._config;
         const themeCfg = String(c.theme || "auto").toLowerCase();
         const isNative = themeCfg === "ha";
@@ -3218,7 +3634,25 @@ class WashingMachineCard extends HTMLElement {
     }
 
     _update() {
+        if (typeof this._el !== "function") return;
         this._updateTheme();
+        const wrap = this._el("wrap");
+        const setupContainer = this._el("setupContainer");
+
+        if (this._showSetupMessage && this._isHomeConnectMode()) {
+            if (wrap) wrap.classList.add("hidden");
+            if (setupContainer) setupContainer.classList.remove("hidden");
+            return;
+        }
+
+        if (setupContainer) setupContainer.classList.add("hidden");
+        if (wrap) wrap.classList.remove("hidden");
+
+        const hero = this._el("hero");
+        if (hero) {
+            hero.innerHTML = this._machineSvg();
+        }
+
         if (this._isHomeConnectMode()) {
             this._updateHomeConnect();
         } else {
@@ -3680,6 +4114,15 @@ class WashingMachineCardEditor extends HTMLElement {
                             }],
                         },
                     },
+                }, {
+                    key: "device_id",
+                    kind: "device",
+                    title: "Home Connect Device",
+                    selector: {
+                        device: {
+                            integration: "home_connect",
+                        },
+                    },
                 }],
             }, {
                 title: "General",
@@ -4079,9 +4522,10 @@ class WashingMachineCardEditor extends HTMLElement {
 
     _updateModeInfo() {
         const mode = this._config?.mode || "standard";
+        const hasDevice = !!this._config?.device_id || !!this._config?.home_connect;
         const modeInfo = this.shadowRoot?.getElementById("modeInfo");
         if (modeInfo) {
-            modeInfo.classList.toggle("hidden", mode !== "home_connect");
+            modeInfo.classList.toggle("hidden", mode !== "home_connect" || hasDevice);
         }
     }
 
