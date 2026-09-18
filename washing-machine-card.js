@@ -629,12 +629,19 @@ class WashingMachineCard extends HTMLElement {
                 }
             }
 
-            if (!config.home_connect) {
+            // FIXED: Show setup message ONLY if NO device_id AND NO home_connect config
+            if (!config.device_id && !config.home_connect) {
                 this._showSetupMessage = true;
             } else {
                 this._showSetupMessage = false;
+
+                // If device selected but no entities discovered, warn user
+                if (config.device_id && !config.home_connect) {
+                    console.warn('Home Connect device selected but no entities discovered');
+                }
+
                 const type = WashingMachineCard.normalizeType(config.appliance_type);
-                if (!config.home_connect[type]) {
+                if (config.home_connect && !config.home_connect[type]) {
                     console.warn(`washing-machine-card: No ${type} configuration in home_connect object`);
                 }
             }
@@ -664,8 +671,22 @@ class WashingMachineCard extends HTMLElement {
                 };
                 this._showSetupMessage = false;
                 console.log('Home Connect entities auto-discovered:', discovered);
+            } else {
+                // NO ENTITIES FOUND - hide setup message but log warning
+                this._showSetupMessage = false;
+                console.warn(`No Home Connect entities found for device: ${c.device_id}`);
             }
         }
+
+        // Update setup message flag based on current config state
+        if (c && (c.mode || "standard") === "home_connect") {
+            if (!c.device_id && !c.home_connect) {
+                this._showSetupMessage = true;
+            } else {
+                this._showSetupMessage = false;
+            }
+        }
+
         if (!this._built)
             this._build();
         this._update();
@@ -4118,6 +4139,10 @@ class WashingMachineCardEditor extends HTMLElement {
                     key: "device_id",
                     kind: "device",
                     title: "Home Connect Device",
+                    visibleWhen: (config) => {
+                        const mode = config?.mode || "standard";
+                        return mode === "home_connect";
+                    },
                     selector: {
                         device: {
                             integration: "home_connect",
@@ -4167,6 +4192,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         kind: "entity",
                         title: "Status entity (required in standard mode)",
                         required: false,
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {}
                         },
@@ -4253,6 +4282,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "power_entity",
                         kind: "entity",
                         title: "Power sensor",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: "sensor"
@@ -4262,6 +4295,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "power_threshold",
                         kind: "number",
                         title: "Running threshold (W)",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                     default:
                         D.power_threshold,
                         min: 0,
@@ -4269,6 +4306,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "power_max",
                         kind: "number",
                         title: "Gauge max (W)",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                     default:
                         D.power_max,
                         min: 1,
@@ -4281,6 +4322,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "plug_entity",
                         kind: "entity",
                         title: "Plug / switch entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: ["switch", "input_boolean"]
@@ -4291,6 +4336,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         kind: "boolean",
                         title: "Confirm before turning off plug",
                         description: "Show a confirmation popup when turning off the plug entity.",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                     default:
                         D.confirm_plug_off,
                         selector: {
@@ -4300,6 +4349,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "notify_entity",
                         kind: "entity",
                         title: "Notification entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {}
                         },
@@ -4312,6 +4365,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "last_wash_entity",
                         kind: "entity",
                         title: "Last start time entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: "input_datetime"
@@ -4321,6 +4378,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "duration_entity",
                         kind: "entity",
                         title: "Duration entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: "input_number"
@@ -4330,6 +4391,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "energy_entity",
                         kind: "entity",
                         title: "Energy entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: "input_number"
@@ -4339,6 +4404,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "cost_entity",
                         kind: "entity",
                         title: "Cost entity",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                         selector: {
                             entity: {
                                 domain: "input_number"
@@ -4348,6 +4417,10 @@ class WashingMachineCardEditor extends HTMLElement {
                         key: "currency",
                         kind: "text",
                         title: "Currency symbol",
+                        visibleWhen: (config) => {
+                            const mode = config?.mode || "standard";
+                            return mode === "standard";
+                        },
                     default:
                         D.currency,
                     },
@@ -4534,6 +4607,13 @@ class WashingMachineCardEditor extends HTMLElement {
     }
 
     _buildField(field) {
+        // CHECK VISIBILITY FIRST
+        if (field.visibleWhen && !field.visibleWhen(this._config)) {
+            const hidden = document.createElement("div");
+            hidden.style.display = "none";
+            return hidden;
+        }
+
         const wrap = document.createElement("div");
         wrap.className = "wm-field" + (field.kind === "boolean" ? " wm-field--row" : "");
 
@@ -4608,6 +4688,15 @@ class WashingMachineCardEditor extends HTMLElement {
                 const el = this._fieldEls[field.key];
                 if (!el)
                     continue;
+
+                // APPLY VISIBILITY LOGIC
+                if (field.visibleWhen) {
+                    const shouldBeVisible = field.visibleWhen(this._config);
+                    const wrapper = el.closest('.wm-field');
+                    if (wrapper) {
+                        wrapper.style.display = shouldBeVisible ? '' : 'none';
+                    }
+                }
 
                 const isNative = field.kind === "text" || field.kind === "number";
                 if (!isNative)
