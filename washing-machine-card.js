@@ -45,6 +45,20 @@ class WashingMachineCard extends HTMLElement {
             remote_control_required: "Remote control must be enabled on the appliance.\nPlease enable remote control using the appliance controls.",
             program_selection_failed: "Failed to select program. Check that remote control is enabled.",
             service_call_failed: "Action failed. Please try again.",
+            badge_finished: "FINISHED",
+            badge_paused: "PAUSED",
+            badge_ready: "READY",
+            badge_delayed: "DELAYED",
+            badge_error: "ERROR",
+            badge_action_required: "ACTION REQ.",
+            state_finished: "Finished",
+            state_paused: "Paused",
+            state_ready: "Ready",
+            state_delayed: "Delayed start",
+            state_error: "Error",
+            state_action_required: "Action required",
+            ring_ready: "READY",
+            ring_paused: "PAUSED",
             decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
@@ -700,29 +714,64 @@ class WashingMachineCard extends HTMLElement {
         return cl?.state === "on";
     }
 
-    _isRunning() {
-        const c = this._config;
-        const status = this._st(c.status_entity);
-        const byStatus =
-            status && c.running_states.includes(String(status.state).toLowerCase());
-        let byPower = false;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            byPower = !isNaN(p) && p > c.power_threshold;
+    _computeApplianceState() {
+        const mode = this._getMode();
+
+        if (mode === "standard") {
+            if (this._isRunning())
+                return "running";
+            const c = this._config;
+            if (c.power_entity) {
+                const p = parseFloat(this._st(c.power_entity)?.state);
+                if (!isNaN(p) && p >= 1)
+                    return "idle";
+            }
+            return "off";
         }
-        return byStatus || byPower;
+
+        // Home Connect mode
+        const opState = this._getOperationState();
+        if (!opState)
+            return "unknown";
+
+        const state = opState.toLowerCase();
+
+        // Map Home Connect states to card states
+        if (state === "run") return "running";
+        if (state === "pause") return "paused";
+        if (state === "ready") return "ready";
+        if (state === "delayedstart") return "delayed";
+        if (state === "finished") return "finished";
+        if (state === "error") return "error";
+        if (state === "actionrequired") return "action_required";
+        if (state === "inactive") return "off";
+        if (state === "aborting") return "aborting";
+
+        return "idle";
+    }
+
+    _isRunning() {
+        const mode = this._getMode();
+
+        if (mode === "standard") {
+            const c = this._config;
+            const status = this._st(c.status_entity);
+            const byStatus =
+                status && c.running_states.includes(String(status.state).toLowerCase());
+            let byPower = false;
+            if (c.power_entity) {
+                const p = parseFloat(this._st(c.power_entity)?.state);
+                byPower = !isNaN(p) && p > c.power_threshold;
+            }
+            return byStatus || byPower;
+        }
+
+        // Home Connect mode
+        return this._computeApplianceState() === "running";
     }
 
     _applianceState() {
-        if (this._isRunning())
-            return "running";
-        const c = this._config;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            if (!isNaN(p) && p >= 1)
-                return "idle";
-        }
-        return "off";
+        return this._computeApplianceState();
     }
 
     _parseDate(state) {
@@ -2199,10 +2248,8 @@ class WashingMachineCard extends HTMLElement {
         }
     }
 
-    _update() {
+    _updateTheme() {
         const c = this._config;
-        const t = this._t;
-        const wrap = this._el("wrap");
         const themeCfg = String(c.theme || "auto").toLowerCase();
         const isNative = themeCfg === "ha";
         const haIsDark = !!this._hass?.themes?.darkMode;
@@ -2210,6 +2257,75 @@ class WashingMachineCard extends HTMLElement {
         this.classList.toggle("wm-native-dark", isNative && haIsDark);
         const dark = !isNative && (themeCfg === "dark" || (themeCfg !== "light" && haIsDark));
         this.classList.toggle("wm-dark", dark);
+    }
+
+    _formatTime(timeStr) {
+        if (!timeStr) return "--:--";
+        const str = String(timeStr).trim();
+
+        // ISO 8601 Duration (e.g. PT1H30M, PT45M, PT20S)
+        if (str.startsWith("PT") || str.startsWith("P")) {
+            const hMatch = str.match(/(\d+)H/i);
+            const mMatch = str.match(/(\d+)M/i);
+            const sMatch = str.match(/(\d+)S/i);
+            const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+            const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+            const s = sMatch ? parseInt(sMatch[1], 10) : 0;
+
+            if (h > 0) {
+                return `${h}:${String(m).padStart(2, "0")}`;
+            }
+            return `${m}:${String(s).padStart(2, "0")}`;
+        }
+
+        // Numeric seconds (e.g. 5400)
+        const num = parseFloat(str);
+        if (!isNaN(num) && !str.includes(":")) {
+            const h = Math.floor(num / 3600);
+            const m = Math.floor((num % 3600) / 60);
+            if (h > 0) {
+                return `${h}:${String(m).padStart(2, "0")}`;
+            }
+            return `${m}:${String(Math.floor(num % 60)).padStart(2, "0")}`;
+        }
+
+        // Timestamp / Date string
+        if (str.includes("T") || str.includes("-")) {
+            const d = this._parseDate(str);
+            if (d) {
+                return d.toLocaleTimeString(this._t.locale, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: this._hour12(),
+                });
+            }
+        }
+
+        return str;
+    }
+
+    _translateProgram(programName) {
+        if (!programName) return "";
+        // Clean up common prefixes like "Dishcare.Dishwasher.Program."
+        const parts = programName.split(".");
+        const cleanName = parts[parts.length - 1] || programName;
+        return cleanName;
+    }
+
+    _update() {
+        this._updateTheme();
+        if (this._isHomeConnectMode()) {
+            this._updateHomeConnect();
+        } else {
+            this._updateStandard();
+        }
+    }
+
+    _updateStandard() {
+        const c = this._config;
+        const t = this._t;
+        const wrap = this._el("wrap");
+
         const running = this._isRunning();
         wrap.classList.toggle("running", running);
         this._el("name").textContent = c.name || t.name;
@@ -2217,7 +2333,7 @@ class WashingMachineCard extends HTMLElement {
         const noData = !status || ["unknown", "unavailable"].includes(status.state);
         const applianceState = noData ? "nodata" : this._applianceState();
         const displayState = (applianceState === "off" && !c.power_entity) ? "idle" : applianceState;
-        this._el("badgeText").textContent = t[`badge_${displayState}`];
+        this._el("badgeText").textContent = t[`badge_${displayState}`] || displayState.toUpperCase();
         wrap.classList.toggle("state-idle", applianceState === "idle");
         const active = applianceState === "running" || applianceState === "idle";
         wrap.classList.toggle("idle", !active);
@@ -2227,9 +2343,9 @@ class WashingMachineCard extends HTMLElement {
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : "#4a5871");
         this._el("ringTime").textContent = active ? (clock || "…") : "—";
         const ringState = displayState === "running" ? "running" : displayState === "idle" ? "idle" : "off";
-        this._el("ringLabel").textContent = t[`ring_${ringState}`];
+        this._el("ringLabel").textContent = t[`ring_${ringState}`] || ringState.toUpperCase();
         this._el("ringArc").style.display = active ? "" : "none";
-        this._el("stState").textContent = t[`state_${displayState}`];
+        this._el("stState").textContent = t[`state_${displayState}`] || displayState;
         const hideStatus = !!c.hide_status_panel && !active;
         this._el("statusPanel").classList.toggle("hidden", hideStatus);
 
@@ -2288,6 +2404,135 @@ class WashingMachineCard extends HTMLElement {
         }
         if (anyLc)
             this._el("lastCycle").classList.remove("hidden");
+
+        if (c.notify_entity) {
+            const on = this._st(c.notify_entity)?.state === "on";
+            this._el("notifyBtn").classList.remove("hidden");
+            this._el("notifyBtn").classList.toggle("on", on);
+        }
+        if (c.plug_entity) {
+            const on = this._st(c.plug_entity)?.state === "on";
+            this._el("plugBtn").classList.remove("hidden");
+            this._el("plugBtn").classList.toggle("on", on);
+        }
+    }
+
+    _updateHomeConnect() {
+        const c = this._config;
+        const t = this._t;
+        const wrap = this._el("wrap");
+
+        const state = this._computeApplianceState();
+        const running = state === "running";
+
+        wrap.classList.toggle("running", running);
+        this._el("name").textContent = c.name || t.name;
+
+        // Badge display
+        let badgeText = t[`badge_${state}`];
+        if (!badgeText) {
+            if (state === "running") badgeText = t.badge_running;
+            else if (state === "off") badgeText = t.badge_off;
+            else if (state === "finished") badgeText = t.badge_finished || "FINISHED";
+            else if (state === "paused") badgeText = t.badge_paused || "PAUSED";
+            else if (state === "ready") badgeText = t.badge_ready || "READY";
+            else if (state === "delayed") badgeText = t.badge_delayed || "DELAYED";
+            else if (state === "error") badgeText = t.badge_error || "ERROR";
+            else if (state === "action_required") badgeText = t.badge_action_required || "ACTION REQ.";
+            else badgeText = t.badge_idle || "IDLE";
+        }
+        this._el("badgeText").textContent = badgeText;
+
+        const active = running || state === "ready" || state === "paused" || state === "delayed";
+        wrap.classList.toggle("state-idle", state === "ready" || state === "idle");
+        wrap.classList.toggle("idle", !active && state !== "finished");
+
+        // Display & Ring times
+        const activeProgram = this._getActiveProgram() || this._getSelectedProgram();
+        const progress = this._getProgress();
+        const remainingTime = this._getRemainingTime();
+        const endTime = this._getEndTime();
+
+        if (running && remainingTime) {
+            const formatted = this._formatTime(remainingTime);
+            this._el("dispTime").textContent = formatted;
+            this._el("ringTime").textContent = formatted;
+        } else if (state === "delayed" && endTime) {
+            const formatted = this._formatTime(endTime);
+            this._el("dispTime").textContent = formatted;
+            this._el("ringTime").textContent = formatted;
+        } else {
+            this._el("dispTime").textContent = active ? "0:00" : "--:--";
+            this._el("ringTime").textContent = active ? "…" : "—";
+        }
+
+        this._el("dispDot").setAttribute("fill", running ? "#22b263" : (active ? "#f0a04b" : "#4a5871"));
+
+        // Ring Label
+        let ringLabel = t.ring_idle;
+        if (state === "running") ringLabel = t.ring_running;
+        else if (state === "ready") ringLabel = t.ring_ready || "READY";
+        else if (state === "paused") ringLabel = t.ring_paused || "PAUSED";
+        else if (state === "off") ringLabel = t.ring_off;
+        this._el("ringLabel").textContent = ringLabel;
+
+        // Progress Arc
+        if (progress !== null && running) {
+            this._el("ringArc").style.display = "";
+            const dasharray = (Math.max(0, Math.min(100, progress)) / 100) * 245;
+            this._el("ringArc").setAttribute("stroke-dasharray", `${dasharray} 245`);
+        } else {
+            this._el("ringArc").style.display = active ? "" : "none";
+            if (!active) {
+                this._el("ringArc").style.display = "none";
+            }
+        }
+
+        // Status text
+        let stateText = t[`state_${state}`];
+        if (!stateText) {
+            if (state === "running") {
+                stateText = activeProgram ? this._translateProgram(activeProgram) : t.state_running;
+            } else if (state === "ready") {
+                stateText = activeProgram ? `${t.state_ready || "Ready"}: ${this._translateProgram(activeProgram)}` : (t.state_ready || "Ready");
+            } else if (state === "finished") {
+                stateText = t.state_finished || "Finished";
+            } else if (state === "paused") {
+                stateText = t.state_paused || "Paused";
+            } else if (state === "off") {
+                stateText = t.state_off;
+            } else {
+                stateText = t.state_idle;
+            }
+        } else if (state === "running" && activeProgram) {
+            stateText = this._translateProgram(activeProgram);
+        }
+        this._el("stState").textContent = stateText;
+
+        const hideStatus = !!c.hide_status_panel && !active && state !== "finished";
+        this._el("statusPanel").classList.toggle("hidden", hideStatus);
+
+        // Power gauge / last cycle / extra entity buttons if standard entities also configured in HC mode
+        if (c.power_entity) {
+            const ps = this._st(c.power_entity);
+            const p = parseFloat(ps?.state);
+            const unit = ps?.attributes?.unit_of_measurement || "W";
+            this._el("powerRow").classList.remove("hidden");
+            this._el("bar").classList.remove("hidden");
+            const unitL = String(unit).toLowerCase();
+            this._el("powerLabel").textContent =
+                ["a", "а"].includes(unitL) ? t.current : t.power;
+            let disp;
+            if (isNaN(p))
+                disp = "—";
+            else if (["w", "вт"].includes(unitL) && Math.abs(p) >= 1000)
+                disp = `${this._fmtNum(p / 1000, 2)} ${t.kw}`;
+            else
+                disp = `${Math.abs(p) >= 10 ? Math.round(p) : this._fmtNum(p, 2)} ${unit}`;
+            this._el("powerValue").textContent = disp;
+            const frac = isNaN(p) ? 0 : Math.min(1, Math.max(0, p / (c.power_max || 1)));
+            this._el("barFill").style.width = `${frac * 100}%`;
+        }
 
         if (c.notify_entity) {
             const on = this._st(c.notify_entity)?.state === "on";
