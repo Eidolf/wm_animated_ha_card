@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
-const { execSync } = require('child_process');
 
 // Mock environment
 global.HTMLElement = class HTMLElement {};
@@ -180,9 +179,51 @@ console.log('✔ Task 1.2 completed successfully\n');
 console.log('Testing Task 1.5: Full configuration loading');
 
 function parseYamlFile(filePath) {
-    const pyCmd = `python3 -c "import yaml, json, sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" "${filePath}"`;
-    const jsonStr = execSync(pyCmd).toString();
-    return JSON.parse(jsonStr);
+    const yamlText = fs.readFileSync(filePath, 'utf8');
+    const result = {};
+    const lines = yamlText.split('\n');
+    let stack = [{ indent: -1, obj: result }];
+    for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i];
+        const withoutComment = rawLine.split('#')[0];
+        if (!withoutComment.trim()) continue;
+        const indent = rawLine.search(/\S/);
+        const line = withoutComment.trim();
+        if (line.startsWith('- ')) {
+            const val = line.slice(2).trim().replace(/^['\"]|['\"]$/g, '');
+            if (Array.isArray(stack[stack.length - 1].obj)) {
+                stack[stack.length - 1].obj.push(val);
+            }
+            continue;
+        }
+        while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
+            stack.pop();
+        }
+        const parent = stack[stack.length - 1].obj;
+        const colonIdx = line.indexOf(':');
+        if (colonIdx !== -1) {
+            const key = line.slice(0, colonIdx).trim();
+            const rawVal = line.slice(colonIdx + 1).trim();
+            if (rawVal === '') {
+                let isArr = false;
+                for (let j = i + 1; j < lines.length; j++) {
+                    const nlTrim = lines[j].split('#')[0].trim();
+                    if (!nlTrim) continue;
+                    if (nlTrim.startsWith('- ')) isArr = true;
+                    break;
+                }
+                const newObj = isArr ? [] : {};
+                parent[key] = newObj;
+                stack.push({ indent, obj: newObj });
+            } else {
+                let val = rawVal.replace(/^['\"]|['\"]$/g, '');
+                if (val === 'true') val = true;
+                else if (val === 'false') val = false;
+                parent[key] = val;
+            }
+        }
+    }
+    return result;
 }
 
 // Test washer full config

@@ -185,13 +185,15 @@ async function runTests() {
 
     // Test without remote control
     card._hass.states['binary_sensor.washer_remote_control'].state = 'off';
-    let failedWithoutRC = false;
+    global.alert = () => {};
+    let caughtError = null;
     try {
         await card._hcSelectProgram('Cotton');
     } catch (e) {
-        failedWithoutRC = true;
+        caughtError = e;
     }
-    assert.strictEqual(failedWithoutRC, true);
+    assert(caughtError !== null, 'Should reject when remote control is disabled');
+    assert.strictEqual(caughtError.message, 'Remote control not enabled', 'Error message should be exact');
     console.log('  ✔ _hcSelectProgram() rejects without remote control');
 
     console.log('✔ Task 2.4 completed successfully\n');
@@ -222,27 +224,32 @@ async function runTests() {
     // Test start
     const resStart = await card._hcStart();
     assert.strictEqual(resStart.service, 'turn_on');
+    assert.strictEqual(resStart.data.entity_id, 'switch.washer_start');
     console.log('  ✔ _hcStart() works');
 
     // Test pause
     const resPause = await card._hcPause();
     assert.strictEqual(resPause.service, 'turn_on');
+    assert.strictEqual(resPause.data.entity_id, 'switch.washer_pause');
     console.log('  ✔ _hcPause() works');
 
     // Test stop
     const resStop = await card._hcStop();
     assert.strictEqual(resStop.service, 'press');
+    assert.strictEqual(resStop.data.entity_id, 'button.washer_stop');
     console.log('  ✔ _hcStop() works');
 
     // Test toggle from Ready (should start)
     const resToggleStart = await card._hcToggleStartPause();
     assert.strictEqual(resToggleStart.service, 'turn_on');
+    assert.strictEqual(resToggleStart.data.entity_id, 'switch.washer_start');
     console.log('  ✔ _hcToggleStartPause() starts when Ready');
 
     // Test toggle from Run (should pause)
     card._hass.states['sensor.washer_operation_state'].state = 'Run';
     const resTogglePause = await card._hcToggleStartPause();
     assert.strictEqual(resTogglePause.service, 'turn_on');
+    assert.strictEqual(resTogglePause.data.entity_id, 'switch.washer_pause');
     console.log('  ✔ _hcToggleStartPause() pauses when Running');
 
     console.log('✔ Task 2.5 completed successfully\n');

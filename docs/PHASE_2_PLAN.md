@@ -354,7 +354,7 @@ _hcSelectProgram(programName) {
 
 /**
  * Start the appliance program
- * Uses start_entity if configured, otherwise remote_start_entity
+ * Uses start_entity
  * @returns {Promise|undefined}
  */
 _hcStart() {
@@ -363,18 +363,12 @@ _hcStart() {
     const type = this._applianceType;
     const hc = this._config.home_connect?.[type];
     
-    if (hc.start_entity) {
+    if (hc?.start_entity) {
         // Use dedicated start entity
         return this._turnOn(hc.start_entity);
-    } else if (hc.remote_start_entity) {
-        // Fallback: toggle remote_start (some integrations use this)
-        const entity = this._hcEntity("remote_start_entity");
-        if (entity) {
-            return this._toggle(entity.entity_id);
-        }
     }
     
-    console.warn("No start_entity or remote_start_entity configured");
+    console.warn("No start_entity configured");
     return;
 }
 
@@ -446,7 +440,6 @@ _hcToggleStartPause() {
 
 #### Validation
 - [ ] Start works with start_entity
-- [ ] Start falls back to remote_start_entity
 - [ ] Pause works
 - [ ] Stop works
 - [ ] Toggle correctly detects state

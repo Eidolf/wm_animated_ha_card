@@ -134,7 +134,9 @@ _getDoorState() {
     const door = this._hcEntity("door_entity");
     if (!door) return null;
     // binary_sensor: on = open, off = closed
-    return door.state === "on" ? "open" : "closed";
+    if (door.state === "on") return "open";
+    if (door.state === "off") return "closed";
+    return null;
 }
 
 /**
@@ -172,7 +174,9 @@ _getConnectivityState() {
     const conn = this._hcEntity("connectivity_entity");
     if (!conn) return null;
     // binary_sensor: on = connected, off = disconnected
-    return conn.state === "on" ? "connected" : "disconnected";
+    if (conn.state === "on") return "connected";
+    if (conn.state === "off") return "disconnected";
+    return null;
 }
 
 /**

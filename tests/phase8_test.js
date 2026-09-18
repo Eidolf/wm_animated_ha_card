@@ -129,7 +129,7 @@ function runTests() {
 
         assert(!conn.classList.contains('hidden'), 'hcConnectivity must be visible when connectivity entity configured');
         assert(dot.className.includes('connected'),   'dot must have class "connected"');
-        assert(label.textContent.length > 0,          'label must show connected text');
+        assert.strictEqual(label.textContent, card._t.connected, 'label must show connected text');
 
         console.log('  ✔ Connected state: dot=connected, label populated, widget visible');
     }
@@ -157,7 +157,7 @@ function runTests() {
         const label = card._el('hcConnLabel');
 
         assert(dot.className.includes('disconnected'), 'dot must have class "disconnected"');
-        assert(label.textContent.length > 0,           'label must show offline text');
+        assert.strictEqual(label.textContent, card._t.disconnected, 'label must show offline text');
 
         console.log('  ✔ Disconnected state: dot=disconnected, label populated');
     }

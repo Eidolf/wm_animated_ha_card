@@ -22,7 +22,7 @@ theme: auto                # auto | light | dark | ha
 home_connect:
   washer:
     # ── Status ────────────────────────────────────────────────────
-    # Required for any HC functionality
+    # State-display and start/pause toggle input (optional for basic controls)
     operation_state_entity: sensor.washer_operation_state
       # Values: Inactive | Ready | DelayedStart | Run | Pause
       #         ActionRequired | Finished | Error | Aborting
