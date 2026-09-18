@@ -1,0 +1,17 @@
+# Work documents and specifications
+docs/*_SPECIFICATION.md
+docs/*_PLAN.md
+docs/*_FIX.md
+docs/CRITICAL_FINDINGS.md
+docs/IMPLEMENTATION_*.md
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

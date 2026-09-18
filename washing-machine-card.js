@@ -3872,6 +3872,16 @@ class WashingMachineCard extends HTMLElement {
         const running = state === "running";
 
         wrap.classList.toggle("running", running);
+
+        // Door state visualization
+        const type = this._applianceType;
+        const hc = c?.home_connect?.[type];
+        if (hc?.door_entity) {
+            const doorEntity = this._st(hc.door_entity);
+            const doorOpen = doorEntity?.state === "on" || doorEntity?.state === "open" || doorEntity?.state === "Open";
+            wrap.classList.toggle("door-open", doorOpen);
+        }
+
         this._el("name").textContent = c.name || t.name;
 
         // Badge display
