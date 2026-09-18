@@ -1,0 +1,14 @@
+type: custom:washing-machine-card
+appliance_type: washer
+name: Test Washing Machine
+status_entity: binary_sensor.test_washing
+power_entity: sensor.test_power
+plug_entity: switch.test_plug
+notify_entity: automation.test_notify
+last_wash_entity: input_datetime.test_start
+duration_entity: input_number.test_duration
+energy_entity: input_number.test_energy
+cost_entity: input_number.test_cost
+currency: "€"
+language: en
+theme: auto

@@ -1,0 +1,2 @@
+type: custom:washing-machine-card
+status_entity: binary_sensor.test_washing
