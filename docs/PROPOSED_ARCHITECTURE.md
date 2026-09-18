@@ -245,8 +245,18 @@ static DEFAULTS = {
 };
 
 setConfig(config) {
-    if (!config.status_entity && !config.home_connect) {
-        throw new Error("washing-machine-card: status_entity is required in standard mode");
+    const mode = config.mode || "standard";
+    if (mode !== "standard" && mode !== "home_connect") {
+        throw new Error(`washing-machine-card: Unsupported mode "${mode}"`);
+    }
+    if (mode === "standard") {
+        if (!config.status_entity) {
+            throw new Error("washing-machine-card: status_entity is required in standard mode");
+        }
+    } else if (mode === "home_connect") {
+        if (!config.home_connect) {
+            throw new Error("washing-machine-card: home_connect configuration required in home_connect mode");
+        }
     }
     
     this._config = {
@@ -254,13 +264,6 @@ setConfig(config) {
         ...config,
         appliance_type: WashingMachineCard.normalizeType(config.appliance_type),
     };
-    
-    // Validate mode-specific requirements
-    if (this._getMode() === "home_connect") {
-        if (!config.home_connect) {
-            throw new Error("washing-machine-card: home_connect configuration required in home_connect mode");
-        }
-    }
     
     this._uid = `a${Math.random().toString(36).slice(2, 9)}`;
     this._built = false;
@@ -339,7 +342,7 @@ _hasIDos(hc) {
 ```javascript
 // Backward-compatible entity accessor (unchanged)
 _st(entityId) {
-    return entityId ? this._hass.states[entityId] : undefined;
+    return entityId ? this._hass?.states?.[entityId] : undefined;
 }
 
 // New: Home Connect entity accessor
@@ -371,18 +374,24 @@ _getDoorState() {
     const door = this._hcEntity("door_entity");
     if (!door) return null;
     // binary_sensor: on = open, off = closed
-    return door.state === "on" ? "open" : "closed";
+    if (door.state === "on") return "open";
+    if (door.state === "off") return "closed";
+    return null;
 }
 
 _getProgress() {
     const progress = this._hcEntity("progress_entity")?.state;
-    return progress ? parseFloat(progress) : null;
+    if (progress === undefined || progress === null) return null;
+    const val = parseFloat(progress);
+    return Number.isFinite(val) ? val : null;
 }
 
 _getConnectivityState() {
     const conn = this._hcEntity("connectivity_entity");
     if (!conn) return null;
-    return conn.state === "on" ? "connected" : "disconnected";
+    if (conn.state === "on") return "connected";
+    if (conn.state === "off") return "disconnected";
+    return null;
 }
 ```
 
@@ -532,12 +541,8 @@ _hcStart() {
     const type = this._applianceType;
     const hc = this._config.home_connect?.[type];
     
-    if (hc.start_entity) {
+    if (hc?.start_entity) {
         this._toggleEntity(hc.start_entity);
-    } else {
-        // Fallback: Some integrations use remote_start
-        const remoteStart = hc.remote_start_entity;
-        if (remoteStart) this._toggleEntity(remoteStart);
     }
 }
 

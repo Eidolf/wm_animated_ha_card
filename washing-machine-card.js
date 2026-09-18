@@ -184,6 +184,9 @@ class WashingMachineCard extends HTMLElement {
 
     setConfig(config) {
         const mode = config.mode || "standard";
+        if (mode !== "standard" && mode !== "home_connect") {
+            throw new Error(`washing-machine-card: Unsupported mode "${mode}"`);
+        }
         if (mode === "standard") {
             if (!config.status_entity) {
                 throw new Error("washing-machine-card: status_entity is required in standard mode");
@@ -629,7 +632,9 @@ class WashingMachineCard extends HTMLElement {
     _getDoorState() {
         const door = this._hcEntity("door_entity");
         if (!door) return null;
-        return door.state === "on" ? "open" : "closed";
+        if (door.state === "on") return "open";
+        if (door.state === "off") return "closed";
+        return null;
     }
 
     /**
@@ -666,7 +671,9 @@ class WashingMachineCard extends HTMLElement {
     _getConnectivityState() {
         const conn = this._hcEntity("connectivity_entity");
         if (!conn) return null;
-        return conn.state === "on" ? "connected" : "disconnected";
+        if (conn.state === "on") return "connected";
+        if (conn.state === "off") return "disconnected";
+        return null;
     }
 
     /**

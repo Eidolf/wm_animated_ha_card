@@ -134,7 +134,9 @@ _getDoorState() {
     const door = this._hcEntity("door_entity");
     if (!door) return null;
     // binary_sensor: on = open, off = closed
-    return door.state === "on" ? "open" : "closed";
+    if (door.state === "on") return "open";
+    if (door.state === "off") return "closed";
+    return null;
 }
 
 /**
@@ -143,9 +145,9 @@ _getDoorState() {
  */
 _getProgress() {
     const progress = this._hcEntity("progress_entity")?.state;
-    if (!progress) return null;
+    if (progress === undefined || progress === null) return null;
     const val = parseFloat(progress);
-    return isNaN(val) ? null : val;
+    return Number.isFinite(val) ? val : null;
 }
 
 /**
@@ -172,7 +174,9 @@ _getConnectivityState() {
     const conn = this._hcEntity("connectivity_entity");
     if (!conn) return null;
     // binary_sensor: on = connected, off = disconnected
-    return conn.state === "on" ? "connected" : "disconnected";
+    if (conn.state === "on") return "connected";
+    if (conn.state === "off") return "disconnected";
+    return null;
 }
 
 /**

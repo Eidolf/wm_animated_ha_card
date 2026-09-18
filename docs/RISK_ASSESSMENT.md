@@ -9,7 +9,7 @@
 
 ## EXECUTIVE SUMMARY
 
-This document provides a comprehensive risk assessment for the proposed Home Connect integration. The analysis evaluates **32 distinct risk scenarios** across five categories, with mitigation strategies for each.
+This document provides a comprehensive risk assessment for the proposed Home Connect integration. The analysis evaluates **18 distinct risk scenarios** across five categories, with mitigation strategies for each.
 
 **Overall Risk Level:** 🟡 **MEDIUM**
 
@@ -701,7 +701,7 @@ _validateHomeConnectConfig() {
     // Check entity existence
     const missing = [];
     Object.entries(config).forEach(([key, entityId]) => {
-        if (entityId && !this._hass.states[entityId]) {
+        if (key.endsWith("_entity") && typeof entityId === "string" && !this._hass.states[entityId]) {
             missing.push({ key, entityId });
         }
     });
@@ -1041,6 +1041,9 @@ _hcSelectProgram(program) {
 **2. Error Handling:**
 ```javascript
 async _hcSelectProgram(program) {
+    const type = this._applianceType;
+    const entityId = this._config.home_connect?.[type]?.program_selector_entity;
+    if (!entityId) return;
     try {
         await this._selectOption(entityId, program);
         // Success feedback

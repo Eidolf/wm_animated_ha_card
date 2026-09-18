@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
-const { execSync } = require('child_process');
 
 // Mock environment
 global.HTMLElement = class HTMLElement {};
@@ -27,6 +26,12 @@ card.setConfig({ status_entity: 'binary_sensor.test' });
 assert.strictEqual(card._hcEntity('power_entity'), undefined, 
     '_hcEntity should return undefined in standard mode');
 console.log('  ✔ Returns undefined in standard mode');
+
+// Unsupported mode should throw
+assert.throws(() => {
+    card.setConfig({ mode: 'invalid_mode', status_entity: 'binary_sensor.test' });
+}, /Unsupported mode "invalid_mode"/, 'Should reject unsupported mode');
+console.log('  ✔ Unsupported mode rejected');
 
 // HC mode without hass should return undefined
 card.setConfig({
@@ -143,15 +148,27 @@ console.log('  ✔ _getRemoteStartState() works');
 assert.strictEqual(card._getChildLockState(), false, 'Should get child lock state');
 console.log('  ✔ _getChildLockState() works');
 
-// Test door open state
+// Test door states: on -> open, off -> closed, other -> null
 card._hass.states['binary_sensor.washer_door'].state = 'on';
 assert.strictEqual(card._getDoorState(), 'open', 'Door should be open');
-console.log('  ✔ Door state correctly maps on=open');
+card._hass.states['binary_sensor.washer_door'].state = 'off';
+assert.strictEqual(card._getDoorState(), 'closed', 'Door should be closed');
+card._hass.states['binary_sensor.washer_door'].state = 'unavailable';
+assert.strictEqual(card._getDoorState(), null, 'Unavailable door should return null');
+card._hass.states['binary_sensor.washer_door'].state = 'unknown';
+assert.strictEqual(card._getDoorState(), null, 'Unknown door should return null');
+console.log('  ✔ Door state correctly maps on=open, off=closed, other=null');
 
-// Test disconnected connectivity state
+// Test connectivity states: on -> connected, off -> disconnected, other -> null
 card._hass.states['binary_sensor.washer_connected'].state = 'off';
 assert.strictEqual(card._getConnectivityState(), 'disconnected', 'Connectivity should be disconnected');
-console.log('  ✔ Connectivity state correctly maps off=disconnected');
+card._hass.states['binary_sensor.washer_connected'].state = 'on';
+assert.strictEqual(card._getConnectivityState(), 'connected', 'Connectivity should be connected');
+card._hass.states['binary_sensor.washer_connected'].state = 'unavailable';
+assert.strictEqual(card._getConnectivityState(), null, 'Unavailable connectivity should return null');
+card._hass.states['binary_sensor.washer_connected'].state = 'unknown';
+assert.strictEqual(card._getConnectivityState(), null, 'Unknown connectivity should return null');
+console.log('  ✔ Connectivity state correctly maps on=connected, off=disconnected, other=null');
 
 // Test null returns when entities missing
 card.setConfig({
@@ -180,9 +197,51 @@ console.log('✔ Task 1.2 completed successfully\n');
 console.log('Testing Task 1.5: Full configuration loading');
 
 function parseYamlFile(filePath) {
-    const pyCmd = `python3 -c "import yaml, json, sys; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" "${filePath}"`;
-    const jsonStr = execSync(pyCmd).toString();
-    return JSON.parse(jsonStr);
+    const yamlText = fs.readFileSync(filePath, 'utf8');
+    const result = {};
+    const lines = yamlText.split('\n');
+    let stack = [{ indent: -1, obj: result }];
+    for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i];
+        const withoutComment = rawLine.split('#')[0];
+        if (!withoutComment.trim()) continue;
+        const indent = rawLine.search(/\S/);
+        const line = withoutComment.trim();
+        if (line.startsWith('- ')) {
+            const val = line.slice(2).trim().replace(/^['\"]|['\"]$/g, '');
+            if (Array.isArray(stack[stack.length - 1].obj)) {
+                stack[stack.length - 1].obj.push(val);
+            }
+            continue;
+        }
+        while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
+            stack.pop();
+        }
+        const parent = stack[stack.length - 1].obj;
+        const colonIdx = line.indexOf(':');
+        if (colonIdx !== -1) {
+            const key = line.slice(0, colonIdx).trim();
+            const rawVal = line.slice(colonIdx + 1).trim();
+            if (rawVal === '') {
+                let isArr = false;
+                for (let j = i + 1; j < lines.length; j++) {
+                    const nlTrim = lines[j].split('#')[0].trim();
+                    if (!nlTrim) continue;
+                    if (nlTrim.startsWith('- ')) isArr = true;
+                    break;
+                }
+                const newObj = isArr ? [] : {};
+                parent[key] = newObj;
+                stack.push({ indent, obj: newObj });
+            } else {
+                let val = rawVal.replace(/^['\"]|['\"]$/g, '');
+                if (val === 'true') val = true;
+                else if (val === 'false') val = false;
+                parent[key] = val;
+            }
+        }
+    }
+    return result;
 }
 
 // Test washer full config

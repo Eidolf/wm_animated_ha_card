@@ -370,12 +370,16 @@ _getSelectedProgram() {
 _getDoorState() {
     const door = this._hcEntity("door_entity");
     if (!door) return null;
-    return door.state === "on" ? "open" : "closed";
+    if (door.state === "on") return "open";
+    if (door.state === "off") return "closed";
+    return null;
 }
 
 _getProgress() {
     const progress = this._hcEntity("progress_entity")?.state;
-    return progress ? parseFloat(progress) : null;
+    if (progress === undefined || progress === null) return null;
+    const val = parseFloat(progress);
+    return Number.isFinite(val) ? val : null;
 }
 
 _getRemainingTime() {
@@ -389,7 +393,9 @@ _getEndTime() {
 _getConnectivityState() {
     const conn = this._hcEntity("connectivity_entity");
     if (!conn) return null;
-    return conn.state === "on" ? "connected" : "disconnected";
+    if (conn.state === "on") return "connected";
+    if (conn.state === "off") return "disconnected";
+    return null;
 }
 
 _getRemoteControlState() {
