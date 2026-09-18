@@ -4517,51 +4517,6 @@ class WashingMachineCardEditor extends HTMLElement {
 
         const editor = root.getElementById("editor");
 
-        const modeInfo = document.createElement("div");
-        modeInfo.id = "modeInfo";
-        modeInfo.className = "mode-info hidden";
-        modeInfo.innerHTML = `
-            <style>
-                .mode-info {
-                    margin: 4px 0 12px;
-                    padding: 12px 16px;
-                    background: var(--primary-color, #2f80ed);
-                    color: var(--text-primary-color, #fff);
-                    border-radius: 8px;
-                    display: flex;
-                    gap: 12px;
-                    align-items: flex-start;
-                }
-                .mode-info.hidden {
-                    display: none;
-                }
-                .mode-info ha-icon {
-                    --mdc-icon-size: 24px;
-                    flex-shrink: 0;
-                    margin-top: 2px;
-                }
-                .mode-info-text {
-                    flex: 1;
-                    font-size: 13px;
-                    line-height: 1.4;
-                }
-                .mode-info code {
-                    background: rgba(0,0,0,0.2);
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                    font-family: monospace;
-                }
-            </style>
-            <ha-icon icon="mdi:information-outline"></ha-icon>
-            <div class="mode-info-text">
-                <strong>Home Connect Mode Selected</strong><br>
-                Additional configuration required. Please edit the YAML to add the 
-                <code>home_connect</code> configuration object.<br>
-                See example configurations in <code>test-configs/</code> directory.
-            </div>
-        `;
-        editor.appendChild(modeInfo);
-
         const sections = WashingMachineCardEditor._sections;
 
         sections.forEach((section) => {
@@ -4593,29 +4548,18 @@ class WashingMachineCardEditor extends HTMLElement {
         this._syncValues();
     }
 
-    _updateModeInfo() {
-        const mode = this._config?.mode || "standard";
-        const hasDevice = !!this._config?.device_id || !!this._config?.home_connect;
-        const modeInfo = this.shadowRoot?.getElementById("modeInfo");
-        if (modeInfo) {
-            modeInfo.classList.toggle("hidden", mode !== "home_connect" || hasDevice);
-        }
-    }
-
     _isChoiceField(field) {
         return field.kind === "select" || field.kind === "boolean";
     }
 
     _buildField(field) {
-        // CHECK VISIBILITY FIRST
-        if (field.visibleWhen && !field.visibleWhen(this._config)) {
-            const hidden = document.createElement("div");
-            hidden.style.display = "none";
-            return hidden;
-        }
-
         const wrap = document.createElement("div");
         wrap.className = "wm-field" + (field.kind === "boolean" ? " wm-field--row" : "");
+
+        // Apply initial visibility
+        if (field.visibleWhen && !field.visibleWhen(this._config)) {
+            wrap.style.display = "none";
+        }
 
         if (field.kind === "boolean") {
             const textCol = document.createElement("div");
@@ -4720,7 +4664,6 @@ class WashingMachineCardEditor extends HTMLElement {
                 }
             }
         }
-        this._updateModeInfo();
     }
 
     _valueChanged(field, value) {
