@@ -1440,23 +1440,48 @@ class WashingMachineCard extends HTMLElement {
           </linearGradient>
         </defs>
         ${this._svgChassis(u)}
-        <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
-        <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
-        <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
-        <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
+
+        <!-- Drum interior (visible when door is open) -->
+        <g class="drum-interior" id="drumInterior">
+          <circle cx="110" cy="128" r="46" fill="#1b2537"/>
+          <g class="drum-pattern" opacity=".6">
+            <circle cx="98"  cy="116" r="2.2" fill="#3a4a63"/>
+            <circle cx="122" cy="116" r="2.2" fill="#3a4a63"/>
+            <circle cx="92"  cy="128" r="2.2" fill="#3a4a63"/>
+            <circle cx="128" cy="128" r="2.2" fill="#3a4a63"/>
+            <circle cx="98"  cy="140" r="2.2" fill="#3a4a63"/>
+            <circle cx="122" cy="140" r="2.2" fill="#3a4a63"/>
+          </g>
+        </g>
+
+        <!-- Laundry (inside drum) -->
         <g class="laundry">
           <circle cx="100" cy="124" r="14"   fill="#ea4335"/>
           <circle cx="119" cy="131" r="13.2" fill="#4285f4"/>
           <circle cx="110" cy="115" r="11"   fill="#fbbc05"/>
           <circle cx="103" cy="135" r="8"    fill="#f28b82" opacity=".9"/>
         </g>
-        <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
-                 transform="rotate(-24 94 106)"/>
-        <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+
+        <!-- Progress arcs -->
         <g class="arcs">
           <circle cx="110" cy="128" r="53" fill="none" stroke="#2f80ed" stroke-width="5.5"
                   stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
         </g>
+
+        <!-- Door group with transform origin at left hinge point (80px 128px) -->
+        <g class="door-group" id="doorGroup">
+          <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
+          <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
+          <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
+          <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
+          <!-- Door handle -->
+          <rect x="156" y="124" width="10" height="7" rx="3.5" fill="#b0bac6"/>
+          <!-- Glass highlight reflection -->
+          <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
+                   transform="rotate(-24 94 106)"/>
+          <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+        </g>
+
         ${isHc ? `
           <!-- Home Connect Interactive Overlays -->
           <rect class="hc-control" id="hcProgramBtn" x="42" y="20" width="34" height="13" rx="4"
@@ -2118,6 +2143,28 @@ class WashingMachineCard extends HTMLElement {
           .running .mw-glow, .running .mw-wave, .running .mw-rim,
           .running .mw-mug, .running .mw-frame, .running .mw-dots,
           .running .badge .b-dot, .running .ring-anim { animation: none; }
+          .door-group { transition: none !important; }
+        }
+
+        .door-group {
+          transform-box: view-box;
+          transform-origin: 80px 128px;
+          transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .door-group.door-open {
+          transform: rotate(-85deg);
+        }
+        .door-group.door-closed {
+          transform: rotate(0deg);
+        }
+        .drum-interior {
+          transition: opacity 0.4s ease-in-out;
+          opacity: 0;
+        }
+        .door-group.door-open ~ .drum-interior,
+        .door-open ~ .drum-interior,
+        #doorGroup.door-open ~ #drumInterior {
+          opacity: 1;
         }
 
         .panel {
@@ -2764,6 +2811,26 @@ class WashingMachineCard extends HTMLElement {
             const on = this._st(c.plug_entity)?.state === "on";
             this._el("plugBtn").classList.remove("hidden");
             this._el("plugBtn").classList.toggle("on", on);
+        }
+
+        // Animate door state
+        this._updateDoorAnimation();
+    }
+
+    _updateDoorAnimation() {
+        if (!this._isHomeConnectMode()) return;
+        const doorGroup = this._el("doorGroup");
+        const drumInterior = this._el("drumInterior");
+        if (!doorGroup) return;
+
+        const doorState = this._getDoorState();
+        const isOpen = doorState === "open";
+
+        doorGroup.classList.toggle("door-open", isOpen);
+        doorGroup.classList.toggle("door-closed", !isOpen);
+
+        if (drumInterior) {
+            drumInterior.style.opacity = isOpen ? "1" : "0";
         }
     }
 }
