@@ -127,8 +127,8 @@ assert.strictEqual(card._getProgramIcon('CustomProgram'), '🔄');
 console.log('  ✔ _getProgramIcon() maps program names to icons');
 
 assert.strictEqual(card._translateProgram('Laundry.Washer.Program.Cotton'), 'Cotton');
-assert.strictEqual(card._translateProgram('EasyCare'), 'EasyCare');
-console.log('  ✔ _translateProgram() strips prefixes');
+assert.strictEqual(card._translateProgram('EasyCare'), 'Easy Care');
+console.log('  ✔ _translateProgram() strips prefixes and uses locale map');
 
 // ========================================
 // Task 4.3: Dialog & Selection Interaction
