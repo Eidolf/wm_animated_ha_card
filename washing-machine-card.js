@@ -75,6 +75,11 @@ class WashingMachineCard extends HTMLElement {
             silence_on_demand: "Silence on Demand",
             brilliant_dry: "BrilliantDry",
             no_options_available: "No options available",
+            connected: "Connected",
+            disconnected: "Offline",
+            active_program: "Program",
+            salt_low: "Salt Low",
+            rinseaid_low: "Rinse Aid Low",
             decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
@@ -107,6 +112,11 @@ class WashingMachineCard extends HTMLElement {
             silence_on_demand: "Тихий режим",
             brilliant_dry: "Экстра сушка",
             no_options_available: "Нет доступных опций",
+            connected: "Подключено",
+            disconnected: "Не в сети",
+            active_program: "Программа",
+            salt_low: "Соль заканчивается",
+            rinseaid_low: "Ополаскиватель заканчивается",
             decimal: ",",
             types: {
                 washer: { name: "Стиральная машина", state_running: "Идёт стирка" },
@@ -139,6 +149,11 @@ class WashingMachineCard extends HTMLElement {
             silence_on_demand: "Silence on Demand",
             brilliant_dry: "BrilliantDry",
             no_options_available: "Keine Optionen verfügbar",
+            connected: "Verbunden",
+            disconnected: "Offline",
+            active_program: "Programm",
+            salt_low: "Salz leer",
+            rinseaid_low: "Klarspüler leer",
             decimal: ",",
             types: {
                 washer: { name: "Waschmaschine", state_running: "Wäsche läuft" },
@@ -170,6 +185,11 @@ class WashingMachineCard extends HTMLElement {
             silence_on_demand: "Silence à la demande",
             brilliant_dry: "Séchage brillant",
             no_options_available: "Aucune option disponible",
+            connected: "Connecté",
+            disconnected: "Hors ligne",
+            active_program: "Programme",
+            salt_low: "Sel bas",
+            rinseaid_low: "Liquide de rinçage bas",
             decimal: ",",
             types: {
                 washer: { name: "Lave-linge", state_running: "Lavage en cours" },
@@ -2480,6 +2500,116 @@ class WashingMachineCard extends HTMLElement {
           color: var(--wm-muted, #718096);
           font-size: 13px;
         }
+
+        /* Phase 8: Connectivity indicator */
+        .hc-connectivity {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 8px;
+          background: var(--wm-panel-bg);
+          border: 1px solid var(--wm-panel-border);
+          white-space: nowrap;
+        }
+        .hc-conn-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          transition: background 0.3s, box-shadow 0.3s;
+        }
+        .hc-conn-dot.connected {
+          background: #22b263;
+          box-shadow: 0 0 0 2px rgba(34, 178, 99, 0.22);
+          animation: hc-pulse 2.5s ease-in-out infinite;
+        }
+        .hc-conn-dot.disconnected {
+          background: #d93025;
+          box-shadow: 0 0 0 2px rgba(217, 48, 37, 0.22);
+        }
+        .hc-conn-dot.unknown {
+          background: #8a95a3;
+        }
+        .hc-conn-label { color: var(--wm-muted); }
+        @keyframes hc-pulse {
+          0%, 100% { box-shadow: 0 0 0 2px rgba(34,178,99,0.22); }
+          50% { box-shadow: 0 0 0 5px rgba(34,178,99,0.08); }
+        }
+
+        /* Phase 8: Program display panel */
+        .hc-program-panel {
+          margin-top: 10px;
+          padding: 10px 12px;
+          background: var(--wm-panel-bg);
+          border: 1px solid var(--wm-panel-border);
+          border-radius: 12px;
+        }
+        .hc-program-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          font-size: 12px;
+        }
+        .hc-program-label {
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          color: var(--wm-label);
+          text-transform: uppercase;
+          font-size: 10px;
+        }
+        .hc-program-value {
+          font-size: 13px;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .hc-program-progress {
+          height: 4px;
+          border-radius: 3px;
+          background: var(--wm-bar-bg);
+          margin-top: 8px;
+          overflow: hidden;
+        }
+        .hc-progress-fill {
+          height: 100%;
+          border-radius: 3px;
+          background: var(--wm-accent);
+          transition: width 0.6s ease;
+        }
+
+        /* Phase 8: Feature chips */
+        .hc-features {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 10px;
+        }
+        .hc-chip {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 12px;
+          background: var(--wm-badge-bg, rgba(47,128,237,0.1));
+          color: var(--wm-badge-fg, #2f80ed);
+          white-space: nowrap;
+          border: 1px solid rgba(47,128,237,0.2);
+          transition: opacity 0.3s;
+        }
+        .hc-chip.warning {
+          background: rgba(217,144,48,0.13);
+          color: #b87800;
+          border-color: rgba(217,144,48,0.25);
+        }
+        .hc-chip.active {
+          background: rgba(34,178,99,0.13);
+          color: #1a8f50;
+          border-color: rgba(34,178,99,0.25);
+        }
       </style>
 
       <ha-card>
@@ -2489,6 +2619,10 @@ class WashingMachineCard extends HTMLElement {
             <div class="h-title" id="name"></div>
             <div class="badge"><span class="b-dot"></span><span id="badgeText"></span></div>
             <div class="h-spacer"></div>
+            <div class="hc-connectivity hidden" id="hcConnectivity">
+              <div class="hc-conn-dot unknown" id="hcConnDot"></div>
+              <span class="hc-conn-label" id="hcConnLabel"></span>
+            </div>
             <div class="h-btn hidden" id="optionsBtn" title="${t.tip_options_btn}">
               <ha-icon icon="mdi:tune-variant"></ha-icon>
             </div>
@@ -2526,6 +2660,16 @@ class WashingMachineCard extends HTMLElement {
                 <span class="st-power" id="powerValue">—</span>
               </div>
               <div class="bar hidden" id="bar"><div class="bar-fill" id="barFill"></div></div>
+              <div class="hc-program-panel hidden" id="hcProgramPanel">
+                <div class="hc-program-row">
+                  <span class="hc-program-label" id="hcProgramLabel"></span>
+                  <span class="hc-program-value" id="hcProgramValue">—</span>
+                </div>
+                <div class="hc-program-progress hidden" id="hcProgressBar">
+                  <div class="hc-progress-fill" id="hcProgressFill"></div>
+                </div>
+              </div>
+              <div class="hc-features hidden" id="hcFeatures"></div>
             </div>
           </div>
 
@@ -3147,6 +3291,129 @@ class WashingMachineCard extends HTMLElement {
 
         // Animate door state
         this._updateDoorAnimation();
+
+        // Phase 8: Status indicators
+        this._updateStatusIndicators();
+    }
+
+    /**
+     * Phase 8: Update connectivity indicator in header
+     */
+    _updateConnectivity() {
+        const connectivity = this._el("hcConnectivity");
+        const dot = this._el("hcConnDot");
+        const label = this._el("hcConnLabel");
+        if (!connectivity) return;
+
+        const caps = this._getApplianceCapabilities();
+        if (!caps.hasConnectivity) {
+            connectivity.classList.add("hidden");
+            return;
+        }
+
+        connectivity.classList.remove("hidden");
+        const connState = this._getConnectivityState();
+        const t = this._t;
+
+        if (connState === "connected") {
+            dot.className = "hc-conn-dot connected";
+            label.textContent = t.connected || "Connected";
+        } else if (connState === "disconnected") {
+            dot.className = "hc-conn-dot disconnected";
+            label.textContent = t.disconnected || "Offline";
+        } else {
+            dot.className = "hc-conn-dot unknown";
+            label.textContent = "";
+        }
+    }
+
+    /**
+     * Phase 8: Update active program display panel
+     */
+    _updateProgramDisplay() {
+        const panel = this._el("hcProgramPanel");
+        if (!panel) return;
+
+        const activeProgram = this._getActiveProgram();
+        if (!activeProgram) {
+            panel.classList.add("hidden");
+            return;
+        }
+
+        panel.classList.remove("hidden");
+        const label = this._el("hcProgramLabel");
+        const value = this._el("hcProgramValue");
+        const progressBar = this._el("hcProgressBar");
+        const progressFill = this._el("hcProgressFill");
+
+        if (label) label.textContent = this._t.active_program || "Program";
+        if (value) value.textContent = this._translateProgram(activeProgram);
+
+        const progress = this._getProgress();
+        if (progressBar && progressFill) {
+            if (progress !== null) {
+                progressBar.classList.remove("hidden");
+                progressFill.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+            } else {
+                progressBar.classList.add("hidden");
+            }
+        }
+    }
+
+    /**
+     * Phase 8: Update feature chips (i-Dos, consumables, active options)
+     */
+    _updateFeatureChips() {
+        const container = this._el("hcFeatures");
+        if (!container) return;
+
+        const t = this._t;
+        const chips = [];
+
+        // i-Dos indicators (washer)
+        const idos1Active = this._hcEntity("idos1_active_entity")?.state === "on";
+        const idos1Low = this._hcEntity("idos1_low_entity")?.state === "on";
+        const idos2Active = this._hcEntity("idos2_active_entity")?.state === "on";
+        const idos2Low = this._hcEntity("idos2_low_entity")?.state === "on";
+
+        if (idos1Active)
+            chips.push(`<div class="hc-chip ${idos1Low ? "warning" : "active"}">i-Dos 1${idos1Low ? " ⚠" : ""}</div>`);
+        if (idos2Active)
+            chips.push(`<div class="hc-chip ${idos2Low ? "warning" : "active"}">i-Dos 2${idos2Low ? " ⚠" : ""}</div>`);
+
+        // Dishwasher consumables
+        const saltLow = this._hcEntity("salt_low_entity")?.state === "on";
+        const rinseaidLow = this._hcEntity("rinseaid_low_entity")?.state === "on";
+        if (saltLow)
+            chips.push(`<div class="hc-chip warning">🧂 ${t.salt_low || "Salt Low"}</div>`);
+        if (rinseaidLow)
+            chips.push(`<div class="hc-chip warning">💧 ${t.rinseaid_low || "Rinse Aid Low"}</div>`);
+
+        // Active feature options
+        const featureMap = [
+            ["hygiene_plus_entity",       "🦠 " + (t.hygiene_plus      || "Hygiene+")],
+            ["intensive_zone_entity",     "💪 " + (t.intensive_zone    || "Intensive")],
+            ["variospeed_plus_entity",    "⚡ " + (t.variospeed_plus   || "Vario+")],
+            ["silence_on_demand_entity",  "🔇 " + (t.silence_on_demand || "Silence")],
+            ["brilliant_dry_entity",      "✨ " + (t.brilliant_dry     || "BrilliantDry")],
+        ];
+        for (const [key, label] of featureMap) {
+            if (this._hcEntity(key)?.state === "on")
+                chips.push(`<div class="hc-chip active">${label}</div>`);
+        }
+
+        container.innerHTML = chips.join("");
+        container.classList.toggle("hidden", chips.length === 0);
+    }
+
+    /**
+     * Phase 8: Orchestrate all HC status indicator updates
+     */
+    _updateStatusIndicators() {
+        if (!this._isHomeConnectMode()) return;
+        this._updateConnectivity();
+        this._updateProgramDisplay();
+        this._updateFeatureChips();
     }
 
     _updateDoorAnimation() {
