@@ -499,7 +499,7 @@ class WashingMachineCard extends HTMLElement {
             'active_program_entity': /_active_program$/,
             'selected_program_entity': /_selected_program$/,
             'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
-            'remaining_time_entity': /_remaining_time$/,
+            'remaining_time_entity': /_(remaining|verbleibende)(_program)?_(time|zeit)$/,
             'end_time_entity': /_(finish_time|end_time)$/,
 
             // Control entities
@@ -543,7 +543,7 @@ class WashingMachineCard extends HTMLElement {
             'active_program_entity': /_active_program$/,
             'selected_program_entity': /_selected_program$/,
             'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
-            'remaining_time_entity': /_remaining_time$/,
+            'remaining_time_entity': /_(remaining|verbleibende)(_program)?_(time|zeit)$/,
             'end_time_entity': /_(finish_time|end_time)$/,
 
             // Control entities
@@ -1901,11 +1901,13 @@ class WashingMachineCard extends HTMLElement {
      * Shows detergent fill levels when i-Dos entities are available
      */
     _renderIDosPanel() {
+        const mode = this._getMode();
+        const isHc = mode === "home_connect";
         const type = this._applianceType;
         const hc = this._config?.home_connect?.[type];
 
-        // Only for washers with i-Dos
-        if (type !== 'washer' || !this._hasIDos(hc)) {
+        // Only for washers with i-Dos IN HOME CONNECT MODE
+        if (!isHc || type !== 'washer' || !this._hasIDos(hc)) {
             return `
       <rect x="42" y="20" width="34" height="13" rx="4" fill="#cfd7e0"/>
       <rect x="42" y="20" width="34" height="6"  rx="3" fill="#dee5ec"/>`;
@@ -2151,25 +2153,38 @@ class WashingMachineCard extends HTMLElement {
           </g>
         </g>
 
-        <!-- Laundry (inside drum) -->
-        <g class="laundry">
-          <circle cx="100" cy="124" r="14"   fill="#ea4335"/>
-          <circle cx="119" cy="131" r="13.2" fill="#4285f4"/>
-          <circle cx="110" cy="115" r="11"   fill="#fbbc05"/>
-          <circle cx="103" cy="135" r="8"    fill="#f28b82" opacity=".9"/>
-        </g>
-
-        <!-- Progress arcs -->
-        <g class="arcs">
-          <circle cx="110" cy="128" r="53" fill="none" stroke="#2f80ed" stroke-width="5.5"
-                  stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
-        </g>
-
         <!-- Door group with transform origin at left hinge point (80px 128px) -->
         <g class="door-group" id="doorGroup">
           <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
           <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
           <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
+          
+          <!-- Drum (rotating drum pattern) -->
+          <g class="drum">
+            <circle cx="110" cy="128" r="36" fill="none" stroke="#8a7a6a" stroke-width="1.2" opacity=".55"/>
+            <g fill="#c4b5a5" opacity=".55">
+              <circle cx="92" cy="112" r="1.6"/><circle cx="104" cy="108" r="1.6"/>
+              <circle cx="116" cy="108" r="1.6"/><circle cx="128" cy="112" r="1.6"/>
+              <circle cx="88" cy="124" r="1.6"/><circle cx="132" cy="124" r="1.6"/>
+              <circle cx="90" cy="138" r="1.6"/><circle cx="130" cy="138" r="1.6"/>
+              <circle cx="100" cy="146" r="1.6"/><circle cx="120" cy="146" r="1.6"/>
+              <circle cx="110" cy="150" r="1.6"/>
+            </g>
+          </g>
+          
+          <!-- Laundry (tumbling clothes inside drum) -->
+          <g class="laundry">
+            <ellipse cx="102" cy="126" rx="15" ry="10" fill="#7aa2e3" transform="rotate(-18 102 126)"/>
+            <ellipse cx="120" cy="134" rx="13" ry="9" fill="#e8e0d4" transform="rotate(22 120 134)"/>
+            <ellipse cx="112" cy="118" rx="10" ry="7" fill="#d4a574" transform="rotate(-8 112 118)"/>
+          </g>
+          
+          <!-- Progress arcs (spinning around drum) -->
+          <g class="arcs">
+            <circle cx="110" cy="128" r="53" fill="none" stroke="#f0a04b" stroke-width="5.5"
+                    stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
+          </g>
+          
           <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
           <!-- Door handle -->
           <rect x="156" y="124" width="10" height="7" rx="3.5" fill="#b0bac6"/>
@@ -2180,16 +2195,16 @@ class WashingMachineCard extends HTMLElement {
         </g>
 
         ${isHc ? `
-          <!-- Home Connect Interactive Overlays -->
-          <rect class="hc-control" id="hcProgramBtn" x="42" y="20" width="34" height="13" rx="4"
+          <!-- Home Connect Interactive Overlays - ENLARGED for entire panel areas -->
+          <rect class="hc-control" id="hcProgramBtn" x="40" y="18" width="40" height="20" rx="4"
                 fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_program_btn || "Select Program"}</title>
           </rect>
-          <rect class="hc-control" id="hcStartBtn" x="88" y="18" width="70" height="18" rx="9"
+          <rect class="hc-control" id="hcStartBtn" x="85" y="15" width="78" height="24" rx="9"
                 fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_start_btn || "Start / Pause"}</title>
           </rect>
-          <circle class="hc-control" id="hcPowerBtn" cx="176" cy="27" r="10"
+          <circle class="hc-control" id="hcPowerBtn" cx="176" cy="27" r="13"
                   fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_power_btn || "Power"}</title>
           </circle>
