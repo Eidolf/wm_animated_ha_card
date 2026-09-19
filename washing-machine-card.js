@@ -37,7 +37,7 @@ class WashingMachineCard extends HTMLElement {
             state_running: "Washing", state_idle: "Idle", state_off: "Off", state_nodata: "No data",
             state_finished: "Finished", state_paused: "Paused", state_ready: "Ready",
             state_delayed: "Delayed start", state_error: "Error", state_action_required: "Action required",
-            ring_running: "ELAPSED", ring_idle: "IDLE", ring_off: "OFF",
+            ring_running: "ELAPSED", ring_remaining: "REMAINING", ring_idle: "IDLE", ring_off: "OFF",
             ring_ready: "READY", ring_paused: "PAUSED",
             power: "Current power", current: "Current draw",
             last_cycle: "LAST CYCLE", start: "START", duration: "DURATION",
@@ -131,7 +131,7 @@ class WashingMachineCard extends HTMLElement {
             state_running: "Идёт стирка", state_idle: "Ожидание", state_off: "Выключено", state_nodata: "Нет данных",
             state_finished: "Завершено", state_paused: "На паузе", state_ready: "Готово",
             state_delayed: "Отложенный старт", state_error: "Ошибка", state_action_required: "Требуется действие",
-            ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_off: "ВЫКЛ",
+            ring_running: "ПРОШЛО", ring_remaining: "ОСТАЛОСЬ", ring_idle: "ОЖИДАНИЕ", ring_off: "ВЫКЛ",
             ring_ready: "ГОТОВО", ring_paused: "ПАУЗА",
             power: "Текущая мощность", current: "Текущий ток",
             last_cycle: "ПОСЛЕДНИЙ ЦИКЛ", start: "СТАРТ", duration: "ДЛИТЕЛЬН.",
@@ -223,7 +223,7 @@ class WashingMachineCard extends HTMLElement {
             state_running: "Läuft", state_idle: "Bereit", state_off: "Aus", state_nodata: "Keine Daten",
             state_finished: "Fertig", state_paused: "Pausiert", state_ready: "Bereit",
             state_delayed: "Verzögerter Start", state_error: "Fehler", state_action_required: "Aktion erforderlich",
-            ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_off: "AUS",
+            ring_running: "VERGANGEN", ring_remaining: "VERBLEIBEND", ring_idle: "BEREIT", ring_off: "AUS",
             ring_ready: "BEREIT", ring_paused: "PAUSE",
             power: "Aktuelle Leistung", current: "Stromaufnahme",
             last_cycle: "LETZTER DURCHGANG", start: "START", duration: "DAUER",
@@ -315,7 +315,7 @@ class WashingMachineCard extends HTMLElement {
             state_running: "Lavage en cours", state_idle: "En pause", state_off: "Éteint", state_nodata: "Pas de données",
             state_finished: "Terminé", state_paused: "En pause", state_ready: "Prêt",
             state_delayed: "Départ différé", state_error: "Erreur", state_action_required: "Action requise",
-            ring_running: "ÉCOULÉ", ring_idle: "PAUSE", ring_off: "ÉTEINT",
+            ring_running: "ÉCOULÉ", ring_remaining: "RESTANT", ring_idle: "PAUSE", ring_off: "ÉTEINT",
             ring_ready: "PRÊT", ring_paused: "PAUSE",
             power: "Puissance actuelle", current: "Courant instantané",
             last_cycle: "DERNIER CYCLE", start: "DÉPART", duration: "DURÉE",
@@ -729,7 +729,7 @@ class WashingMachineCard extends HTMLElement {
         this._timer = setInterval(() => {
             if (this._hass && this._built && this._applianceState() !== "off")
                 this._update();
-        }, 30000);
+        }, 3000);
     }
 
     disconnectedCallback() {
@@ -1931,21 +1931,25 @@ class WashingMachineCard extends HTMLElement {
 
         return `
       <!-- i-Dos Panel Background -->
-      <rect x="42" y="20" width="34" height="13" rx="4" fill="#f0f3f7" stroke="#c2cbd6" stroke-width="0.8"/>
+      <rect x="42" y="20" width="34" height="13" rx="4" fill="#cfd7e0"/>
+      <rect x="42" y="20" width="34" height="6"  rx="3" fill="#dee5ec"/>
       
-      <!-- i-Dos 1 Container -->
-      <rect x="45" y="22" width="13" height="9" rx="2" fill="#e5e9ef"/>
-      <rect x="45" y="${31 - level1Height}" width="13" height="${level1Height}" rx="2" fill="${color1}" opacity="0.85"/>
-      <text x="51.5" y="29" text-anchor="middle" font-size="6" fill="#666" font-weight="600">${Math.round(level1)}%</text>
+      <!-- i-Dos Display in Middle Panel (above time display) -->
+      <rect x="88" y="8" width="70" height="8" rx="3" fill="#f0f3f7" stroke="#c2cbd6" stroke-width="0.5"/>
       
-      <!-- i-Dos 2 Container -->
-      <rect x="61" y="22" width="13" height="9" rx="2" fill="#e5e9ef"/>
-      <rect x="61" y="${31 - level2Height}" width="13" height="${level2Height}" rx="2" fill="${color2}" opacity="0.85"/>
-      <text x="67.5" y="29" text-anchor="middle" font-size="6" fill="#666" font-weight="600">${Math.round(level2)}%</text>
+      <!-- i-Dos 1 Container (left half) -->
+      <rect x="91" y="9.5" width="30" height="5" rx="1.5" fill="#e5e9ef"/>
+      <rect x="91" y="${14.5 - level1Height * 0.05}" width="30" height="${level1Height * 0.05}" rx="1.5" fill="${color1}" opacity="0.85"/>
+      <text x="106" y="13" text-anchor="middle" font-size="5" fill="#666" font-weight="600">${Math.round(level1)}%</text>
+      
+      <!-- i-Dos 2 Container (right half) -->
+      <rect x="126" y="9.5" width="30" height="5" rx="1.5" fill="#e5e9ef"/>
+      <rect x="126" y="${14.5 - level2Height * 0.05}" width="30" height="${level2Height * 0.05}" rx="1.5" fill="${color2}" opacity="0.85"/>
+      <text x="141" y="13" text-anchor="middle" font-size="5" fill="#666" font-weight="600">${Math.round(level2)}%</text>
       
       <!-- Active indicators -->
-      ${idos1Active ? `<circle cx="51.5" cy="23.5" r="1.2" fill="${color1}"/>` : ''}
-      ${idos2Active ? `<circle cx="67.5" cy="23.5" r="1.2" fill="${color2}"/>` : ''}`;
+      ${idos1Active ? `<circle cx="106" cy="10.5" r="0.8" fill="${color1}"/>` : ''}
+      ${idos2Active ? `<circle cx="141" cy="10.5" r="0.8" fill="${color2}"/>` : ''}`;
     }
 
     _headerIcon() {
@@ -2744,12 +2748,12 @@ class WashingMachineCard extends HTMLElement {
         .machine { width: 210px; max-width: 62%; filter: brightness(var(--wm-appliance-dim)); }
 
         .laundry, .drum, .arcs {
-          transform-box: view-box;
-          transform-origin: 110px 128px;
+          transform-box: fill-box;
+          transform-origin: center;
         }
-        .running .arcs    { animation: spin 3s linear infinite; }
-        .running .laundry { animation: tumble 3s ease-in-out infinite; }
-        .running .drum    { animation: spin 2.4s linear infinite; }
+        .running .arcs    { animation: spin 3s linear infinite; will-change: transform; }
+        .running .laundry { animation: tumble 3s ease-in-out infinite; will-change: transform; }
+        .running .drum    { animation: spin 2.4s linear infinite; will-change: transform; }
         .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
 
         .dw-stream, .dw-wash, .dw-drop, .dw-jet { opacity: 0; }
@@ -3925,9 +3929,34 @@ class WashingMachineCard extends HTMLElement {
         const endTime = this._getEndTime();
 
         if (running && remainingTime) {
-            const formatted = this._formatTime(remainingTime);
-            this._el("dispTime").textContent = formatted;
-            this._el("ringTime").textContent = formatted;
+            // Alternate between countdown and end time every 3 seconds
+            const now = Date.now();
+            const showCountdown = Math.floor(now / 3000) % 2 === 0;
+            
+            if (showCountdown) {
+                // Show countdown timer (remaining time)
+                const formatted = this._formatTime(remainingTime);
+                this._el("dispTime").textContent = formatted;
+                this._el("ringTime").textContent = formatted;
+            } else if (endTime) {
+                // Show end time (clock time)
+                const endDate = new Date(endTime);
+                if (!isNaN(endDate.getTime())) {
+                    const hours = endDate.getHours();
+                    const minutes = endDate.getMinutes();
+                    const formatted = `${hours}:${minutes.toString().padStart(2, '0')}`;
+                    this._el("dispTime").textContent = formatted;
+                    this._el("ringTime").textContent = formatted;
+                } else {
+                    const formatted = this._formatTime(remainingTime);
+                    this._el("dispTime").textContent = formatted;
+                    this._el("ringTime").textContent = formatted;
+                }
+            } else {
+                const formatted = this._formatTime(remainingTime);
+                this._el("dispTime").textContent = formatted;
+                this._el("ringTime").textContent = formatted;
+            }
         } else if (state === "delayed" && endTime) {
             const formatted = this._formatTime(endTime);
             this._el("dispTime").textContent = formatted;
@@ -3939,12 +3968,17 @@ class WashingMachineCard extends HTMLElement {
 
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : (active ? "#f0a04b" : "#4a5871"));
 
-        // Ring Label
+        // Ring Label - show REMAINING for Home Connect mode
         let ringLabel = t.ring_idle;
-        if (state === "running") ringLabel = t.ring_running;
-        else if (state === "ready") ringLabel = t.ring_ready || "READY";
-        else if (state === "paused") ringLabel = t.ring_paused || "PAUSED";
-        else if (state === "off") ringLabel = t.ring_off;
+        if (state === "running") {
+            ringLabel = t.ring_remaining || "REMAINING";
+        } else if (state === "ready") {
+            ringLabel = t.ring_ready || "READY";
+        } else if (state === "paused") {
+            ringLabel = t.ring_paused || "PAUSED";
+        } else if (state === "off") {
+            ringLabel = t.ring_off;
+        }
         this._el("ringLabel").textContent = ringLabel;
 
         // Progress Arc
