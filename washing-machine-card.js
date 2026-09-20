@@ -531,85 +531,85 @@ class WashingMachineCard extends HTMLElement {
             return matches;
         });
 
-        // Entity pattern mapping for Washer
+        // Entity pattern mapping for Washer (English and German)
         const washerPatterns = {
             // Status entities
-            'operation_state_entity': /_operation_state$/,
-            'active_program_entity': /_active_program$/,
-            'selected_program_entity': /_selected_program$/,
+            'operation_state_entity': /_(operation_state|betriebszustand)$/,
+            'active_program_entity': /_(active_program|aktives_programm)$/,
+            'selected_program_entity': /_(selected_program|ausgewahltes_programm)$/,
             'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
             'remaining_time_entity': /_(remaining|verbleibende)(_program)?_(time|zeit)$/,
-            'end_time_entity': /_(finish_time|end_time)$/,
+            'end_time_entity': /_(finish_time|end_time|programm_endzeit)$/,
 
             // Control entities
-            'power_entity': /_power$/,
-            'remote_control_entity': /_remote_control$/,
-            'remote_start_entity': /_remote_start$/,
-            'program_selector_entity': /_(program|active_program)$/,
+            'power_entity': /_(power|einschalter)$/,
+            'remote_control_entity': /_(remote_control|fernsteuerung)$/,
+            'remote_start_entity': /_(remote_start|fernstart)$/,
+            'program_selector_entity': /_(program|active_program|aktives_programm)$/,
 
             // Options
-            'temperature_entity': /_temperature$/,
-            'spin_speed_entity': /_spin_speed$/,
+            'temperature_entity': /_(temperature|temperatur)$/,
+            'spin_speed_entity': /_(spin_speed|schleuderdrehzahl)$/,
 
             // Door & Safety
-            'door_entity': /_door$/,
-            'child_lock_entity': /_child_lock$/,
+            'door_entity': /_(door|tur)$/,
+            'child_lock_entity': /_(child_lock|kindersicherung)$/,
 
             // Connectivity
-            'connectivity_entity': /_connection_state$/,
-            'local_control_entity': /_local_control$/,
+            'connectivity_entity': /_(connection_state|konnektivitat)$/,
+            'local_control_entity': /_(local_control|lokale_steuerung)$/,
 
             // i-Dos (Bosch/Siemens)
-            'idos1_active_entity': /_idos1_dosing_active$/,
-            'idos1_level_entity': /_idos1_fill_level$/,
-            'idos2_active_entity': /_idos2_dosing_active$/,
-            'idos2_level_entity': /_idos2_fill_level$/,
-            'idos1_low_entity': /_idos1_low_fill$/,
-            'idos2_low_entity': /_idos2_low_fill$/,
+            'idos1_active_entity': /_(idos1_dosing_active|i_dos_1_aktiv)$/,
+            'idos1_level_entity': /_(idos1_fill_level|i_dos_1_basisstufe|i_dos_1_fullstand)$/,
+            'idos2_active_entity': /_(idos2_dosing_active|i_dos_2_aktiv)$/,
+            'idos2_level_entity': /_(idos2_fill_level|i_dos_2_basisstufe|i_dos_2_fullstand)$/,
+            'idos1_low_entity': /_(idos1_low_fill|niedriger_fullstand_von_i_dos_1)$/,
+            'idos2_low_entity': /_(idos2_low_fill|niedriger_fullstand_von_i_dos_2)$/,
 
             // Features
             'hygiene_plus_entity': /_hygiene_plus$/,
-            'prewash_entity': /_prewash$/,
-            'extra_rinse_entity': /_extra_rinse$/,
+            'prewash_entity': /_(prewash|vorwasche)$/,
+            'extra_rinse_entity': /_(extra_rinse|extra_spulen)$/,
             'vario_speed_entity': /_(vario_speed|speed_perfect)$/,
-            'silence_entity': /_(silence|quiet)$/,
+            'silence_entity': /_(silence|quiet|leise)$/,
         };
 
-        // Entity pattern mapping for Dishwasher
+        // Entity pattern mapping for Dishwasher (English and German)
         const dishwasherPatterns = {
             // Status entities (same as washer)
-            'operation_state_entity': /_operation_state$/,
-            'active_program_entity': /_active_program$/,
-            'selected_program_entity': /_selected_program$/,
+            'operation_state_entity': /_(operation_state|betriebszustand)$/,
+            'active_program_entity': /_(active_program|aktives_programm)$/,
+            'selected_program_entity': /_(selected_program|ausgewahltes_programm)$/,
             'progress_entity': /_(program|programm)_(progress|fortschritt)$/,
             'remaining_time_entity': /_(remaining|verbleibende)(_program)?_(time|zeit)$/,
-            'end_time_entity': /_(finish_time|end_time)$/,
+            'end_time_entity': /_(finish_time|end_time|programm_endzeit)$/,
 
             // Control entities
-            'power_entity': /_power$/,
-            'remote_control_entity': /_remote_control$/,
-            'remote_start_entity': /_remote_start$/,
-            'program_selector_entity': /_(program|active_program)$/,
+            'power_entity': /_(power|einschalter)$/,
+            'remote_control_entity': /_(remote_control|fernsteuerung)$/,
+            'remote_start_entity': /_(remote_start|fernstart)$/,
+            'program_selector_entity': /_(program|active_program|aktives_programm)$/,
 
             // Door
-            'door_entity': /_door$/,
+            'door_entity': /_(door|tur)$/,
 
             // Connectivity
-            'connectivity_entity': /_connection_state$/,
-            'local_control_entity': /_local_control$/,
+            'connectivity_entity': /_(connection_state|konnektivitat)$/,
+            'local_control_entity': /_(local_control|lokale_steuerung)$/,
 
             // Consumables (dishwasher-specific)
-            'salt_low_entity': /_salt_low$/,
-            'rinse_aid_low_entity': /_(rinse_aid_low|rinseaid_low)$/,
+            'salt_low_entity': /_(salt_low|salz_niedrig)$/,
+            'rinse_aid_low_entity': /_(rinse_aid_low|rinseaid_low|klarspuler_niedrig)$/,
 
             // Features
             'hygiene_plus_entity': /_hygiene_plus$/,
-            'intensive_zone_entity': /_(intensive_zone|extra_dry)$/,
+            'intensive_zone_entity': /_(intensive_zone|extra_dry|intensiv_zone|extra_trocken)$/,
             'vario_speed_entity': /_(vario_speed|speed_perfect)$/,
-            'silence_entity': /_(silence|quiet)$/,
-            'brilliant_dry_entity': /_brilliant_dry$/,
-            'extra_dry_entity': /_extra_dry$/,
-            'half_load_entity': /_half_load$/,
+            'silence_entity': /_(silence|quiet|leise)$/,
+            'brilliant_dry_entity': /_(brilliant_dry|glanzen_trocken)$/,
+            'extra_dry_entity': /_(extra_dry|extra_trocken)$/,
+            'half_load_entity': /_(half_load|halbe_beladung)$/,
         };
 
         const patterns = applianceType === 'dishwasher' ? dishwasherPatterns : washerPatterns;
