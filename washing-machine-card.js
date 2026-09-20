@@ -2144,69 +2144,33 @@ class WashingMachineCard extends HTMLElement {
       <rect x="175.1" y="18.5" width="1.8" height="6.5" rx=".9" fill="#31415a"/>`
         })}
 
-        <!-- Drum interior (visible when door is open) -->
-        <g class="drum-interior" id="drumInterior">
-          <circle cx="110" cy="128" r="46" fill="#1b2537"/>
-          <g class="drum-pattern" opacity=".6">
-            <circle cx="98"  cy="116" r="2.2" fill="#3a4a63"/>
-            <circle cx="122" cy="116" r="2.2" fill="#3a4a63"/>
-            <circle cx="92"  cy="128" r="2.2" fill="#3a4a63"/>
-            <circle cx="128" cy="128" r="2.2" fill="#3a4a63"/>
-            <circle cx="98"  cy="140" r="2.2" fill="#3a4a63"/>
-            <circle cx="122" cy="140" r="2.2" fill="#3a4a63"/>
-          </g>
+        <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
+        <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
+        <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
+        <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
+        <g class="laundry">
+          <circle cx="100" cy="124" r="14"   fill="#ea4335"/>
+          <circle cx="119" cy="131" r="13.2" fill="#4285f4"/>
+          <circle cx="110" cy="115" r="11"   fill="#fbbc05"/>
+          <circle cx="103" cy="135" r="8"    fill="#f28b82" opacity=".9"/>
         </g>
-
-        <!-- Door group with transform origin at left hinge point (80px 128px) -->
-        <g class="door-group" id="doorGroup">
-          <circle cx="110" cy="128" r="58" fill="url(#${u}-ring)"/>
-          <circle cx="110" cy="128" r="58" fill="none" stroke="#c2cbd6" stroke-width="1.4"/>
-          <circle cx="110" cy="128" r="47" fill="#e3e9f0"/>
-          
-          <!-- Drum (rotating drum pattern) -->
-          <g class="drum">
-            <circle cx="110" cy="128" r="36" fill="none" stroke="#8a7a6a" stroke-width="1.2" opacity=".55"/>
-            <g fill="#c4b5a5" opacity=".55">
-              <circle cx="92" cy="112" r="1.6"/><circle cx="104" cy="108" r="1.6"/>
-              <circle cx="116" cy="108" r="1.6"/><circle cx="128" cy="112" r="1.6"/>
-              <circle cx="88" cy="124" r="1.6"/><circle cx="132" cy="124" r="1.6"/>
-              <circle cx="90" cy="138" r="1.6"/><circle cx="130" cy="138" r="1.6"/>
-              <circle cx="100" cy="146" r="1.6"/><circle cx="120" cy="146" r="1.6"/>
-              <circle cx="110" cy="150" r="1.6"/>
-            </g>
-          </g>
-          
-          <!-- Laundry (tumbling clothes inside drum) -->
-          <g class="laundry">
-            <ellipse cx="102" cy="126" rx="15" ry="10" fill="#7aa2e3" transform="rotate(-18 102 126)"/>
-            <ellipse cx="120" cy="134" rx="13" ry="9" fill="#e8e0d4" transform="rotate(22 120 134)"/>
-            <ellipse cx="112" cy="118" rx="10" ry="7" fill="#d4a574" transform="rotate(-8 112 118)"/>
-          </g>
-          
-          <!-- Progress arcs (spinning around drum) -->
-          <g class="arcs">
-            <circle cx="110" cy="128" r="53" fill="none" stroke="#f0a04b" stroke-width="5.5"
-                    stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
-          </g>
-          
-          <circle cx="110" cy="128" r="42" fill="url(#${u}-glass)"/>
-          <!-- Door handle -->
-          <rect x="156" y="124" width="10" height="7" rx="3.5" fill="#b0bac6"/>
-          <!-- Glass highlight reflection -->
-          <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
-                   transform="rotate(-24 94 106)"/>
-          <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+        <ellipse cx="94" cy="106" rx="22" ry="13" fill="#ffffff" opacity=".14"
+                 transform="rotate(-24 94 106)"/>
+        <circle cx="110" cy="128" r="42" fill="none" stroke="#0d1526" stroke-width="2" opacity=".35"/>
+        <g class="arcs">
+          <circle cx="110" cy="128" r="53" fill="none" stroke="#2f80ed" stroke-width="5.5"
+                  stroke-linecap="round" stroke-dasharray="104 62.5" opacity=".95"/>
         </g>
 
         ${isHc ? `
-          <!-- Home Connect Interactive Overlays - ENLARGED for entire panel areas -->
-          <rect class="hc-control" id="hcProgramBtn" x="40" y="18" width="40" height="20" rx="4"
+          <!-- Home Connect Interactive Overlays - Waschmaschine 3 Felder -->
+          <rect class="hc-control" id="hcIdosBtn" x="40" y="18" width="42" height="20" rx="4"
+                fill="rgba(47,128,237,0.01)" cursor="pointer">
+            <title>${t.tip_idos_btn || "i-Dos Settings"}</title>
+          </rect>
+          <rect class="hc-control" id="hcProgramBtn" x="86" y="16" width="76" height="24" rx="9"
                 fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_program_btn || "Select Program"}</title>
-          </rect>
-          <rect class="hc-control" id="hcStartBtn" x="85" y="15" width="78" height="24" rx="9"
-                fill="rgba(47,128,237,0.01)" cursor="pointer">
-            <title>${t.tip_start_btn || "Start / Pause"}</title>
           </rect>
           <circle class="hc-control" id="hcPowerBtn" cx="176" cy="27" r="13"
                   fill="rgba(47,128,237,0.01)" cursor="pointer">
@@ -2392,16 +2356,12 @@ class WashingMachineCard extends HTMLElement {
         <rect x="78" y="188" width="64" height="7" rx="3.5" fill="#cfd7e0" stroke="#b4bec9" stroke-width="1"/>
 
         ${isHc ? `
-          <!-- Home Connect Interactive Overlays -->
-          <rect class="hc-control" id="hcProgramBtn" x="42" y="18" width="46" height="22" rx="6"
+          <!-- Home Connect Interactive Overlays - Geschirrspüler 2 Felder -->
+          <rect class="hc-control" id="hcProgramBtn" x="40" y="16" width="122" height="26" rx="8"
                 fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_program_btn || "Select Program"}</title>
           </rect>
-          <rect class="hc-control" id="hcStartBtn" x="90" y="18" width="60" height="22" rx="6"
-                fill="rgba(47,128,237,0.01)" cursor="pointer">
-            <title>${t.tip_start_btn || "Start / Pause"}</title>
-          </rect>
-          <circle class="hc-control" id="hcPowerBtn" cx="162" cy="29" r="9"
+          <circle class="hc-control" id="hcPowerBtn" cx="162" cy="29" r="11"
                   fill="rgba(47,128,237,0.01)" cursor="pointer">
             <title>${t.tip_power_btn || "Power"}</title>
           </circle>
@@ -2748,12 +2708,12 @@ class WashingMachineCard extends HTMLElement {
         .machine { width: 210px; max-width: 62%; filter: brightness(var(--wm-appliance-dim)); }
 
         .laundry, .drum, .arcs {
-          transform-box: fill-box;
-          transform-origin: center;
+          transform-box: view-box;
+          transform-origin: 110px 128px;
         }
-        .running .arcs    { animation: spin 3s linear infinite; will-change: transform; }
-        .running .laundry { animation: tumble 3s ease-in-out infinite; will-change: transform; }
-        .running .drum    { animation: spin 2.4s linear infinite; will-change: transform; }
+        .running .arcs    { animation: spin 3s linear infinite; }
+        .running .laundry { animation: tumble 3s ease-in-out infinite; }
+        .running .drum    { animation: spin 2.4s linear infinite; }
         .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
 
         .dw-stream, .dw-wash, .dw-drop, .dw-jet { opacity: 0; }
@@ -3732,9 +3692,17 @@ class WashingMachineCard extends HTMLElement {
     _attachSVGInteractions() {
         if (!this._isHomeConnectMode()) return;
 
+        const idosBtn = this._el("hcIdosBtn");
         const programBtn = this._el("hcProgramBtn");
         const powerBtn = this._el("hcPowerBtn");
-        const startBtn = this._el("hcStartBtn");
+
+        if (idosBtn) {
+            idosBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                // For now, open program selector (i-Dos specific dialog can be added later)
+                this._openProgramSelector();
+            });
+        }
 
         if (programBtn) {
             programBtn.addEventListener("click", (e) => {
@@ -3747,13 +3715,6 @@ class WashingMachineCard extends HTMLElement {
             powerBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 this._hcTogglePower();
-            });
-        }
-
-        if (startBtn) {
-            startBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                this._hcToggleStartPause();
             });
         }
     }
