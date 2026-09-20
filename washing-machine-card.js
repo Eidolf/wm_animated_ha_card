@@ -111,8 +111,29 @@ class WashingMachineCard extends HTMLElement {
                 oven: { name: "Four", state_running: "Cuisson" },
                 microwave: { name: "Micro-ondes", state_running: "Chauffage" },
             },
-        },
-    };
+		},
+		nl: {
+			name: "Wasmachine", badge_running: "BEZIG", badge_idle: "INACTIEF", badge_off: "UIT", badge_nodata: "GEEN DATA",
+  			state_running: "Wast", state_idle: "Inactief", state_off: "Uit", state_nodata: "Geen data",
+  			ring_running: "VERSTREKEN", ring_idle: "INACTIEF", ring_off: "UIT",
+  			power: "Huidig vermogen", current: "Huidig verbruik",
+  			last_cycle: "LAATSTE CYCLUS", start: "START", duration: "DUUR",
+  			energy: "ENERGIE", cost: "KOSTEN",
+  			min: "min", kwh: "kWh", kw: "kW",
+  			today: "Vandaag", yesterday: "Gisteren",
+  			tip_notify: "Melding bij voltooiing", tip_plug: "Stekker apparaat", tip_history: "Geschiedenis",
+  			confirm_plug_off: "Stekker uitschakelen? Dit kan de huidige cyclus onderbreken.",
+  			decimal: ",",
+  			types: {
+    			washer: { name: "Wasmachine", state_running: "Wast" },
+    			dryer: { name: "Droger", state_running: "Droogt" },
+    			dishwasher: { name: "Vaatwasser", state_running: "Wast af" },
+    			oven: { name: "Oven", state_running: "Bakt" },
+    			microwave: { name: "Magnetron", state_running: "Verwarmt" },
+			},
+		},
+	};
+
 
     static DEFAULTS = {
         appliance_type: "washer",
@@ -132,6 +153,10 @@ class WashingMachineCard extends HTMLElement {
 			// French
 			"lavage", "en cours", "essorage", "rincage", "rinçage",
 			"cuisson", "chauffage",
+			// Dutch
+			"wassen", "bezig", "centrifugeren", "spoelen", "spoelen",
+			"bakken", "verwarmen",
+			
 		],
         power_threshold: 10,
         power_max: 2500,
