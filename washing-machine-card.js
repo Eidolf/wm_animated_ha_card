@@ -3788,8 +3788,8 @@ class WashingMachineCard extends HTMLElement {
         if (idosBtn) {
             idosBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
-                // For now, open program selector (i-Dos specific dialog can be added later)
-                this._openProgramSelector();
+                // Open options dialog for i-Dos settings
+                this._openOptionsDialog();
             });
         }
 
