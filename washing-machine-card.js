@@ -484,12 +484,51 @@ class WashingMachineCard extends HTMLElement {
 
         // Get all entities for this device
         const states = this._hass.states ? Object.values(this._hass.states) : [];
+
+        // Debug: Log available hass structure
+        console.log('Auto-discovery debug:', {
+            deviceId,
+            hasEntities: !!this._hass.entities,
+            hasDevices: !!this._hass.devices,
+            entityCount: states.length,
+            sampleEntity: states[0]?.entity_id
+        });
+
         const deviceEntities = states.filter(entity => {
             if (!entity?.entity_id) return false;
-            const regDeviceId = this._hass.entities?.[entity.entity_id]?.device_id ||
-                                this._hass.devices?.[deviceId]?.entities?.[entity.entity_id] ||
-                                entity.device_id;
-            return regDeviceId === deviceId;
+
+            // Try multiple ways to find device_id
+            let regDeviceId = null;
+
+            // Method 1: entity registry in hass.entities
+            if (this._hass.entities && this._hass.entities[entity.entity_id]) {
+                regDeviceId = this._hass.entities[entity.entity_id].device_id;
+            }
+
+            // Method 2: devices registry lookup
+            if (!regDeviceId && this._hass.devices && this._hass.devices[deviceId]) {
+                if (this._hass.devices[deviceId].entities &&
+                    this._hass.devices[deviceId].entities.includes(entity.entity_id)) {
+                    regDeviceId = deviceId;
+                }
+            }
+
+            // Method 3: entity.attributes.device_id
+            if (!regDeviceId && entity.attributes?.device_id) {
+                regDeviceId = entity.attributes.device_id;
+            }
+
+            // Method 4: direct entity.device_id
+            if (!regDeviceId && entity.device_id) {
+                regDeviceId = entity.device_id;
+            }
+
+            const matches = regDeviceId === deviceId;
+            if (matches) {
+                console.log('Matched entity:', entity.entity_id);
+            }
+
+            return matches;
         });
 
         // Entity pattern mapping for Washer
@@ -575,6 +614,9 @@ class WashingMachineCard extends HTMLElement {
 
         const patterns = applianceType === 'dishwasher' ? dishwasherPatterns : washerPatterns;
 
+        console.log('Auto-discovery: Found', deviceEntities.length, 'entities for device', deviceId);
+        console.log('Entity IDs:', deviceEntities.map(e => e.entity_id));
+
         // Match entities to patterns
         deviceEntities.forEach(entity => {
             const entityId = entity.entity_id;
@@ -583,16 +625,20 @@ class WashingMachineCard extends HTMLElement {
                 if (pattern.test(entityId)) {
                     if (!entities[configKey]) {
                         entities[configKey] = entityId;
+                        console.log('Mapped', entityId, 'to', configKey);
                     }
                     break; // First match wins
                 }
             }
         });
 
+        console.log('Auto-discovery result:', entities);
+
         // Return config object if we found essential entities
         const hasEssentials = entities.operation_state_entity || entities.power_entity;
         if (!hasEssentials) {
             console.warn('Auto-discovery: No essential Home Connect entities found');
+            console.warn('Found entities:', Object.keys(entities));
             return null;
         }
 
