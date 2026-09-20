@@ -2756,11 +2756,12 @@ class WashingMachineCard extends HTMLElement {
         .laundry, .drum, .arcs {
           transform-box: view-box;
           transform-origin: 110px 128px;
+          will-change: transform;
         }
         .running .arcs    { animation: spin 3s linear infinite; }
         .running .laundry { animation: tumble 3s ease-in-out infinite; }
         .running .drum    { animation: spin 2.4s linear infinite; }
-        .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
+        .running .heat    { animation: heatPulse 2s ease-in-out infinite; will-change: opacity; }
 
         .dw-stream, .dw-wash, .dw-drop, .dw-jet { opacity: 0; }
         .dw-dishes { opacity: .98; }
@@ -2941,6 +2942,8 @@ class WashingMachineCard extends HTMLElement {
         }
         .st-power-label { font-size: 13px; color: var(--wm-muted); }
         .st-power { font-size: 18px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+        .st-elapsed-label { font-size: 13px; color: var(--wm-muted); }
+        .st-elapsed { font-size: 16px; font-weight: 700; white-space: nowrap; }
         .bar {
           height: 10px; border-radius: 6px; background: var(--wm-bar-bg);
           margin-top: 8px; overflow: hidden;
@@ -2967,6 +2970,8 @@ class WashingMachineCard extends HTMLElement {
         /* Home Connect interactive controls */
         .hc-interactive .hc-control {
           transition: opacity 0.2s, fill 0.2s;
+          pointer-events: all;
+          cursor: pointer;
         }
         .hc-interactive .hc-control:hover {
           fill: rgba(47, 128, 237, 0.25) !important;
@@ -3357,6 +3362,10 @@ class WashingMachineCard extends HTMLElement {
                 <span class="st-power-label" id="powerLabel"></span>
                 <span class="st-power" id="powerValue">—</span>
               </div>
+              <div class="st-row hidden" id="elapsedRow">
+                <span class="st-elapsed-label" id="elapsedLabel">Elapsed</span>
+                <span class="st-elapsed" id="elapsedValue">—</span>
+              </div>
               <div class="bar hidden" id="bar"><div class="bar-fill" id="barFill"></div></div>
               <div class="hc-program-panel hidden" id="hcProgramPanel">
                 <div class="hc-program-row">
@@ -3503,6 +3512,40 @@ class WashingMachineCard extends HTMLElement {
         }
 
         return str;
+    }
+
+    _parseTimeToMinutes(timeStr) {
+        if (!timeStr) return 0;
+        const str = String(timeStr).trim();
+
+        // ISO 8601 Duration (e.g. PT1H30M, PT45M, PT20S)
+        if (str.startsWith("PT") || str.startsWith("P")) {
+            const hMatch = str.match(/(\d+)H/i);
+            const mMatch = str.match(/(\d+)M/i);
+            const sMatch = str.match(/(\d+)S/i);
+            const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+            const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+            const s = sMatch ? parseInt(sMatch[1], 10) : 0;
+            return (h * 60) + m + Math.round(s / 60);
+        }
+
+        // Numeric seconds (e.g. 5400)
+        const num = parseFloat(str);
+        if (!isNaN(num) && !str.includes(":")) {
+            return Math.floor(num / 60);
+        }
+
+        // H:MM format (e.g. "1:30")
+        if (str.includes(":")) {
+            const parts = str.split(":");
+            if (parts.length === 2) {
+                const h = parseInt(parts[0], 10) || 0;
+                const m = parseInt(parts[1], 10) || 0;
+                return (h * 60) + m;
+            }
+        }
+
+        return 0;
     }
 
     _translateProgram(programName) {
@@ -3935,34 +3978,56 @@ class WashingMachineCard extends HTMLElement {
         const remainingTime = this._getRemainingTime();
         const endTime = this._getEndTime();
 
-        if (running && remainingTime) {
-            // Alternate between countdown and end time every 3 seconds
+        if (running && (remainingTime || endTime)) {
+            // Alternate between countdown and calculated remaining time every 3 seconds
             const now = Date.now();
             const showCountdown = Math.floor(now / 3000) % 2 === 0;
-            
-            if (showCountdown) {
-                // Show countdown timer (remaining time)
+
+            if (showCountdown && remainingTime) {
+                // Show countdown timer (remaining time from sensor)
                 const formatted = this._formatTime(remainingTime);
                 this._el("dispTime").textContent = formatted;
                 this._el("ringTime").textContent = formatted;
             } else if (endTime) {
-                // Show end time (clock time)
+                // Calculate and show remaining time until end time
                 const endDate = new Date(endTime);
                 if (!isNaN(endDate.getTime())) {
-                    const hours = endDate.getHours();
-                    const minutes = endDate.getMinutes();
-                    const formatted = `${hours}:${minutes.toString().padStart(2, '0')}`;
-                    this._el("dispTime").textContent = formatted;
-                    this._el("ringTime").textContent = formatted;
-                } else {
+                    const currentTime = new Date();
+                    const diffMs = endDate.getTime() - currentTime.getTime();
+
+                    if (diffMs > 0) {
+                        // Calculate remaining hours and minutes
+                        const totalMinutes = Math.floor(diffMs / 60000);
+                        const hours = Math.floor(totalMinutes / 60);
+                        const minutes = totalMinutes % 60;
+                        const formatted = hours > 0
+                            ? `${hours}:${minutes.toString().padStart(2, '0')}`
+                            : `0:${minutes.toString().padStart(2, '0')}`;
+                        this._el("dispTime").textContent = formatted;
+                        this._el("ringTime").textContent = formatted;
+                    } else {
+                        // End time passed, show end time as clock time
+                        const hours = endDate.getHours();
+                        const minutes = endDate.getMinutes();
+                        const formatted = `${hours}:${minutes.toString().padStart(2, '0')}`;
+                        this._el("dispTime").textContent = formatted;
+                        this._el("ringTime").textContent = formatted;
+                    }
+                } else if (remainingTime) {
                     const formatted = this._formatTime(remainingTime);
                     this._el("dispTime").textContent = formatted;
                     this._el("ringTime").textContent = formatted;
+                } else {
+                    this._el("dispTime").textContent = "0:00";
+                    this._el("ringTime").textContent = "…";
                 }
-            } else {
+            } else if (remainingTime) {
                 const formatted = this._formatTime(remainingTime);
                 this._el("dispTime").textContent = formatted;
                 this._el("ringTime").textContent = formatted;
+            } else {
+                this._el("dispTime").textContent = "0:00";
+                this._el("ringTime").textContent = "…";
             }
         } else if (state === "delayed" && endTime) {
             const formatted = this._formatTime(endTime);
@@ -3974,6 +4039,56 @@ class WashingMachineCard extends HTMLElement {
         }
 
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : (active ? "#f0a04b" : "#4a5871"));
+
+        // Elapsed Time - calculate from progress and remaining time
+        if (running && progress !== null && remainingTime) {
+            const remainingMinutes = this._parseTimeToMinutes(remainingTime);
+            if (remainingMinutes > 0 && progress > 0 && progress < 100) {
+                // Calculate total duration from progress and remaining time
+                const totalMinutes = Math.round(remainingMinutes / (1 - (progress / 100)));
+                const elapsedMinutes = totalMinutes - remainingMinutes;
+
+                if (elapsedMinutes >= 0) {
+                    const hours = Math.floor(elapsedMinutes / 60);
+                    const minutes = elapsedMinutes % 60;
+                    const formatted = hours > 0
+                        ? `${hours}:${minutes.toString().padStart(2, '0')}`
+                        : `0:${minutes.toString().padStart(2, '0')}`;
+                    this._el("elapsedRow").classList.remove("hidden");
+                    this._el("elapsedValue").textContent = formatted;
+                } else {
+                    this._el("elapsedRow").classList.add("hidden");
+                }
+            } else {
+                this._el("elapsedRow").classList.add("hidden");
+            }
+        } else if (running && endTime && remainingTime) {
+            // Alternative: calculate elapsed from end time and remaining time
+            const remainingMinutes = this._parseTimeToMinutes(remainingTime);
+            const endDate = new Date(endTime);
+            if (!isNaN(endDate.getTime()) && remainingMinutes > 0) {
+                const startTime = new Date(endDate.getTime() - (remainingMinutes * 60000));
+                const currentTime = new Date();
+                const elapsedMs = currentTime.getTime() - startTime.getTime();
+
+                if (elapsedMs >= 0) {
+                    const elapsedMinutes = Math.floor(elapsedMs / 60000);
+                    const hours = Math.floor(elapsedMinutes / 60);
+                    const minutes = elapsedMinutes % 60;
+                    const formatted = hours > 0
+                        ? `${hours}:${minutes.toString().padStart(2, '0')}`
+                        : `0:${minutes.toString().padStart(2, '0')}`;
+                    this._el("elapsedRow").classList.remove("hidden");
+                    this._el("elapsedValue").textContent = formatted;
+                } else {
+                    this._el("elapsedRow").classList.add("hidden");
+                }
+            } else {
+                this._el("elapsedRow").classList.add("hidden");
+            }
+        } else {
+            this._el("elapsedRow").classList.add("hidden");
+        }
 
         // Ring Label - show REMAINING for Home Connect mode
         let ringLabel = t.ring_idle;
