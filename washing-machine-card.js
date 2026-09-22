@@ -638,6 +638,12 @@ class WashingMachineCard extends HTMLElement {
 
         console.log('Auto-discovery result:', entities);
 
+        // Ensure program_selector_entity is set from selected_program_entity if not already set
+        if (!entities.program_selector_entity && entities.selected_program_entity) {
+            entities.program_selector_entity = entities.selected_program_entity;
+            console.log('Auto-discovery: Set program_selector_entity from selected_program_entity');
+        }
+
         // Return config object if we found essential entities
         const hasEssentials = entities.operation_state_entity || entities.power_entity;
         if (!hasEssentials) {
