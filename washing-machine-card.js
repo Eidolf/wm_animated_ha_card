@@ -2831,23 +2831,17 @@ class WashingMachineCard extends HTMLElement {
         .machine { width: 210px; max-width: 62%; filter: brightness(var(--wm-appliance-dim)); }
 
         .laundry, .drum, .arcs {
-          transform-box: fill-box;
-          transform-origin: center;
+          transform-box: view-box;
+          transform-origin: 110px 128px;
         }
         .running .arcs    {
           animation: spin 3s linear infinite;
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
         }
         .running .laundry {
           animation: tumble 3s ease-in-out infinite;
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
         }
         .running .drum    {
           animation: spin 2.4s linear infinite;
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
         }
         .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
 
@@ -4149,10 +4143,11 @@ class WashingMachineCard extends HTMLElement {
         if (setupContainer) setupContainer.classList.add("hidden");
         if (wrap) wrap.classList.remove("hidden");
 
-        const hero = this._el("hero");
-        if (hero) {
-            hero.innerHTML = this._machineSvg();
+        // SVG is already rendered in setConfig, no need to re-render on every update
+        // Only attach interactions if not already attached
+        if (!this._svgInteractionsAttached) {
             this._attachSVGInteractions();
+            this._svgInteractionsAttached = true;
         }
 
         if (this._isHomeConnectMode()) {
