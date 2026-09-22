@@ -7,7 +7,7 @@
  *
  * https://github.com/sionetta/wm_animated_ha_card
  * License: MIT
- * Version: 1.3.0
+ * Version: 1.4.0
  *
  * UI languages: en, ru, de, fr (auto-detected from Home Assistant, or set `language:`).
  * Appliances: washer, dryer, dishwasher, oven, microwave (`appliance_type:`).
