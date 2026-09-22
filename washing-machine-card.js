@@ -79,6 +79,8 @@ class WashingMachineCard extends HTMLElement {
             setup_step4: "Save - entities will be detected automatically",
             remote_start_required: "Remote start must be activated on the appliance",
             door_must_be_closed: "Please close the door",
+            door_open: "Door Open",
+            door_closed: "Door Closed",
             decimal: ".",
             types: {
                 washer:     { name: "Washing machine",  state_running: "Washing" },
@@ -173,6 +175,8 @@ class WashingMachineCard extends HTMLElement {
             setup_step4: "Сохраните - объекты будут обнаружены автоматически",
             remote_start_required: "Необходимо активировать удалённый запуск на устройстве",
             door_must_be_closed: "Пожалуйста, закройте дверцу",
+            door_open: "Дверца открыта",
+            door_closed: "Дверца закрыта",
             decimal: ",",
             types: {
                 washer:     { name: "Стиральная машина", state_running: "Идёт стирка" },
@@ -265,6 +269,8 @@ class WashingMachineCard extends HTMLElement {
             setup_step4: "Speichern - Entitäten werden automatisch erkannt",
             remote_start_required: "Fernstart muss am Gerät aktiviert werden",
             door_must_be_closed: "Bitte Tür schließen",
+            door_open: "Tür offen",
+            door_closed: "Tür geschlossen",
             decimal: ",",
             types: {
                 washer:     { name: "Waschmaschine",  state_running: "Wäsche läuft" },
@@ -357,6 +363,8 @@ class WashingMachineCard extends HTMLElement {
             setup_step4: "Enregistrez - les entités seront détectées automatiquement",
             remote_start_required: "Le démarrage à distance doit être activé sur l'appareil",
             door_must_be_closed: "Veuillez fermer la porte",
+            door_open: "Porte ouverte",
+            door_closed: "Porte fermée",
             decimal: ",",
             types: {
                 washer:     { name: "Lave-linge",      state_running: "Lavage en cours" },
@@ -2972,6 +2980,32 @@ class WashingMachineCard extends HTMLElement {
         }
         .st-col { flex: 1; min-width: 0; }
         .st-state { font-size: 16.5px; font-weight: 700; }
+        .st-door-status {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 6px;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+        .st-door-status.door-open {
+          background: #fff3cd;
+          color: #856404;
+        }
+        .st-door-status.door-closed {
+          background: #d4edda;
+          color: #155724;
+        }
+        .st-door-icon {
+          font-size: 16px;
+          line-height: 1;
+        }
+        .st-door-text {
+          font-size: 13px;
+        }
         .st-row {
           display: flex; align-items: baseline; justify-content: space-between;
           margin-top: 9px; gap: 8px;
@@ -3471,6 +3505,10 @@ class WashingMachineCard extends HTMLElement {
             </div>
             <div class="st-col">
               <div class="st-state" id="stState"></div>
+              <div class="st-door-status hidden" id="doorStatus">
+                <span class="st-door-icon" id="doorIcon">🚪</span>
+                <span class="st-door-text" id="doorText">Door</span>
+              </div>
               <div class="st-row hidden" id="powerRow">
                 <span class="st-power-label" id="powerLabel"></span>
                 <span class="st-power" id="powerValue">—</span>
@@ -4193,6 +4231,31 @@ class WashingMachineCard extends HTMLElement {
             const doorEntity = this._st(hc.door_entity);
             const doorOpen = doorEntity?.state === "on" || doorEntity?.state === "open" || doorEntity?.state === "Open";
             wrap.classList.toggle("door-open", doorOpen);
+
+            // Update door status display
+            const doorStatusEl = this._el("doorStatus");
+            const doorIconEl = this._el("doorIcon");
+            const doorTextEl = this._el("doorText");
+
+            if (doorStatusEl && doorIconEl && doorTextEl) {
+                doorStatusEl.classList.remove("hidden");
+                doorStatusEl.classList.toggle("door-open", doorOpen);
+                doorStatusEl.classList.toggle("door-closed", !doorOpen);
+
+                if (doorOpen) {
+                    doorIconEl.textContent = "🚪";
+                    doorTextEl.textContent = t.door_open || "Door Open";
+                } else {
+                    doorIconEl.textContent = "🔒";
+                    doorTextEl.textContent = t.door_closed || "Door Closed";
+                }
+            }
+        } else {
+            // Hide door status if no door entity
+            const doorStatusEl = this._el("doorStatus");
+            if (doorStatusEl) {
+                doorStatusEl.classList.add("hidden");
+            }
         }
 
         this._el("name").textContent = c.name || t.name;
