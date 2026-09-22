@@ -2831,12 +2831,24 @@ class WashingMachineCard extends HTMLElement {
         .machine { width: 210px; max-width: 62%; filter: brightness(var(--wm-appliance-dim)); }
 
         .laundry, .drum, .arcs {
-          transform-box: view-box;
-          transform-origin: 110px 128px;
+          transform-box: fill-box;
+          transform-origin: center;
         }
-        .running .arcs    { animation: spin 3s linear infinite; }
-        .running .laundry { animation: tumble 3s ease-in-out infinite; }
-        .running .drum    { animation: spin 2.4s linear infinite; }
+        .running .arcs    {
+          animation: spin 3s linear infinite;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        .running .laundry {
+          animation: tumble 3s ease-in-out infinite;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        .running .drum    {
+          animation: spin 2.4s linear infinite;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
         .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
 
         .dw-stream, .dw-wash, .dw-drop, .dw-jet { opacity: 0; }
