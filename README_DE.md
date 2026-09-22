@@ -124,8 +124,8 @@ theme: auto                                        # auto / light / dark / ha
 | `name` | nein | übersetzt | Titel der Karte (Default hängt von `appliance_type` ab). |
 | `plug_entity` | nein | – | Schalter der Steckdose. Erscheint als Button in der Kopfzeile, Tippen schaltet um. |
 | `notify_entity` | nein | – | Automatisierung, `switch` oder `input_boolean` für die Benachrichtigung „Durchgang beendet“. Tippen schaltet um. |
-| `power_entity` | nein | – | Sensor für Leistung (W) oder Strom (A): rote Skala, Wertanzeige, und er erkennt zusätzlich, ob das Gerät läuft. |
-| `power_threshold` | nein | `10` | Oberhalb dieses Werts gilt das Gerät als laufend. |
+| `power_entity` | nein | – | Sensor für Leistung (W) oder Strom (A): rote Skala, Wertanzeige, und er unterscheidet einen laufenden Durchgang von einer Pause – siehe `power_threshold`. |
+| `power_threshold` | nein | `10` | Mit einem `power_entity` wird ein laufender Durchgang, der weniger als diesen Wert zieht, als **Pause** angezeigt statt als laufend. Ohne den Sensor kann die Karte beides nicht unterscheiden, und allein `status_entity` entscheidet. |
 | `power_max` | nein | `2500` | Maximum der Skala, in Einheiten von `power_entity`. |
 | `last_wash_entity` | nein | – | `input_datetime` mit dem Start des Durchgangs; daraus wird auch die verstrichene Zeit berechnet. |
 | `duration_entity` | nein | – | Dauer des letzten Durchgangs in Minuten. |

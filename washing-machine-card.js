@@ -31,9 +31,9 @@ class WashingMachineCard extends HTMLElement {
     static STRINGS = {
         en: {
             name: "Washing machine",
-            badge_running: "RUNNING", badge_idle: "IDLE", badge_off: "OFF", badge_nodata: "NO DATA",
-            state_running: "Washing", state_idle: "Idle", state_off: "Off", state_nodata: "No data",
-            ring_running: "ELAPSED", ring_idle: "IDLE", ring_off: "OFF",
+            badge_running: "RUNNING", badge_idle: "IDLE", badge_paused: "PAUSED", badge_off: "OFF", badge_nodata: "NO DATA",
+            state_running: "Washing", state_idle: "Idle", state_paused: "Paused", state_off: "Off", state_nodata: "No data",
+            ring_running: "ELAPSED", ring_idle: "IDLE", ring_paused: "PAUSED", ring_off: "OFF",
             power: "Current power", current: "Current draw",
             last_cycle: "LAST CYCLE", start: "START", duration: "DURATION",
             energy: "ENERGY", cost: "COST",
@@ -55,9 +55,9 @@ class WashingMachineCard extends HTMLElement {
         },
         ru: {
             name: "Стиральная машина",
-            badge_running: "В РАБОТЕ", badge_idle: "ОЖИДАНИЕ", badge_off: "ВЫКЛ", badge_nodata: "НЕТ ДАННЫХ",
-            state_running: "Идёт стирка", state_idle: "Ожидание", state_off: "Выключено", state_nodata: "Нет данных",
-            ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_off: "ВЫКЛ",
+            badge_running: "В РАБОТЕ", badge_idle: "ОЖИДАНИЕ", badge_paused: "ПАУЗА", badge_off: "ВЫКЛ", badge_nodata: "НЕТ ДАННЫХ",
+            state_running: "Идёт стирка", state_idle: "Ожидание", state_paused: "Пауза", state_off: "Выключено", state_nodata: "Нет данных",
+            ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_paused: "ПАУЗА", ring_off: "ВЫКЛ",
             power: "Текущая мощность", current: "Текущий ток",
             last_cycle: "ПОСЛЕДНИЙ ЦИКЛ", start: "СТАРТ", duration: "ДЛИТЕЛЬН.",
             energy: "РАСХОД", cost: "СТОИМОСТЬ",
@@ -78,9 +78,9 @@ class WashingMachineCard extends HTMLElement {
         },
         de: {
             name: "Waschmaschine",
-            badge_running: "LÄUFT", badge_idle: "BEREIT", badge_off: "AUS", badge_nodata: "KEINE DATEN",
-            state_running: "Läuft", state_idle: "Bereit", state_off: "Aus", state_nodata: "Keine Daten",
-            ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_off: "AUS",
+            badge_running: "LÄUFT", badge_idle: "BEREIT", badge_paused: "PAUSE", badge_off: "AUS", badge_nodata: "KEINE DATEN",
+            state_running: "Läuft", state_idle: "Bereit", state_paused: "Pause", state_off: "Aus", state_nodata: "Keine Daten",
+            ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_paused: "PAUSE", ring_off: "AUS",
             power: "Aktuelle Leistung", current: "Stromaufnahme",
             last_cycle: "LETZTER DURCHGANG", start: "START", duration: "DAUER",
             energy: "VERBRAUCH", cost: "KOSTEN",
@@ -101,9 +101,9 @@ class WashingMachineCard extends HTMLElement {
             ],
         },
         fr: {
-            name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN PAUSE", badge_off: "ÉTEINT", badge_nodata: "PAS DE DONNÉES",
-            state_running: "Lavage en cours", state_idle: "En pause", state_off: "Éteint", state_nodata: "Pas de données",
-            ring_running: "ÉCOULÉ", ring_idle: "PAUSE", ring_off: "ÉTEINT",
+            name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN VEILLE", badge_paused: "EN PAUSE", badge_off: "ÉTEINT", badge_nodata: "PAS DE DONNÉES",
+            state_running: "Lavage en cours", state_idle: "En veille", state_paused: "En pause", state_off: "Éteint", state_nodata: "Pas de données",
+            ring_running: "ÉCOULÉ", ring_idle: "VEILLE", ring_paused: "PAUSE", ring_off: "ÉTEINT",
             power: "Puissance actuelle", current: "Courant instantané",
             last_cycle: "DERNIER CYCLE", start: "DÉPART", duration: "DURÉE",
             energy: "ÉNERGIE", cost: "COÛT",
@@ -120,14 +120,14 @@ class WashingMachineCard extends HTMLElement {
             },
             running_states: [
                 "lavage", "en cours", "essorage", "rincage", "rinçage",
-                "cuisson", "chauffage", "réchauffage", "rechauffage", "séchage",
+                "cuisson", "chauffage", "réchauffage", "rechauffage", "séchage", "sechage",
             ],
         },
         nl: {
             name: "Wasmachine",
-            badge_running: "BEZIG", badge_idle: "INACTIEF", badge_off: "UIT", badge_nodata: "GEEN DATA",
-            state_running: "Wast", state_idle: "Inactief", state_off: "Uit", state_nodata: "Geen data",
-            ring_running: "VERSTREKEN", ring_idle: "INACTIEF", ring_off: "UIT",
+            badge_running: "BEZIG", badge_idle: "INACTIEF", badge_paused: "GEPAUZEERD", badge_off: "UIT", badge_nodata: "GEEN DATA",
+            state_running: "Wast", state_idle: "Inactief", state_paused: "Gepauzeerd", state_off: "Uit", state_nodata: "Geen data",
+            ring_running: "VERSTREKEN", ring_idle: "INACTIEF", ring_paused: "GEPAUZEERD", ring_off: "UIT",
             power: "Huidig vermogen", current: "Huidig verbruik",
             last_cycle: "LAATSTE CYCLUS", start: "START", duration: "DUUR",
             energy: "ENERGIE", cost: "KOSTEN",
@@ -327,7 +327,7 @@ class WashingMachineCard extends HTMLElement {
             return cycleIsActive ? "running" : "off";
         const p = parseFloat(this._st(c.power_entity)?.state);
         if (cycleIsActive)
-            return !isNaN(p) && p > c.power_threshold ? "running" : "idle";
+            return !isNaN(p) && p > c.power_threshold ? "running" : "paused";
         return "off";
     }
 
@@ -433,7 +433,7 @@ class WashingMachineCard extends HTMLElement {
             const m = Math.round(n % 60);
             return {
                 value: `${h}h${String(m).padStart(2, "0")}`,
-                unit: "min"
+                unit: ""
             };
         }
         return {
@@ -1426,15 +1426,16 @@ class WashingMachineCard extends HTMLElement {
         const applianceState = noData ? "nodata" : this._applianceState();
         const displayState = (applianceState === "off" && !c.power_entity) ? "idle" : applianceState;
         this._el("badgeText").textContent = t[`badge_${displayState}`];
-        wrap.classList.toggle("state-idle", applianceState === "idle");
-        const active = applianceState === "running" || applianceState === "idle";
+        const paused = applianceState === "paused";
+        wrap.classList.toggle("state-idle", applianceState === "idle" || paused);
+        const active = applianceState === "running" || applianceState === "idle" || paused;
         wrap.classList.toggle("idle", !active);
         const start = active ? this._startDate() : null;
         const clock = start ? this._fmtClock(start) : null;
         this._el("dispTime").textContent = active ? (clock || "0:00") : "--:--";
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : "#4a5871");
         this._el("ringTime").textContent = active ? (clock || "…") : "—";
-        const ringState = displayState === "running" ? "running" : displayState === "idle" ? "idle" : "off";
+        const ringState = ["running", "idle", "paused"].includes(displayState) ? displayState : "off";
         this._el("ringLabel").textContent = t[`ring_${ringState}`];
         this._el("ringArc").style.display = active ? "" : "none";
         this._el("stState").textContent = t[`state_${displayState}`];

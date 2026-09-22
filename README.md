@@ -124,8 +124,8 @@ theme: auto                                        # auto / light / dark / ha
 | `name` | no | localized | Card title (defaults depend on `appliance_type`). |
 | `plug_entity` | no | — | Smart plug switch; shown as a header button, tap toggles it. |
 | `notify_entity` | no | — | Automation/switch/input_boolean for the "cycle finished" notification; tap toggles it. |
-| `power_entity` | no | — | Power (W) or current (A) sensor: red gauge, value display and a second "running" detector. |
-| `power_threshold` | no | `10` | Above this value the appliance counts as running. |
+| `power_entity` | no | — | Power (W) or current (A) sensor: red gauge, value display, and it tells a running cycle from a paused one — see `power_threshold`. |
+| `power_threshold` | no | `10` | With a `power_entity`, a cycle that is under way but drawing less than this shows as **paused** rather than running. Without one the card cannot tell the two apart, and `status_entity` alone decides. |
 | `power_max` | no | `2500` | Gauge maximum, in `power_entity` units. |
 | `last_wash_entity` | no | — | `input_datetime` with the cycle start; also the source of the elapsed time. |
 | `duration_entity` | no | — | Last cycle duration in minutes. |

@@ -124,8 +124,8 @@ theme: auto                                        # auto / light / dark / ha
 | `name` | non | localisé | Titre de la carte (le défaut dépend de `appliance_type`). |
 | `plug_entity` | non | — | Interrupteur de la prise connectée ; affiché comme bouton dans l'en-tête, l'appui le commute. |
 | `notify_entity` | non | — | Automatisation / switch / input_boolean de la notification « cycle terminé » ; l'appui la commute. |
-| `power_entity` | non | — | Capteur de puissance (W) ou de courant (A) : jauge rouge, affichage de la valeur et seconde détection de marche. |
-| `power_threshold` | non | `10` | Au-dessus de cette valeur, l'appareil est considéré en marche. |
+| `power_entity` | non | — | Capteur de puissance (W) ou de courant (A) : jauge rouge, affichage de la valeur, et il distingue un cycle en marche d'un cycle en pause — voir `power_threshold`. |
+| `power_threshold` | non | `10` | Avec un `power_entity`, un cycle en cours qui consomme moins que cette valeur s'affiche **en pause** plutôt qu'en marche. Sans ce capteur, la carte ne peut pas faire la différence et seul `status_entity` décide. |
 | `power_max` | non | `2500` | Maximum de la jauge, dans l'unité de `power_entity`. |
 | `last_wash_entity` | non | — | `input_datetime` contenant le début du cycle ; sert aussi à calculer le temps écoulé. |
 | `duration_entity` | non | — | Durée du dernier cycle, en minutes. |

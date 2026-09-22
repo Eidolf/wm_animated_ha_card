@@ -124,8 +124,8 @@ theme: auto                                        # auto / light / dark / ha
 | `name` | nee | gelokaliseerd | Titel van de kaart (standaardwaarden hangen af van `appliance_type`). |
 | `plug_entity` | nee | — | Smart-plug-schakelaar; getoond als knop in de header, tikken schakelt hem. |
 | `notify_entity` | nee | — | Automatisering/schakelaar/input_boolean voor de melding "cyclus voltooid"; tikken schakelt hem. |
-| `power_entity` | nee | — | Vermogen- (W) of stroomsensor (A): rode meter, waardeweergave en een tweede detector voor "loopt". |
-| `power_threshold` | nee | `10` | Boven deze waarde telt het apparaat als lopend. |
+| `power_entity` | nee | — | Vermogen- (W) of stroomsensor (A): rode meter, waardeweergave, en hij onderscheidt een lopende cyclus van een gepauzeerde — zie `power_threshold`. |
+| `power_threshold` | nee | `10` | Met een `power_entity` wordt een lopende cyclus die minder dan deze waarde verbruikt weergegeven als **gepauzeerd** in plaats van lopend. Zonder die sensor ziet de kaart het verschil niet en beslist alleen `status_entity`. |
 | `power_max` | nee | `2500` | Maximum van de meter, in de eenheid van `power_entity`. |
 | `last_wash_entity` | nee | — | `input_datetime` met de start van de cyclus; ook de bron van de verstreken tijd. |
 | `duration_entity` | nee | — | Duur van de laatste cyclus in minuten. |

@@ -4,7 +4,7 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.4.0] — 2026-09-20
+## [1.4.0] — 2026-09-22
 
 ### Added
 - **Dutch** — the card's fifth UI language, covering every label and all five
@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   [@RienduPre](https://github.com/RienduPre) (#7, #21).
 - **`media/demo_nl.gif`** and **`media/themes_nl.jpg`**, so the Dutch README
   shows the card in Dutch rather than borrowing the English screenshots.
+
+- **A paused cycle now says so.** With a `power_entity` configured the card
+  distinguishes three states instead of two: *running* (a cycle is under way and
+  the appliance is drawing power), *paused* (the cycle is under way but power has
+  dropped below `power_threshold` — a soak or a drain) and *off*. Previously a
+  soak was still reported as running. New `badge_paused` / `state_paused` /
+  `ring_paused` strings in all five languages; the elapsed-time ring keeps
+  counting through a pause, because the cycle has not ended.
+  Thanks to [@KroFR](https://github.com/KroFR) (#19).
+- **Numbers follow the Home Assistant number format.** `_fmtNum()` now reads
+  `hass.locale.number_format` — `comma_decimal`, `decimal_comma`, `space_comma`,
+  `none` and `system` — instead of a decimal separator hardcoded per language,
+  and applies a thousands separator. English now reads `1,234.5` where it read
+  `1234.5`. Thanks to [@KroFR](https://github.com/KroFR) (#19).
+- **`running_states` is editable from the visual editor** and each language now
+  carries its own keyword list, which is what the card falls back to.
+  Thanks to [@KroFR](https://github.com/KroFR) (#19).
+
+### Changed
+- **`power_entity` is no longer an independent "running" detector.** It used to
+  be able to report a cycle on its own, even while `status_entity` said nothing
+  was happening. It now refines what `status_entity` reports rather than
+  overriding it: the status entity decides whether a cycle is under way, and the
+  power sensor decides whether that cycle is running or paused. The option's
+  description has been reworded in all five READMEs.
+  Thanks to [@KroFR](https://github.com/KroFR) (#19).
+- **French: `badge_idle` was "EN PAUSE"**, which now belongs to the paused state.
+  Idle became "EN VEILLE" so the two states no longer read identically.
 
 ### Fixed
 - **The ring label could lose its last pixel column** in the longest
@@ -23,7 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reporting that state was not detected as running even though the card has a
   dryer type. `spoelen` was also listed twice.
 - **`séchage` was missing from the French `running_states`** — the same gap,
-  present since French was added.
+  present since French was added. The unaccented `sechage` is there too.
+- **`duration_format: hhmm` rendered "1h05 min"** — the value already carries its
+  own units, so the separate unit is now empty for that format.
 
 ### Changed
 - The READMEs no longer claim the card is "responsive via CSS container
