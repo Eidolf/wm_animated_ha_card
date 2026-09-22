@@ -545,7 +545,9 @@ class WashingMachineCard extends HTMLElement {
             'power_entity': /_(power|einschalter)$/,
             'remote_control_entity': /_(remote_control|fernsteuerung)$/,
             'remote_start_entity': /_(remote_start|fernstart)$/,
-            'program_selector_entity': /_(program|active_program|aktives_programm)$/,
+            'active_program_entity': /_(active_program|aktives_programm)$/,
+            'selected_program_entity': /_(selected_program|ausgewahltes_programm)$/,
+            'program_selector_entity': /_(selected_program|ausgewahltes_programm)$/,
 
             // Options
             'temperature_entity': /_(temperature|temperatur)$/,
@@ -589,7 +591,9 @@ class WashingMachineCard extends HTMLElement {
             'power_entity': /_(power|einschalter)$/,
             'remote_control_entity': /_(remote_control|fernsteuerung)$/,
             'remote_start_entity': /_(remote_start|fernstart)$/,
-            'program_selector_entity': /_(program|active_program|aktives_programm)$/,
+            'active_program_entity': /_(active_program|aktives_programm)$/,
+            'selected_program_entity': /_(selected_program|ausgewahltes_programm)$/,
+            'program_selector_entity': /_(selected_program|ausgewahltes_programm)$/,
 
             // Door
             'door_entity': /_(door|tur)$/,
@@ -3161,6 +3165,29 @@ class WashingMachineCard extends HTMLElement {
           font-size: 13px;
           font-weight: 600;
         }
+        .hc-idos-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--wm-divider, #e2e8f0);
+        }
+        .hc-idos-row:last-child {
+          border-bottom: none;
+        }
+        .hc-idos-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .hc-idos-label {
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .hc-idos-level {
+          font-size: 11px;
+          color: var(--wm-muted, #718096);
+        }
         .hc-toggle-switch {
           position: relative;
           display: inline-block;
@@ -3726,9 +3753,16 @@ class WashingMachineCard extends HTMLElement {
         if (!dialog) return;
 
         const t = this._t;
+        const type = this._applianceType;
 
         const tempEntity = this._hcEntity("temperature_entity");
         const spinEntity = this._hcEntity("spin_speed_entity");
+
+        // i-Dos entities (washer only)
+        const idos1ActiveEntity = type === 'washer' ? this._hcEntity("idos1_active_entity") : null;
+        const idos2ActiveEntity = type === 'washer' ? this._hcEntity("idos2_active_entity") : null;
+        const idos1LevelEntity = type === 'washer' ? this._hcEntity("idos1_level_entity") : null;
+        const idos2LevelEntity = type === 'washer' ? this._hcEntity("idos2_level_entity") : null;
 
         const features = [
             { key: "child_lock_entity", label: t.child_lock || "Child Lock", toggleFn: () => this._hcToggleChildLock() },
@@ -3739,13 +3773,55 @@ class WashingMachineCard extends HTMLElement {
             { key: "brilliant_dry_entity", label: t.brilliant_dry || "BrilliantDry", toggleFn: () => this._hcToggleBrilliantDry() },
         ].filter(f => !!this._hcEntity(f.key));
 
-        const hasAny = !!tempEntity || !!spinEntity || features.length > 0;
+        const hasAny = !!tempEntity || !!spinEntity || features.length > 0 || !!idos1ActiveEntity || !!idos2ActiveEntity;
 
         let contentHtml = '';
         if (!hasAny) {
             contentHtml = `<div class="hc-empty-options">${t.no_options_available || "No options available"}</div>`;
         } else {
             contentHtml = `<div class="hc-options-container">`;
+
+            // i-Dos Section
+            if (idos1ActiveEntity || idos2ActiveEntity) {
+                contentHtml += `<div class="hc-option-section" id="idosOptionSection">`;
+                contentHtml += `<div class="hc-option-header"><span>${t.idos_settings || "i-Dos Settings"}</span></div>`;
+
+                if (idos1ActiveEntity) {
+                    const idos1Active = idos1ActiveEntity.state === "on";
+                    const idos1Level = idos1LevelEntity ? parseFloat(idos1LevelEntity.state) || 0 : 0;
+                    contentHtml += `
+                        <div class="hc-idos-row">
+                            <div class="hc-idos-info">
+                                <span class="hc-idos-label">i-Dos 1 (Detergent)</span>
+                                ${idos1LevelEntity ? `<span class="hc-idos-level">Level: ${idos1Level}</span>` : ''}
+                            </div>
+                            <label class="hc-toggle-switch">
+                                <input type="checkbox" data-idos="idos1" ${idos1Active ? 'checked' : ''}>
+                                <span class="hc-toggle-slider"></span>
+                            </label>
+                        </div>
+                    `;
+                }
+
+                if (idos2ActiveEntity) {
+                    const idos2Active = idos2ActiveEntity.state === "on";
+                    const idos2Level = idos2LevelEntity ? parseFloat(idos2LevelEntity.state) || 0 : 0;
+                    contentHtml += `
+                        <div class="hc-idos-row">
+                            <div class="hc-idos-info">
+                                <span class="hc-idos-label">i-Dos 2 (Softener)</span>
+                                ${idos2LevelEntity ? `<span class="hc-idos-level">Level: ${idos2Level}</span>` : ''}
+                            </div>
+                            <label class="hc-toggle-switch">
+                                <input type="checkbox" data-idos="idos2" ${idos2Active ? 'checked' : ''}>
+                                <span class="hc-toggle-slider"></span>
+                            </label>
+                        </div>
+                    `;
+                }
+
+                contentHtml += `</div>`;
+            }
 
             if (tempEntity) {
                 const currentTemp = String(tempEntity.state || "");
@@ -3821,6 +3897,33 @@ class WashingMachineCard extends HTMLElement {
         `;
 
         dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        // Bind i-Dos toggles
+        dialog.querySelectorAll("input[data-idos]").forEach(input => {
+            input.addEventListener("change", () => {
+                const idosNum = input.dataset.idos;
+                const isChecked = input.checked;
+                if (idosNum === "idos1") {
+                    const entity = this._hcEntity("idos1_active_entity");
+                    if (entity) {
+                        if (isChecked) {
+                            this._callService("switch", "turn_on", { entity_id: entity.entity_id });
+                        } else {
+                            this._callService("switch", "turn_off", { entity_id: entity.entity_id });
+                        }
+                    }
+                } else if (idosNum === "idos2") {
+                    const entity = this._hcEntity("idos2_active_entity");
+                    if (entity) {
+                        if (isChecked) {
+                            this._callService("switch", "turn_on", { entity_id: entity.entity_id });
+                        } else {
+                            this._callService("switch", "turn_off", { entity_id: entity.entity_id });
+                        }
+                    }
+                }
+            });
+        });
 
         // Bind temperature pill buttons
         dialog.querySelectorAll("button[data-temp]").forEach(btn => {
