@@ -2800,12 +2800,11 @@ class WashingMachineCard extends HTMLElement {
         .laundry, .drum, .arcs {
           transform-box: view-box;
           transform-origin: 110px 128px;
-          will-change: transform;
         }
         .running .arcs    { animation: spin 3s linear infinite; }
         .running .laundry { animation: tumble 3s ease-in-out infinite; }
         .running .drum    { animation: spin 2.4s linear infinite; }
-        .running .heat    { animation: heatPulse 2s ease-in-out infinite; will-change: opacity; }
+        .running .heat    { animation: heatPulse 2s ease-in-out infinite; }
 
         .dw-stream, .dw-wash, .dw-drop, .dw-jet { opacity: 0; }
         .dw-dishes { opacity: .98; }
