@@ -9,7 +9,7 @@
  * License: MIT
  * Version: 1.4.0
  *
- * UI languages: en, ru, de, fr, nl (auto-detected from Home Assistant, or set `language:`).
+ * UI languages: en, ru, de, fr (auto-detected from Home Assistant, or set `language:`).
  * Appliances: washer, dryer, dishwasher, oven, microwave (`appliance_type:`).
  * Theme: follows the Home Assistant theme automatically (`theme: auto | light | dark`),
  * or `theme: ha` to adopt the colours of your active Home Assistant theme.
@@ -17,7 +17,7 @@
  * Install:
  *   1. Copy to /config/www/washing-machine-card.js
  *   2. Add a dashboard resource:
- *        url: /local/washing-machine-card.js?v=6
+ *        url: /local/washing-machine-card.js?v=5
  *        type: module
  *   3. Add the card — full example at the bottom of this file.
  *
@@ -41,7 +41,6 @@ class WashingMachineCard extends HTMLElement {
             today: "Today", yesterday: "Yesterday",
             tip_notify: "Finish notification", tip_plug: "Machine plug", tip_history: "History",
             confirm_plug_off: "Turn off the plug? This may interrupt the current cycle.",
-            decimal: ".",
             types: {
                 washer: { name: "Washing machine", state_running: "Washing" },
                 dryer: { name: "Dryer", state_running: "Drying" },
@@ -49,6 +48,10 @@ class WashingMachineCard extends HTMLElement {
                 oven: { name: "Oven", state_running: "Baking" },
                 microwave: { name: "Microwave", state_running: "Heating" },
             },
+            running_states: [
+                "washing", "running", "run", "wash", "spin", "rinse", "drying", "dry", "tumble",
+                "baking", "bake", "cooking", "cook", "heating", "heat", "microwave", "oven",
+            ],
         },
         ru: {
             name: "Стиральная машина",
@@ -62,7 +65,6 @@ class WashingMachineCard extends HTMLElement {
             today: "Сегодня", yesterday: "Вчера",
             tip_notify: "Уведомление об окончании", tip_plug: "Розетка машины", tip_history: "История",
             confirm_plug_off: "Выключить розетку? Это может прервать текущий цикл.",
-            decimal: ",",
             types: {
                 washer: { name: "Стиральная машина", state_running: "Идёт стирка" },
                 dryer: { name: "Сушилка", state_running: "Сушка" },
@@ -70,6 +72,9 @@ class WashingMachineCard extends HTMLElement {
                 oven: { name: "Духовка", state_running: "Выпечка" },
                 microwave: { name: "Микроволновка", state_running: "Разогрев" },
             },
+            running_states: [
+                "стирка", "отжим", "полоскание",
+            ],
         },
         de: {
             name: "Waschmaschine",
@@ -83,7 +88,6 @@ class WashingMachineCard extends HTMLElement {
             today: "Heute", yesterday: "Gestern",
             tip_notify: "Benachrichtigung bei Ende", tip_plug: "Steckdose der Maschine", tip_history: "Verlauf",
             confirm_plug_off: "Steckdose ausschalten? Der laufende Durchgang könnte dadurch unterbrochen werden.",
-            decimal: ",",
             types: {
                 washer: { name: "Waschmaschine", state_running: "Wäsche läuft" },
                 dryer: { name: "Tumbler", state_running: "Trocknet" },
@@ -91,6 +95,10 @@ class WashingMachineCard extends HTMLElement {
                 oven: { name: "Backofen", state_running: "Backt" },
                 microwave: { name: "Mikrowelle", state_running: "Erwärmt" },
             },
+            running_states: [
+                "waschen", "läuft", "schleudern", "spülen", "trocknen",
+                "backen", "heizen", "erwärmen",
+            ],
         },
         fr: {
             name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN PAUSE", badge_off: "ÉTEINT", badge_nodata: "PAS DE DONNÉES",
@@ -103,14 +111,17 @@ class WashingMachineCard extends HTMLElement {
             today: "Aujourd'hui", yesterday: "Hier",
             tip_notify: "Notification de fin", tip_plug: "Prise machine", tip_history: "Historique",
             confirm_plug_off: "Éteindre la prise ? Cela peut interrompre le cycle en cours.",
-            decimal: ",",
             types: {
                 washer: { name: "Lave-linge", state_running: "Lavage en cours" },
                 dryer: { name: "Sèche-linge", state_running: "Séchage en cours" },
-                dishwasher: { name: "Lave-vaisselle", state_running: "Lavage vaisselle" },
-                oven: { name: "Four", state_running: "Cuisson" },
-                microwave: { name: "Micro-ondes", state_running: "Chauffage" },
+                dishwasher: { name: "Lave-vaisselle", state_running: "Lavage en cours" },
+                oven: { name: "Four", state_running: "Cuisson en cours" },
+                microwave: { name: "Micro-ondes", state_running: "Réchauffage en cours" },
             },
+            running_states: [
+                "lavage", "en cours", "essorage", "rincage", "rinçage",
+                "cuisson", "chauffage", "réchauffage", "rechauffage", "séchage",
+            ],
         },
         nl: {
             name: "Wasmachine",
@@ -124,7 +135,6 @@ class WashingMachineCard extends HTMLElement {
             today: "Vandaag", yesterday: "Gisteren",
             tip_notify: "Melding bij voltooiing", tip_plug: "Stekker apparaat", tip_history: "Geschiedenis",
             confirm_plug_off: "Stekker uitschakelen? Dit kan de huidige cyclus onderbreken.",
-            decimal: ",",
             types: {
                 washer: { name: "Wasmachine", state_running: "Wast" },
                 dryer: { name: "Droger", state_running: "Droogt" },
@@ -132,6 +142,10 @@ class WashingMachineCard extends HTMLElement {
                 oven: { name: "Oven", state_running: "Bakt" },
                 microwave: { name: "Magnetron", state_running: "Verwarmt" },
             },
+            running_states: [
+                "wassen", "bezig", "centrifugeren", "spoelen", "drogen",
+                "bakken", "verwarmen",
+            ],
         },
     };
 
@@ -140,29 +154,17 @@ class WashingMachineCard extends HTMLElement {
         language: "auto",
         theme: "auto",
         currency: "€",
-		running_states: [
-			// English
-			"washing", "running", "run", "wash", "on", "spin", "rinse",
-			"drying", "dry", "tumble",
-			"baking", "bake", "cooking", "cook", "heating", "heat", "microwave", "oven",
-			// Russian
-			"стирка", "отжим", "полоскание",
-			// German
-			"waschen", "läuft", "schleudern", "spülen", "trocknen",
-			"backen", "heizen", "erwärmen",
-			// French
-			"lavage", "en cours", "essorage", "rincage", "rinçage",
-			"sechage", "séchage", "cuisson", "chauffage",
-			// Dutch
-			"wassen", "bezig", "centrifugeren", "spoelen", "drogen",
-			"bakken", "verwarmen",
-		],
         power_threshold: 10,
         power_max: 2500,
         hide_status_panel: false,
         confirm_plug_off: true,
         duration_format: "minutes",
     };
+
+    static get DEFAULT_RUNNING_STATES() {
+        return Object.values(WashingMachineCard.STRINGS).flatMap(
+            (lang) => lang.running_states || []);
+    }
 
     static normalizeType(value) {
         const raw = String(value || "washer").toLowerCase().trim();
@@ -210,6 +212,7 @@ class WashingMachineCard extends HTMLElement {
         }
         this._config = {
             ...WashingMachineCard.DEFAULTS,
+            running_states: WashingMachineCard.DEFAULT_RUNNING_STATES,
             ...config,
             appliance_type: WashingMachineCard.normalizeType(config.appliance_type),
         };
@@ -297,28 +300,34 @@ class WashingMachineCard extends HTMLElement {
         return entityId ? this._hass.states[entityId] : undefined;
     }
 
-    _isRunning() {
+    _cycleIsActive() {
         const c = this._config;
         const status = this._st(c.status_entity);
-        const byStatus =
-            status && c.running_states.includes(String(status.state).toLowerCase());
-        let byPower = false;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            byPower = !isNaN(p) && p > c.power_threshold;
-        }
-        return byStatus || byPower;
+        const state = status ? String(status.state).toLowerCase() : "";
+        const byStatus = !!status && c.running_states.includes(state);
+        const byBinaryOn = state === "on";
+        return byStatus || byBinaryOn;
+    }
+
+    _isRunning() {
+        const c = this._config;
+        const cycleIsActive = this._cycleIsActive();
+        // Without a power sensor, the status entity is the only source of truth.
+        if (!c.power_entity)
+            return cycleIsActive;
+        // With a power sensor, RUNNING requires an active cycle and power consumption above the configured threshold.
+        const p = parseFloat(this._st(c.power_entity)?.state);
+        return cycleIsActive && !isNaN(p) && p > c.power_threshold;
     }
 
     _applianceState() {
-        if (this._isRunning())
-            return "running";
         const c = this._config;
-        if (c.power_entity) {
-            const p = parseFloat(this._st(c.power_entity)?.state);
-            if (!isNaN(p) && p >= 1)
-                return "idle";
-        }
+        const cycleIsActive = this._cycleIsActive();
+        if (!c.power_entity)
+            return cycleIsActive ? "running" : "off";
+        const p = parseFloat(this._st(c.power_entity)?.state);
+        if (cycleIsActive)
+            return !isNaN(p) && p > c.power_threshold ? "running" : "idle";
         return "off";
     }
 
@@ -372,14 +381,46 @@ class WashingMachineCard extends HTMLElement {
         return `${h}:${String(m).padStart(2, "0")}`;
     }
 
+    static NUMBER_SEPARATORS = {
+        comma_decimal: { group: ",", decimal: "." },
+        decimal_comma: { group: ".", decimal: "," },
+        space_comma: { group: " ", decimal: "," },
+    };
     _fmtNum(value, digits = 2) {
         const n = parseFloat(value);
         if (isNaN(n))
             return null;
-        let s = n.toFixed(digits);
-        if (digits > 0)
-            s = s.replace(/0+$/, "").replace(/\.$/, "");
-        return s.replace(".", this._t.decimal);
+        // Trim trailing zeros (e.g. 2.50 -> 2.5, 2.00 -> 2), same as before.
+        let trimmedDigits = '';
+        if (digits > 0) {
+            const stripped = n.toFixed(digits).replace(/0+$/, "").replace(/\.$/, "");
+            const dotIndex = stripped.indexOf(".");
+            trimmedDigits = dotIndex === -1 ? 0 : stripped.length - dotIndex - 1;
+        }
+        const numberFormat = this._hass?.locale?.number_format;
+        // "None": raw number, no thousands separator, dot as decimal point.
+        if (numberFormat === "none")
+            return n.toFixed(trimmedDigits);
+        // "System": defer entirely to the browser/OS locale.
+        if (numberFormat === "system") {
+            return new Intl.NumberFormat(undefined, {
+                minimumFractionDigits: trimmedDigits,
+                maximumFractionDigits: trimmedDigits,
+            }).format(n);
+        }
+        // comma_decimal / decimal_comma / space_comma: build the string from the separators the option name itself describes.
+        const separators = WashingMachineCard.NUMBER_SEPARATORS[numberFormat];
+        if (separators) {
+            const isNegative = n < 0;
+            const [intPart, decPart] = Math.abs(n).toFixed(trimmedDigits).split(".");
+            const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separators.group);
+            return `${isNegative ? "-" : ""}${grouped}${decPart ? separators.decimal + decPart : ""}`;
+        }
+        // Default ("language", or unset): follow the interface's own language, untouched.
+        return new Intl.NumberFormat(this._hass?.locale?.language, {
+            minimumFractionDigits: trimmedDigits,
+            maximumFractionDigits: trimmedDigits,
+        }).format(n);
     }
 
     _fmtDuration(state) {
@@ -392,7 +433,7 @@ class WashingMachineCard extends HTMLElement {
             const m = Math.round(n % 60);
             return {
                 value: `${h}h${String(m).padStart(2, "0")}`,
-                unit: ""
+                unit: "min"
             };
         }
         return {
@@ -906,7 +947,6 @@ class WashingMachineCard extends HTMLElement {
 
     _build() {
         const c = this._config;
-        const t = this._t;
         const root = this.shadowRoot || this.attachShadow({
             mode: "open"
         });
@@ -1234,7 +1274,7 @@ class WashingMachineCard extends HTMLElement {
         .ring-time { font-size: 19px; font-weight: 800; line-height: 1; }
         .ring-label {
           font-size: 8px; font-weight: 700; letter-spacing: .8px; color: var(--wm-label);
-          margin-top: 3px; max-width: 64px; overflow: hidden; white-space: nowrap;
+          margin-top: 3px; max-width: 58px; overflow: hidden; white-space: nowrap;
         }
         .st-col { flex: 1; min-width: 0; }
         .st-state { font-size: 16.5px; font-weight: 700; }
@@ -1275,13 +1315,13 @@ class WashingMachineCard extends HTMLElement {
             <div class="h-title" id="name"></div>
             <div class="badge"><span class="b-dot"></span><span id="badgeText"></span></div>
             <div class="h-spacer"></div>
-            <div class="h-btn hidden" id="notifyBtn" title="${t.tip_notify}">
+            <div class="h-btn hidden" id="notifyBtn">
               <ha-icon icon="mdi:bell-ring-outline"></ha-icon>
             </div>
-            <div class="h-btn hidden" id="plugBtn" title="${t.tip_plug}">
+            <div class="h-btn hidden" id="plugBtn">
               <ha-icon icon="mdi:power-socket-eu"></ha-icon>
             </div>
-            <div class="h-btn" id="chartBtn" title="${t.tip_history}">
+            <div class="h-btn" id="chartBtn">
               <ha-icon icon="mdi:chart-bar"></ha-icon>
             </div>
           </div>
@@ -1313,22 +1353,22 @@ class WashingMachineCard extends HTMLElement {
           </div>
 
           <div class="panel hidden" id="lastCycle">
-            <div class="lc-title">${t.last_cycle}</div>
+            <div class="lc-title" id="lcTitle"></div>
             <div class="lc-grid">
               <div class="lc-item hidden" id="lcStart">
-                <div class="lc-label">${t.start}</div>
+                <div class="lc-label" id="lcStartLabel"></div>
                 <div class="lc-value" id="lcStartV">—</div>
               </div>
               <div class="lc-item hidden" id="lcDuration">
-                <div class="lc-label">${t.duration}</div>
+                <div class="lc-label" id="lcDurationLabel"></div>
                 <div class="lc-value" id="lcDurationV">—</div>
               </div>
               <div class="lc-item hidden" id="lcEnergy">
-                <div class="lc-label">${t.energy}</div>
+                <div class="lc-label" id="lcEnergyLabel"></div>
                 <div class="lc-value" id="lcEnergyV">—</div>
               </div>
               <div class="lc-item hidden" id="lcCost">
-                <div class="lc-label">${t.cost}</div>
+                <div class="lc-label" id="lcCostLabel"></div>
                 <div class="lc-value" id="lcCostV">—</div>
               </div>
             </div>
@@ -1400,6 +1440,14 @@ class WashingMachineCard extends HTMLElement {
         this._el("stState").textContent = t[`state_${displayState}`];
         const hideStatus = !!c.hide_status_panel && !active;
         this._el("statusPanel").classList.toggle("hidden", hideStatus);
+        this._el("notifyBtn").title = t.tip_notify;
+        this._el("plugBtn").title = t.tip_plug;
+        this._el("chartBtn").title = t.tip_history;
+        this._el("lcTitle").textContent = t.last_cycle;
+        this._el("lcStartLabel").textContent = t.start;
+        this._el("lcDurationLabel").textContent = t.duration;
+        this._el("lcEnergyLabel").textContent = t.energy;
+        this._el("lcCostLabel").textContent = t.cost;
 
         if (c.power_entity) {
             const ps = this._st(c.power_entity);
@@ -1480,14 +1528,30 @@ if (!customElements.get("washing-machine-card")) {
  
 class WashingMachineCardEditor extends HTMLElement {
     static AUTO_LANGUAGE = "auto";
-    static _defaultName(config, hass) {
+
+    static _resolveLanguage(config, hass) {
         const S = WashingMachineCard.STRINGS;
         const cfgLang = config?.language;
         const isAuto = !cfgLang || cfgLang === WashingMachineCardEditor.AUTO_LANGUAGE;
-        const lang = (!isAuto && S[cfgLang]) ? cfgLang : WashingMachineCard.detectLanguage(hass);
+        return (!isAuto && S[cfgLang]) ? cfgLang : WashingMachineCard.detectLanguage(hass);
+    }
+
+    static _defaultName(config, hass) {
+        const S = WashingMachineCard.STRINGS;
+        const lang = WashingMachineCardEditor._resolveLanguage(config, hass);
         const type = WashingMachineCard.normalizeType(config?.appliance_type);
         const base = S[lang] || S.en;
         return base.types?.[type]?.name || base.name;
+    }
+
+    static _defaultRunningStates(config, hass) {
+        const lang = WashingMachineCardEditor._resolveLanguage(config, hass);
+        return WashingMachineCardEditor._runningStatesForLang(lang);
+    }
+
+    static _runningStatesForLang(lang) {
+        const S = WashingMachineCard.STRINGS;
+        return (S[lang] || S.en).running_states || [];
     }
 
     constructor() {
@@ -1495,6 +1559,8 @@ class WashingMachineCardEditor extends HTMLElement {
         this._config = {};
         this._built = false;
         this._fieldEls = {};
+        this._focusedElements = new Set();
+        this._keywordsLang = null;
     }
 
     setConfig(config) {
@@ -1639,6 +1705,11 @@ class WashingMachineCardEditor extends HTMLElement {
                         selector: {
                             boolean: {}
                         },
+                    }, {
+                        key: "running_states",
+                        kind: "keywords",
+                        title: "Running State keywords",
+                        description: "Running State keywords determine when the card considers the appliance to be running. Built-in keywords for the selected language appear in blue. Add or remove keywords as needed.",
                     },
                 ],
             }, {
@@ -1727,7 +1798,7 @@ class WashingMachineCardEditor extends HTMLElement {
                         title: "Energy entity",
                         selector: {
                             entity: {
-                                domain: "input_number"
+                                domain: ["input_number", "sensor"]
                             }
                         },
                     }, {
@@ -1736,7 +1807,7 @@ class WashingMachineCardEditor extends HTMLElement {
                         title: "Cost entity",
                         selector: {
                             entity: {
-                                domain: "input_number"
+                                domain: ["input_number", "sensor"]
                             }
                         },
                     }, {
@@ -1772,7 +1843,6 @@ class WashingMachineCardEditor extends HTMLElement {
       <style>
         :host { display: block; }
         .wm-editor { display: flex; flex-direction: column; gap: 16px; padding: 4px 0 8px; }
-
         .wm-field { display: flex; flex-direction: column; gap: 6px; }
         .wm-field-title {
           font-size: 13px;
@@ -1780,11 +1850,9 @@ class WashingMachineCardEditor extends HTMLElement {
           color: var(--secondary-text-color, #6b7684);
           padding: 0 2px;
         }
-
         .wm-field-title--primary {
           color: var(--primary-text-color, #1c2733);
         }
-
         .wm-native-input {
           box-sizing: border-box;
           width: 100%;
@@ -1805,7 +1873,6 @@ class WashingMachineCardEditor extends HTMLElement {
           color: var(--secondary-text-color, #8a95a3);
           opacity: .75;
         }
-
         .wm-field--row {
           flex-direction: row;
           align-items: center;
@@ -1825,7 +1892,31 @@ class WashingMachineCardEditor extends HTMLElement {
           color: var(--secondary-text-color, #8a95a3);
         }
         .wm-field--row ha-selector { flex-shrink: 0; }
-
+        .wm-chips-box { display: flex; flex-direction: column; gap: 8px; }
+        .wm-chips {
+          display: flex; flex-wrap: wrap; gap: 6px;
+          min-height: 20px;
+        }
+        .wm-chip {
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 5px 6px 5px 11px; border-radius: 999px;
+          font-size: 12.5px; font-weight: 600; line-height: 1.3;
+          background: var(--secondary-background-color, #eef1f4);
+          color: var(--primary-text-color, #1c2733);
+          border: 1px solid var(--divider-color, #d8e0ea);
+        }
+        .wm-chip--default {
+          background: rgba(var(--rgb-primary-color, 47,128,237), .14);
+          border-color: rgba(var(--rgb-primary-color, 47,128,237), .35);
+          color: var(--primary-color, #2f80ed);
+        }
+        .wm-chip-remove {
+          display: flex; align-items: center; justify-content: center;
+          width: 16px; height: 16px; padding: 0; border: none; border-radius: 50%;
+          background: transparent; color: inherit; opacity: .65;
+          font-size: 13px; line-height: 1; cursor: pointer;
+        }
+        .wm-chip-remove:hover { opacity: 1; background: rgba(0,0,0,.08); }
         ha-expansion-panel { border-radius: 8px; }
         .wm-section-body { display: flex; flex-direction: column; gap: 16px; padding: 12px; }
         .wm-section-header { display: flex; align-items: center; gap: 8px; }
@@ -1907,9 +1998,44 @@ class WashingMachineCardEditor extends HTMLElement {
         }
 
         const title = document.createElement("div");
-        title.className = "wm-field-title";
+        title.className = "wm-field-title" + (field.kind === "keywords" ? " wm-field-title--primary" : "");
         title.textContent = field.title;
         wrap.appendChild(title);
+
+        if (field.description) {
+            const desc = document.createElement("div");
+            desc.className = "wm-field-desc";
+            desc.textContent = field.description;
+            wrap.appendChild(desc);
+        }
+
+        if (field.kind === "keywords") {
+            const box = document.createElement("div");
+            box.className = "wm-chips-box";
+            const chipsRow = document.createElement("div");
+            chipsRow.className = "wm-chips";
+            box.appendChild(chipsRow);
+            const input = document.createElement("input");
+            input.className = "wm-native-input";
+            input.type = "text";
+            input.placeholder = "Type a keyword and press Enter";
+            input.addEventListener("keydown", (ev) => {
+                if (ev.key === "Enter") {
+                    ev.preventDefault();
+                    this._addKeyword(field, input.value);
+                    input.value = "";
+                }
+            });
+            input.addEventListener("focus", () => this._focusedElements.add(input));
+            input.addEventListener("blur", () => this._focusedElements.delete(input));
+            box.appendChild(input);
+            wrap.appendChild(box);
+            this._fieldEls[field.key] = {
+                chipsRow,
+                input
+            };
+            return wrap;
+        }
 
         if (field.kind === "text" || field.kind === "number") {
             const input = document.createElement("input");
@@ -1949,6 +2075,18 @@ class WashingMachineCardEditor extends HTMLElement {
                 if (!el)
                     continue;
 
+                if (field.kind === "keywords") {
+                    if (!this._focusedElements.has(el.input)) {
+                        this._migrateKeywordsOnLanguageChange(field);
+                        const raw = this._config[field.key];
+                        const words = Array.isArray(raw)
+                             ? raw
+                             : WashingMachineCardEditor._defaultRunningStates(this._config, this._hass);
+                        this._renderKeywordChips(field, el, words);
+                    }
+                    continue;
+                }
+
                 const isNative = field.kind === "text" || field.kind === "number";
                 if (!isNative)
                     el.hass = this._hass;
@@ -1983,6 +2121,84 @@ class WashingMachineCardEditor extends HTMLElement {
         if (field.key === "appliance_type")
             v = WashingMachineCard.normalizeType(v);
         this._commit(field, v);
+    }
+
+    // When the selected language changes, a previously-saved custom list is
+    // still anchored to the *old* language's defaults. Swap those out for the
+    // new language's defaults while keeping any keywords the user added that
+    // aren't part of either language's built-in list.
+    _migrateKeywordsOnLanguageChange(field) {
+        const lang = WashingMachineCardEditor._resolveLanguage(this._config, this._hass);
+        if (this._keywordsLang === null) {
+            this._keywordsLang = lang;
+            return;
+        }
+        if (this._keywordsLang === lang)
+            return;
+        const raw = this._config[field.key];
+        if (Array.isArray(raw)) {
+            const oldDefaults = WashingMachineCardEditor._runningStatesForLang(this._keywordsLang);
+            const newDefaults = WashingMachineCardEditor._runningStatesForLang(lang);
+            const customExtras = raw.filter((word) => !oldDefaults.includes(word));
+            const merged = Array.from(new Set([...newDefaults, ...customExtras]));
+            const sameAsNewDefault = merged.length === newDefaults.length &&
+                newDefaults.every((word) => merged.includes(word));
+            this._commit(field, sameAsNewDefault ? undefined : merged);
+        }
+        this._keywordsLang = lang;
+    }
+
+    _renderKeywordChips(field, els, words) {
+        const defaults = WashingMachineCardEditor._defaultRunningStates(this._config, this._hass);
+        const sorted = [...words].sort((a, b) => a.localeCompare(b, undefined, {
+                sensitivity: "base"
+            }));
+        els.chipsRow.innerHTML = "";
+        sorted.forEach((word) => {
+            const chip = document.createElement("span");
+            chip.className = "wm-chip" + (defaults.includes(word) ? " wm-chip--default" : "");
+            const text = document.createElement("span");
+            text.textContent = word;
+            chip.appendChild(text);
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "wm-chip-remove";
+            removeBtn.setAttribute("aria-label", `Remove ${word}`);
+            removeBtn.textContent = "×";
+            removeBtn.addEventListener("click", () => this._removeKeyword(field, word));
+            chip.appendChild(removeBtn);
+            els.chipsRow.appendChild(chip);
+        });
+    }
+
+    _currentKeywords(field) {
+        const raw = this._config[field.key];
+        return Array.isArray(raw)
+             ? [...raw]
+             : WashingMachineCardEditor._defaultRunningStates(this._config, this._hass);
+    }
+
+    _addKeyword(field, value) {
+        const word = String(value ?? "").trim();
+        if (!word)
+            return;
+        const current = this._currentKeywords(field);
+        if (current.includes(word))
+            return;
+        this._applyKeywords(field, [...current, word]);
+    }
+
+    _removeKeyword(field, word) {
+        const current = this._currentKeywords(field);
+        this._applyKeywords(field, current.filter((w) => w !== word));
+    }
+
+    _applyKeywords(field, words) {
+        const defaults = WashingMachineCardEditor._defaultRunningStates(this._config, this._hass);
+        const sameAsDefault = words.length === defaults.length &&
+            defaults.every((word) => words.includes(word));
+        this._commit(field, (words.length === 0 || sameAsDefault) ? undefined : words);
+        this._renderKeywordChips(field, this._fieldEls[field.key], words.length === 0 ? defaults : words);
     }
 
     _nativeValueChanged(field, rawValue) {
