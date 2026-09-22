@@ -1911,6 +1911,19 @@ class WashingMachineCard extends HTMLElement {
             return;
         }
 
+        if (!this._getRemoteControlState()) {
+            const err = new Error("Remote control not enabled");
+            this._handleServiceError(err, "set_temperature");
+            const t = this._t;
+            const message = t.remote_control_required ||
+                           "Remote control must be enabled on the appliance.\n" +
+                           "Please enable remote control using the appliance controls.";
+            if (typeof alert === "function") {
+                alert(message);
+            }
+            return Promise.reject(err);
+        }
+
         return this._selectOption(hc.temperature_entity, temperature)
             .catch(error => {
                 this._handleServiceError(error, "set_temperature");
@@ -1920,7 +1933,7 @@ class WashingMachineCard extends HTMLElement {
 
     /**
      * Set spin speed
-     * 
+     *
      * @param {string} speed - Speed option (e.g., "800", "1200", "1400")
      * @returns {Promise|undefined}
      */
@@ -1933,6 +1946,19 @@ class WashingMachineCard extends HTMLElement {
         if (!hc?.spin_speed_entity) {
             console.warn("No spin_speed_entity configured");
             return;
+        }
+
+        if (!this._getRemoteControlState()) {
+            const err = new Error("Remote control not enabled");
+            this._handleServiceError(err, "set_spin_speed");
+            const t = this._t;
+            const message = t.remote_control_required ||
+                           "Remote control must be enabled on the appliance.\n" +
+                           "Please enable remote control using the appliance controls.";
+            if (typeof alert === "function") {
+                alert(message);
+            }
+            return Promise.reject(err);
         }
 
         return this._selectOption(hc.spin_speed_entity, speed)
@@ -3042,6 +3068,7 @@ class WashingMachineCard extends HTMLElement {
           flex-direction: column;
           align-items: center;
           gap: 6px;
+          position: relative;
         }
         .hc-program-item:hover {
           background: var(--wm-btn-on-bg, #eaf3fe);
@@ -3052,6 +3079,18 @@ class WashingMachineCard extends HTMLElement {
           background: var(--wm-btn-on-bg, #eaf3fe);
           border-color: var(--wm-accent, #2f80ed);
           border-width: 2.5px;
+        }
+        .hc-program-item.active {
+          background: #d4edda;
+          border-color: #22b263;
+          border-width: 2.5px;
+        }
+        .hc-program-badge {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          font-size: 14px;
+          line-height: 1;
         }
         .hc-program-icon {
           font-size: 26px;
@@ -3598,7 +3637,12 @@ class WashingMachineCard extends HTMLElement {
                                   selectorEntity?.attributes?.options ||
                                   defaultPrograms;
 
-        const currentProgram = this._getSelectedProgram() || this._getActiveProgram();
+        const selectedProgram = this._getSelectedProgram();
+        const activeProgram = this._getActiveProgram();
+
+        // Check if remote control is enabled
+        const remoteControlEnabled = this._getRemoteControlState();
+        const remoteStartEnabled = this._getRemoteStartState();
 
         dialog.innerHTML = `
             <div class="hc-dialog-header">
@@ -3606,13 +3650,37 @@ class WashingMachineCard extends HTMLElement {
                 <button class="hc-dialog-close" id="closeHcDialog" title="${t.close || "Close"}">✕</button>
             </div>
             <div class="hc-dialog-body">
+                ${!remoteControlEnabled ? `
+                    <div class="hc-warning" style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 16px; color: #856404; font-size: 13px;">
+                        ⚠️ ${t.remote_control_required || "Remote control must be enabled on the appliance"}
+                    </div>
+                ` : ''}
+                ${remoteControlEnabled && !remoteStartEnabled ? `
+                    <div class="hc-info" style="background: #d1ecf1; padding: 12px; border-radius: 8px; margin-bottom: 16px; color: #0c5460; font-size: 13px;">
+                        ℹ️ ${t.remote_start_required || "Remote start must be activated on the appliance"}
+                    </div>
+                ` : ''}
                 <div class="hc-program-grid" id="hcProgramGrid">
-                    ${availablePrograms.map(prog => `
-                        <div class="hc-program-item ${prog === currentProgram ? 'selected' : ''}" data-program="${prog}">
+                    ${availablePrograms.map(prog => {
+                        const isSelected = prog === selectedProgram;
+                        const isActive = prog === activeProgram;
+                        const classes = ['hc-program-item'];
+                        if (isSelected) classes.push('selected');
+                        if (isActive) classes.push('active');
+
+                        return `
+                        <div class="${classes.join(' ')}" data-program="${prog}">
                             <div class="hc-program-icon">${this._getProgramIcon(prog)}</div>
                             <div class="hc-program-name">${this._translateProgram(prog)}</div>
+                            ${isActive ? '<div class="hc-program-badge">▶</div>' : ''}
+                            ${isSelected && !isActive ? '<div class="hc-program-badge">✓</div>' : ''}
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
+                </div>
+                <div class="hc-dialog-footer" style="margin-top: 16px; padding: 12px; background: #f5f7fa; border-radius: 8px; font-size: 12px; color: #6c757d;">
+                    <div><strong>Workflow:</strong></div>
+                    <div>1. Select program (✓) → 2. Set options → 3. Select same program again to start (▶)</div>
                 </div>
             </div>
         `;
@@ -3625,7 +3693,23 @@ class WashingMachineCard extends HTMLElement {
                 const program = item.dataset.program;
                 dialog.close();
                 if (program) {
-                    this._hcSelectProgram(program);
+                    // If clicking on selected program, treat it as start command
+                    if (program === selectedProgram && program !== activeProgram) {
+                        // User is trying to start the selected program
+                        // Set it to active_program_entity to start
+                        const activeEntity = this._hcEntity("active_program_entity");
+                        if (activeEntity) {
+                            this._selectOption(activeEntity.entity_id, program)
+                                .catch(error => {
+                                    this._handleServiceError(error, "start_program");
+                                });
+                        } else {
+                            this._hcSelectProgram(program);
+                        }
+                    } else {
+                        // Just select the program
+                        this._hcSelectProgram(program);
+                    }
                 }
             });
         });
