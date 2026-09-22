@@ -3151,6 +3151,47 @@ class WashingMachineCard extends HTMLElement {
           background: var(--wm-accent, #2f80ed);
           color: #fff;
         }
+        .hc-action-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 24px;
+          border-radius: 12px;
+          border: none;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .hc-start-btn {
+          background: var(--wm-accent, #22b263);
+          color: #fff;
+        }
+        .hc-start-btn:hover {
+          background: #1a8e4f;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(34, 178, 99, 0.3);
+        }
+        .hc-pause-btn {
+          background: #f0a04b;
+          color: #fff;
+        }
+        .hc-pause-btn:hover {
+          background: #d88a35;
+          transform: translateY(-2px);
+        }
+        .hc-stop-btn {
+          background: #e74c3c;
+          color: #fff;
+        }
+        .hc-stop-btn:hover {
+          background: #c0392b;
+          transform: translateY(-2px);
+        }
+        .hc-btn-icon {
+          font-size: 16px;
+          line-height: 1;
+        }
         .hc-feature-row {
           display: flex;
           align-items: center;
@@ -3705,14 +3746,39 @@ class WashingMachineCard extends HTMLElement {
                     `;
                     }).join('')}
                 </div>
+                ${selectedProgram && selectedProgram !== activeProgram ? `
+                    <div class="hc-program-actions" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
+                        <button class="hc-action-btn hc-start-btn" id="startProgramBtn">
+                            <span class="hc-btn-icon">▶</span>
+                            <span>${t.start_program || "Start Program"}</span>
+                        </button>
+                    </div>
+                ` : ''}
                 <div class="hc-dialog-footer" style="margin-top: 16px; padding: 12px; background: #f5f7fa; border-radius: 8px; font-size: 12px; color: #6c757d;">
                     <div><strong>Workflow:</strong></div>
-                    <div>1. Select program (✓) → 2. Set options → 3. Select same program again to start (▶)</div>
+                    <div>1. Select program (✓) → 2. Set options → 3. Click Start button (▶)</div>
                 </div>
             </div>
         `;
 
         dialog.querySelector("#closeHcDialog")?.addEventListener("click", () => dialog.close());
+
+        // Bind start program button
+        const startBtn = dialog.querySelector("#startProgramBtn");
+        if (startBtn) {
+            startBtn.addEventListener("click", () => {
+                if (selectedProgram) {
+                    const activeEntity = this._hcEntity("active_program_entity");
+                    if (activeEntity) {
+                        this._selectOption(activeEntity.entity_id, selectedProgram)
+                            .catch(error => {
+                                this._handleServiceError(error, "start_program");
+                            });
+                    }
+                }
+                dialog.close();
+            });
+        }
 
         const items = dialog.querySelectorAll(".hc-program-item");
         items.forEach(item => {
@@ -3720,23 +3786,8 @@ class WashingMachineCard extends HTMLElement {
                 const program = item.dataset.program;
                 dialog.close();
                 if (program) {
-                    // If clicking on selected program, treat it as start command
-                    if (program === selectedProgram && program !== activeProgram) {
-                        // User is trying to start the selected program
-                        // Set it to active_program_entity to start
-                        const activeEntity = this._hcEntity("active_program_entity");
-                        if (activeEntity) {
-                            this._selectOption(activeEntity.entity_id, program)
-                                .catch(error => {
-                                    this._handleServiceError(error, "start_program");
-                                });
-                        } else {
-                            this._hcSelectProgram(program);
-                        }
-                    } else {
-                        // Just select the program
-                        this._hcSelectProgram(program);
-                    }
+                    // Just select the program (don't start)
+                    this._hcSelectProgram(program);
                 }
             });
         });
