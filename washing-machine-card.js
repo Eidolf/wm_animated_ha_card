@@ -1186,11 +1186,44 @@ class WashingMachineCard extends HTMLElement {
     }
 
     /**
-     * Get remaining time (may be ISO duration string)
+     * Get remaining time (may be ISO duration string or timestamp)
      * @returns {string|null}
      */
     _getRemainingTime() {
-        return this._hcEntity("remaining_time_entity")?.state || null;
+        const entity = this._hcEntity("remaining_time_entity");
+        if (!entity) return null;
+
+        const state = entity.state;
+        if (!state) return null;
+
+        const str = String(state).trim();
+
+        // If it's a timestamp (contains T or looks like a date), calculate remaining time
+        if (str.includes('T') || str.match(/^\d{4}-\d{2}-\d{2}/)) {
+            const endDate = new Date(str);
+            if (!isNaN(endDate.getTime())) {
+                const now = new Date();
+                const diffMs = endDate.getTime() - now.getTime();
+
+                if (diffMs > 0) {
+                    // Convert to ISO duration format (PT1H30M)
+                    const totalSeconds = Math.floor(diffMs / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+                    if (hours > 0) {
+                        return `PT${hours}H${minutes}M`;
+                    } else {
+                        return `PT${minutes}M`;
+                    }
+                } else {
+                    return null; // Time has passed
+                }
+            }
+        }
+
+        // Otherwise return as-is (ISO duration, numeric seconds, etc.)
+        return state;
     }
 
     /**
